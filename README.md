@@ -5,7 +5,8 @@
 
 ## Visual Analytics 2020 - MSc Engineering in computer science - Sapienza
 
-We are a group of students at the MS Course in Engineering in Computer Science at the Sapienza university in Rome. In this GitHub repository we will present the project for Visual Analytics course taught by prof. Santucci
+We are a group of students at the MS Course in Engineering in Computer Science at the Sapienza university in Rome. In this GitHub repository we will present the project for Visual Analytics course taught by prof. Santucci.
+
 Here are our LinkedIn profiles:
 
 - [Ruocco Giovanni](https://www.linkedin.com/in/giovanniruocco07)
