@@ -1,8 +1,7 @@
 function createV4SelectableForceDirectedGraph(svg, data) {
 
     var set = '{"nodes":[],"links":[]}';
-
-    var ind = 0;    
+ 
     var indice = 0;
 
 
@@ -11,15 +10,10 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     console.log(data);
 
 
-    for (let j = 0; j < 10;/* data.length; */ j++) {
+    for (let j = 0; j < 20;/* data.length; */ j++) {
 
         set.nodes.push({"id": data[j].hash , "group": 1, "index": indice});
         indice++;
-
-        ind = set.nodes[set.nodes.length - 1];
-
-        console.log(ind);
-
 
         for (let i = 0; i < data[j].inputs.length; i++) {
     
@@ -66,7 +60,11 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     let parentWidth = d3v4.select('svg').node().parentNode.clientWidth;
     let parentHeight = d3v4.select('svg').node().parentNode.clientHeight;
 
-    var svg = d3v4.select('svg')
+    var svg = d3v4.select('#first')
+    .attr('width', parentWidth)
+    .attr('height', parentHeight)
+
+    var second = d3v4.select('#second')
     .attr('width', parentWidth)
     .attr('height', parentHeight)
 
@@ -109,11 +107,9 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         nodes[set.nodes[i].index] = set.nodes[i];
         set.nodes[i].weight = 1.01;
 
-        console.log(set.nodes);
-        console.log(nodes);
     }
 
-    for (let j = 0; j < 10;/* data.length; */ j++) {
+    for (let j = 0; j < 20;/* data.length; */ j++) {
     
 
         for (let l = 0; l < data[j].inputs.length; l++) {
@@ -133,8 +129,6 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         }meme = meme + meme2 + meme3 + 1;     
           
     }
-
-    console.log(set.links);
 
     // the brush needs to go before the nodes so that it doesn't
     // get called when the mouse is over a node
@@ -160,6 +154,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             else
                 return color(d.group); 
         })
+        .on("click", selectNode)
         .call(d3v4.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -172,13 +167,25 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             if ('name' in d)
                 return d.name;
             else
-                return d.id; 
+                return d.id;       
         });
+
+    svg.selectAll("circle").on('mouseover', function(d) {
+        svg.select('#text0')
+          .text(d.id);
+      });
+
+      svg.selectAll("circle").on('auxclick', function(d) {
+
+        d.fx = null;
+        d.fy = null;
+        
+      });
 
     var simulation = d3v4.forceSimulation()
         .force("link", d3v4.forceLink()
                 .id(function(d) { return d.id; })
-                .distance(function(d) { 
+                .distance(function(d) {
                     return 30;
                     //var dist = 20 / d.value;
                     //console.log('dist:', dist);
@@ -335,22 +342,56 @@ function createV4SelectableForceDirectedGraph(svg, data) {
       d.fx = null;
       d.fy = null;
         node.filter(function(d) { return d.selected; })
-        .each(function(d) { //d.fixed &= ~6; 
-            d.fx = null;
-            d.fy = null;
+        .each(function(d) { //d.fixed &= ~6;
+            d.fx = d.x;
+            d.fy = d.y;
         })
     }
 
-    var texts = ['Use the scroll wheel to zoom',
-                 'Hold the shift key to select nodes']
+    function selectNode(d){
+        console.log(d);
+
+        second.select("#trans_id")
+        .text(d.id);
+
+        second.selectAll("tspan")
+        .remove();
+
+        second.selectAll("tspan")
+        .data(data)
+        .append('text')
+        .text(function(d) {console.log(d); return d; });
+
+    }
+
+    var label = ['Hover a node to show its hash'];
+
+    var texts = ['Hover a node to show its hash', 'Hold the shift key to select nodes', 'Use the scroll wheel to zoom'];
+
+    svg.selectAll('text')
+    .data(label)
+    .enter()
+    .append('text')
+    .attr('x', 950)
+    .attr('y', 20)
+    .attr('id', function(d,i) { return 'text' + i;})
+    .text(function(d) { return d; });
 
     svg.selectAll('text')
         .data(texts)
         .enter()
         .append('text')
-        .attr('x', 900)
-        .attr('y', function(d,i) { return 470 + i * 18; })
+        .attr('x', 950)
+        .attr('y', function(d,i) { return 440 + i * 18; })
         .text(function(d) { return d; });
+
+    second.selectAll('text')
+    .data(texts)
+    .enter()
+    .append('text')
+    .attr('x', 950)
+    .attr('y', function(d,i) { return 440 + i * 18; })
+    .text(function(d) { return d; });
 
     return set;
 };
