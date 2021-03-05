@@ -9,32 +9,28 @@ function createV4SelectableForceDirectedGraph(svg, data) {
 
     console.log(data);
 
-
     for (let j = 0; j < 20;/* data.length; */ j++) {
 
-        set.nodes.push({"id": data[j].hash , "group": 1, "index": indice});
+        set.nodes.push({"id": data[j].hash , "group": 1, "input_count": data[j].input_count, "output_count": data[j].output_count, "input_value": data[j].input_value, "output_value": data[j].output_value, "fee": data[j].fee});
         indice++;
 
         for (let i = 0; i < data[j].inputs.length; i++) {
     
-            set.nodes.push({'id': data[j].inputs[i].addresses[0] , 'group': 2, "index": indice});
+            set.nodes.push({'id': data[j].hash + '-i' + data[j].inputs[i].index, 'name': data[j].inputs[i].addresses[0] , 'group': 2});
             indice ++;
     
-            //set.links.push({"source": data[j].hash , "target": data[j].inputs[i].addresses[0] , "value": 1});
-        
+            set.links.push({"source": data[j].hash , "target": data[j].hash + "-i" + data[j].inputs[i].index , "value": 1});
+
         }
 
         for (let k = 0; k < data[j].outputs.length; k++) {
     
-            set.nodes.push({'id': data[j].outputs[k].addresses[0] , 'group': 5, "index": indice});
+            set.nodes.push({'id': data[j].hash + "-o" + data[j].outputs[k].index, 'name': data[j].outputs[k].addresses[0] , 'group': 5});
             indice ++;
     
-            //set.links.push({"source": data[j].hash , "target": data[j].outputs[k].addresses[0] , "value": 1}); 
+            set.links.push({"source": data[j].hash , "target": data[j].hash + "-o" + data[j].outputs[k].index , "value": 1}); 
         
         }
-
-        
-          
     }
 
 
@@ -68,11 +64,18 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     .attr('width', parentWidth)
     .attr('height', parentHeight)
 
+    var meme = d3v4.select('#rowGroup')
+
     // remove any previous graphs
     svg.selectAll('.g-main').remove();
 
     var gMain = svg.append('g')
     .classed('g-main', true);
+
+ /*    second.selectAll('.g-main').remove();
+
+    var gMain2 = second.append('g')
+    .classed('g-main', true); */
 
     var rect = gMain.append('rect')
     .attr('width', parentWidth)
@@ -96,38 +99,6 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     if (! ("links" in set)) {
         console.log("Graph is missing links");
         return;
-    }
-
-    var nodes = {};
-    var meme = 0;
-    var meme2 = 0;
-    var meme3 = 0;
-    var i;
-    for (i = 0; i < set.nodes.length; i++) {
-        nodes[set.nodes[i].index] = set.nodes[i];
-        set.nodes[i].weight = 1.01;
-
-    }
-
-    for (let j = 0; j < 20;/* data.length; */ j++) {
-    
-
-        for (let l = 0; l < data[j].inputs.length; l++) {
-    
-            set.links.push({"source": nodes[meme] , "target": nodes[l + meme + 1] , "value": 1});
-        
-            meme2 = l+1;
-        }
-
-        for (let k = 0; k < data[j].outputs.length; k++) {
-                  
-    
-            set.links.push({"source": nodes[meme] , "target": nodes[k + meme + meme2 + 1] , "value": 1}); 
-
-            meme3 = k+1;
-        
-        }meme = meme + meme2 + meme3 + 1;     
-          
     }
 
     // the brush needs to go before the nodes so that it doesn't
@@ -354,13 +325,11 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         second.select("#trans_id")
         .text(d.id);
 
-        /* second.selectAll("tspan")
-        .remove(); */
-
-        second.selectAll("tspan")
-        .data(data)
+        meme.selectAll("text")
+        .data(set.nodes)
+        .enter()
         .append('text')
-        .text(function(d) {console.log(d); return d; });
+        .text(function(d) {console.log(d); return d.id; });
 
     }
 
