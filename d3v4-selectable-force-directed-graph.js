@@ -354,8 +354,8 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         second.select("#trans_id")
         .text(d.id);
 
-        second.selectAll("tspan")
-        .remove();
+        /* second.selectAll("tspan")
+        .remove(); */
 
         second.selectAll("tspan")
         .data(data)
