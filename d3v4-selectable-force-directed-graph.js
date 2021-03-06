@@ -64,7 +64,11 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     .attr('width', parentWidth)
     .attr('height', parentHeight)
 
-    var meme = d3v4.select('#rowGroup')
+    var trans = d3v4.select('#tableTrans')
+
+    var ins = d3v4.select('#tableInputs')
+
+    var outs = d3v4.select('#tableOutputs')
 
     // remove any previous graphs
     svg.selectAll('.g-main').remove();
@@ -87,7 +91,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     var zoom = d3v4.zoom()
     .on('zoom', zoomed)
 
-    gMain.call(zoom);
+    gMain.call(zoom).on("dblclick.zoom", null);
 
 
     function zoomed() {
@@ -142,11 +146,18 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         });
 
     svg.selectAll("circle").on('mouseover', function(d) {
-        svg.select('#text0')
-          .text(d.id);
+        
+        if ('name' in d) {
+            svg.select('#text0')
+            .text(d.name)
+        }
+        else {
+            svg.select('#text0')
+            .text(d.id)
+        }
       });
 
-      svg.selectAll("circle").on('auxclick', function(d) {
+      svg.selectAll("circle").on('dblclick', function(d) {
 
         d.fx = null;
         d.fy = null;
@@ -319,23 +330,171 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         })
     }
 
-    function selectNode(d){
-        console.log(d);
-
-        second.select("#trans_id")
-        .text(d.id);
-
-        meme.selectAll("text")
-        .data(set.nodes)
-        .enter()
-        .append('text')
-        .text(function(d) {console.log(d); return d.id; });
-
-    }
-
     var label = ['Hover a node to show its hash'];
 
     var texts = ['Hover a node to show its hash', 'Hold the shift key to select nodes', 'Use the scroll wheel to zoom'];
+
+    function fillInputs(search) {
+
+        var aux = search[0].inputs;
+
+        console.log(aux);
+
+        for (let i = 0; i < aux.length; i++) {
+        
+            ins
+            .append("text")
+            .attr('x', 30)
+            .attr('y', 60)
+            .attr('font-size', '18px')
+            .attr('text-anchor', 'middle')
+            .attr('role', 'row');
+            
+        }
+
+        ins.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 100)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d){ return 'cell0';})
+        .text("meme" /* aux[0].addresses[0] */);
+
+        ins.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 200)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell1';})
+        .text(aux[0].index);
+
+        ins.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 300)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell2';})
+        .text(aux[0].value);
+
+    }
+
+    function fillOutputs(search) {
+
+        var aux = search[0].outputs;
+
+        console.log(aux);
+
+        for (let i = 0; i < aux.length; i++) {
+        
+            outs
+            .append("text")
+            .attr('x', 30)
+            .attr('y', 60)
+            .attr('font-size', '18px')
+            .attr('text-anchor', 'middle')
+            .attr('role', 'row');
+            
+        }
+
+        outs.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 100)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d){ return 'cell0';})
+        .text("meme" /* aux[0].addresses[0] */);
+
+        outs.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 200)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell1';})
+        .text(aux[0].index);
+
+        outs.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 300)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell2';})
+        .text(aux[0].value);
+
+    }
+
+    function selectNode(d){
+
+        var nodo = [];
+
+        nodo = d;
+
+        var search = data.filter( x => x.hash === nodo.id );
+
+        fillInputs(search);
+
+        fillOutputs(search);
+
+        if ('name' in d) {
+            second.select("#trans_id")
+            .text(d.name);
+        }
+        else {
+            second.select("#trans_id")
+            .text(d.id);
+        }
+
+        trans.selectAll("tspan[role*='cell'").remove();
+
+     trans
+        .append("text")
+        .attr('x', 30)
+        .attr('y', 60)
+        .attr('font-size', '18px')
+        .attr('text-anchor', 'middle')
+        .attr('role', 'row');
+
+        trans.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 100)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d){ return 'cell0';})
+        .text("ciao");
+
+        trans.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 200)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell1';})
+        .text(d.input_count);
+
+        trans.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 300)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell2';})
+        .text(d.input_value);
+
+        trans.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 400)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell3';})
+        .text(d.output_count);
+
+        trans.selectAll("text[role='row']")
+        .append("tspan")
+        .attr('x', 500)
+        .attr('y',function(d,i){ return 30*(2+i);})
+        .attr('role', function(d,i){ return 'cell3';})
+        .text(d.output_value);
+
+/*         trans.selectAll("text")
+        .selectAll("tspan[role='cell']")
+        .text(function(){
+            for (let i = 0; i < 5; i++) {
+                console.log(d[i]);
+                 return i;
+                
+            }
+        }); */
+
+    }
+
+
 
     svg.selectAll('text')
     .data(label)

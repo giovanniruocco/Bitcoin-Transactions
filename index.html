@@ -9,45 +9,43 @@
 <svg id="second" width="100%" height="100%" viewBox="0 0 370 160">
     <text style="font-size: xx-small;" id="trans_id" x='340'>hover</text>
   
-    <g id='rowGroup' transform='translate(0, 0) scale(0.6)' role="table">
+    <g id='tableTrans' transform='translate(0, 0) scale(0.6)' role="tableTrans">
       <!-- <rect x='25' y='40' width='120%' height='20' fill='gainsboro'/>
       <rect x='25' y='76' width='120%' height='20' fill='gainsboro'/> -->
   
-      <text x='30' y='30' font-size='18px' font-weight='bold' fill='crimson' text-anchor='middle' role="row">
+      <text x='30' y='30' font-size='18px' font-weight='bold' fill='crimson' text-anchor='middle' role="header">
         <tspan role="columnheader" x='100'>Transaction</tspan>
-        <tspan  role="columnheader" x='200'>Input Count</tspan>
+        <tspan role="columnheader" x='200'>Input Count</tspan>
         <tspan role="columnheader" x='300'>Input Value</tspan>
         <tspan role="columnheader" x='400'>Output Count</tspan>
-      </text>
-  
-      <text x='30' y='30' font-size='18px' text-anchor='middle' role="row">
-        <tspan role="rowheader" x='30' dy='1.5em' font-weight='bold' fill='crimson' text-anchor='start'>Q1</tspan>
-        <tspan role="cell" x='100'>$ 223</tspan>
-        <tspan role="cell" x='200'>$ 195</tspan>
-        <tspan role="cell" x='300'>$ 28</tspan>
-      </text>
-  
-      <text x='30' y='30' font-size='18px' text-anchor='middle' role="row">
-        <tspan role="rowheader" x='30' dy='2.5em' font-weight='bold' fill='crimson' text-anchor='start'>Q2</tspan>
-        <tspan role="cell" x='100'>$ 183</tspan>
-        <tspan role="cell" x='200'>$ 70</tspan>
-        <tspan role="cell" x='300'>$ 113</tspan>
-      </text>
-  
-      <text x='30' y='30' font-size='18px' text-anchor='middle' role="row">
-        <tspan role="rowheader" x='30' dy='3.5em' font-weight='bold' fill='crimson' text-anchor='start'>Q3</tspan>
-        <tspan role="cell" x='100'>$ 277</tspan>
-        <tspan role="cell" x='200'>$ 88</tspan>
-        <tspan role="cell" x='300'>$ 189</tspan>
-      </text>
-  
-      <text x='30' y='30' font-size='18px' text-anchor='middle' role="row">
-        <tspan id="q4" role="rowheader" x='30' dy='4.5em' font-weight='bold' fill='crimson' text-anchor='start'>Q4</tspan>
-        <tspan role="cell" x='100'>$ 402</tspan>
-        <tspan role="cell" x='200'>$ 133</tspan>
-        <tspan role="cell" x='300'>$ 269</tspan>
+        <tspan role="columnheader" x='500'>Output Value</tspan>
       </text>
     </g>
+
+    <g id='tableInputs' transform='translate(0, 50) scale(0.6)' role="tableInputs">
+      <!-- <rect x='25' y='40' width='120%' height='20' fill='gainsboro'/>
+      <rect x='25' y='76' width='120%' height='20' fill='gainsboro'/> -->
+  
+      <text x='30' y='30' font-size='18px' font-weight='bold' fill='crimson' text-anchor='middle' role="header">
+        <tspan role="columnheader" x='100'>Address</tspan>
+        <tspan role="columnheader" x='200'>Index</tspan>
+        <tspan role="columnheader" x='300'>Value</tspan>
+      </text>
+  
+    </g>
+
+    <g id='tableOutputs' transform='translate(0, 100) scale(0.6)' role="tableOutputs">
+      <!-- <rect x='25' y='40' width='120%' height='20' fill='gainsboro'/>
+      <rect x='25' y='76' width='120%' height='20' fill='gainsboro'/> -->
+  
+      <text x='30' y='30' font-size='18px' font-weight='bold' fill='crimson' text-anchor='middle' role="header">
+        <tspan role="columnheader" x='100'>Address</tspan>
+        <tspan role="columnheader" x='200'>Index</tspan>
+        <tspan role="columnheader" x='300'>Value</tspan>
+      </text>
+
+    </g>
+
   </svg>
 </div>
 
