@@ -122,6 +122,14 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .selectAll("circle")
         .data(set.nodes)
         .enter().append("circle")
+
+/*         .attr("r", function(d) { //max_inp:10=inp_value : r  max_inp=9699900000000
+            if (d.group == 1)
+                return 5 + ((15 * d.input_value)/9699900000000);
+            else
+                return 5; 
+        }) */
+
         .attr("r", 5)
         .attr("fill", function(d) { 
             if ('color' in d)
@@ -334,11 +342,15 @@ function createV4SelectableForceDirectedGraph(svg, data) {
 
     var texts = ['Hover a node to show its hash', 'Hold the shift key to select nodes', 'Use the scroll wheel to zoom'];
 
+    var search;
+
     function fillInputs(search) {
 
         var aux = search[0].inputs;
 
-        console.log(aux);
+        ins.selectAll("text[role='row']").remove();
+
+        ins.selectAll("tspan[role*='cell'").remove();
 
         for (let i = 0; i < aux.length; i++) {
         
@@ -348,30 +360,32 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             .attr('y', 60)
             .attr('font-size', '18px')
             .attr('text-anchor', 'middle')
-            .attr('role', 'row');
-            
+            .attr('role', 'row'+i);
+
+            ins.select("text[role='row"+i+"']")
+            .append("tspan")
+            .attr('x', 100)
+            .attr('y', 30 * (i+2))
+            .attr('role', function(d){ return 'cell0';})
+            .text("meme" /* aux[0].addresses[0] */);
+    
+            ins.select("text[role='row"+i+"']")
+            .append("tspan")
+            .attr('x', 200)
+            .attr('y', 30 * (i+2))
+            .attr('role', function(d,i){ return 'cell1';})
+            .text(aux[i].index);
+    
+            ins.select("text[role='row"+i+"']")
+            .append("tspan")
+            .attr('x', 300)
+            .attr('y', 30 * (i+2))
+            .attr('role', function(d,i){ return 'cell2';})
+            .text(aux[i].value);
+
         }
 
-        ins.selectAll("text[role='row']")
-        .append("tspan")
-        .attr('x', 100)
-        .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d){ return 'cell0';})
-        .text("meme" /* aux[0].addresses[0] */);
 
-        ins.selectAll("text[role='row']")
-        .append("tspan")
-        .attr('x', 200)
-        .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d,i){ return 'cell1';})
-        .text(aux[0].index);
-
-        ins.selectAll("text[role='row']")
-        .append("tspan")
-        .attr('x', 300)
-        .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d,i){ return 'cell2';})
-        .text(aux[0].value);
 
     }
 
@@ -379,7 +393,9 @@ function createV4SelectableForceDirectedGraph(svg, data) {
 
         var aux = search[0].outputs;
 
-        console.log(aux);
+        outs.selectAll("text[role='row']").remove();
+
+        outs.selectAll("tspan[role*='cell'").remove();
 
         for (let i = 0; i < aux.length; i++) {
         
@@ -389,63 +405,67 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             .attr('y', 60)
             .attr('font-size', '18px')
             .attr('text-anchor', 'middle')
-            .attr('role', 'row');
+            .attr('role', 'row'+i);
+
+            outs.select("text[role='row"+i+"']")
+            .append("tspan")
+            .attr('x', 100)
+            .attr('y', 30 * (i+2))
+            .attr('role', function(d){ return 'cell0';})
+            .text("meme" /* aux[0].addresses[0] */);
+    
+            outs.select("text[role='row"+i+"']")
+            .append("tspan")
+            .attr('x', 200)
+            .attr('y', 30 * (i+2))
+            .attr('role', function(d,i){ return 'cell1';})
+            .text(aux[i].index);
+    
+            outs.select("text[role='row"+i+"']")
+            .append("tspan")
+            .attr('x', 300)
+            .attr('y', 30 * (i+2))
+            .attr('role', function(d,i){ return 'cell2';})
+            .text(aux[i].value);
             
         }
-
-        outs.selectAll("text[role='row']")
-        .append("tspan")
-        .attr('x', 100)
-        .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d){ return 'cell0';})
-        .text("meme" /* aux[0].addresses[0] */);
-
-        outs.selectAll("text[role='row']")
-        .append("tspan")
-        .attr('x', 200)
-        .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d,i){ return 'cell1';})
-        .text(aux[0].index);
-
-        outs.selectAll("text[role='row']")
-        .append("tspan")
-        .attr('x', 300)
-        .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d,i){ return 'cell2';})
-        .text(aux[0].value);
 
     }
 
     function selectNode(d){
 
+        search=null;
+
         var nodo = [];
 
         nodo = d;
 
-        var search = data.filter( x => x.hash === nodo.id );
+        search = data.filter( x => x.hash === nodo.id );
+
+            if (search.length==0) {
+                
+                search = data.filter( x => x.hash === nodo.id.slice(0, -3));
+                console.log(search);
+            };
 
         fillInputs(search);
 
         fillOutputs(search);
 
-        if ('name' in d) {
+
             second.select("#trans_id")
-            .text(d.name);
-        }
-        else {
-            second.select("#trans_id")
-            .text(d.id);
-        }
+            .text(search[0].hash);
+        
 
         trans.selectAll("tspan[role*='cell'").remove();
 
-     trans
+/*     trans
         .append("text")
         .attr('x', 30)
         .attr('y', 60)
         .attr('font-size', '18px')
         .attr('text-anchor', 'middle')
-        .attr('role', 'row');
+        .attr('role', 'row'); */
 
         trans.selectAll("text[role='row']")
         .append("tspan")
@@ -459,28 +479,28 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .attr('x', 200)
         .attr('y',function(d,i){ return 30*(2+i);})
         .attr('role', function(d,i){ return 'cell1';})
-        .text(d.input_count);
+        .text(search[0].input_count);
 
         trans.selectAll("text[role='row']")
         .append("tspan")
         .attr('x', 300)
         .attr('y',function(d,i){ return 30*(2+i);})
         .attr('role', function(d,i){ return 'cell2';})
-        .text(d.input_value);
+        .text(search[0].input_value);
 
         trans.selectAll("text[role='row']")
         .append("tspan")
         .attr('x', 400)
         .attr('y',function(d,i){ return 30*(2+i);})
         .attr('role', function(d,i){ return 'cell3';})
-        .text(d.output_count);
+        .text(search[0].output_count);
 
         trans.selectAll("text[role='row']")
         .append("tspan")
         .attr('x', 500)
         .attr('y',function(d,i){ return 30*(2+i);})
-        .attr('role', function(d,i){ return 'cell3';})
-        .text(d.output_value);
+        .attr('role', function(d,i){ return 'cell4';})
+        .text(search[0].output_value);
 
 /*         trans.selectAll("text")
         .selectAll("tspan[role='cell']")
