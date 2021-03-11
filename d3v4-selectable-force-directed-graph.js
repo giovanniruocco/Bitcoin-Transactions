@@ -367,7 +367,12 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             .attr('x', 100)
             .attr('y', 30 * (i+2))
             .attr('role', function(d){ return 'cell0';})
-            .text("meme" /* aux[0].addresses[0] */);
+            .data(aux[i].addresses)
+            .text( aux[i].addresses[0])
+            .on("mouseover", toolOver)
+            .on("mousemove", toolMove)
+            .on("mouseleave", toolLeave)
+            .each(wrap);
     
             ins.select("text[role='row"+i+"']")
             .append("tspan")
@@ -412,7 +417,12 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             .attr('x', 100)
             .attr('y', 30 * (i+2))
             .attr('role', function(d){ return 'cell0';})
-            .text("meme" /* aux[0].addresses[0] */);
+            .data(aux[i].addresses)
+            .text( aux[i].addresses[0])
+            .on("mouseover", toolOver)
+            .on("mousemove", toolMove)
+            .on("mouseleave", toolLeave)
+            .each(wrap);
     
             outs.select("text[role='row"+i+"']")
             .append("tspan")
@@ -431,6 +441,57 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         }
 
     }
+
+    function wrap() {
+        var self = d3.select(this),
+            textLength = self.node().getComputedTextLength(),
+            text = self.text();
+            console.log(textLength);
+        while (textLength > (90) && text.length > 0) {
+            text = text.slice(0, -1);
+            self.text(text + '...');
+            textLength = self.node().getComputedTextLength();
+        }
+    } 
+
+      // create a tooltip
+      var tooltip = d3.select("#d3_selectable_force_directed_graph")
+      .append("div")
+        .style("opacity", 0)
+        .style("text-align", "center")
+        .attr("class", "tooltip")
+        .style("font-size", "16px")
+
+        var toolOver = function(d) {
+            console.log(d);
+            tooltip
+              .transition()
+              .duration(200)
+              .style("position", "absolute")
+              .style("opacity", 0.5)
+            if(d.hash){
+                tooltip
+                .html("<span style='color:white'>" + d.hash + "</span>") // + d.Prior_disorder + "<br>" + "HR: " +  d.HR)
+                .style("left", (d3.mouse(this)[0]+30) + "px")
+                .style("top", (d3.mouse(this)[1]+30) + "px")
+            } else {
+                tooltip
+                .html("<span style='color:white'>" + d + "</span>") // + d.Prior_disorder + "<br>" + "HR: " +  d.HR)
+                .style("left", (d3.mouse(this)[0]+30) + "px")
+                .style("top", (d3.mouse(this)[1]+30) + "px")
+            }
+          }
+          var toolMove = function(d) {
+            tooltip
+              .style("left", (d3.mouse(this)[0]+700) + "px")
+              .style("top", (d3.mouse(this)[1]+600) + "px")
+          }
+          var toolLeave = function(d) {
+            tooltip
+              .transition()
+              .duration(200)
+              .style("opacity", 0)
+          }
 
     function selectNode(d){
 
@@ -472,7 +533,12 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .attr('x', 100)
         .attr('y',function(d,i){ return 30*(2+i);})
         .attr('role', function(d){ return 'cell0';})
-        .text("ciao");
+        .data(search)
+        .text(search[0].hash)
+        .on("mouseover", toolOver)
+        .on("mousemove", toolMove)
+        .on("mouseleave", toolLeave)
+        .each(wrap);
 
         trans.selectAll("text[role='row']")
         .append("tspan")
