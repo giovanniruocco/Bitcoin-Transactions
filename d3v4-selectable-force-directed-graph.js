@@ -459,6 +459,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
       .append("div")
         .style("opacity", 0)
         .style("text-align", "center")
+        .style("display", "none")
         .attr("class", "tooltip")
         .style("font-size", "16px")
 
@@ -469,6 +470,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
               .duration(200)
               .style("position", "absolute")
               .style("opacity", 0.5)
+              .style("display", "block")
             if(d.hash){
                 tooltip
                 .html("<span style='color:white'>" + d.hash + "</span>") // + d.Prior_disorder + "<br>" + "HR: " +  d.HR)
@@ -491,6 +493,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
               .transition()
               .duration(200)
               .style("opacity", 0)
+              .style("display", "none")
           }
 
     function selectNode(d){
