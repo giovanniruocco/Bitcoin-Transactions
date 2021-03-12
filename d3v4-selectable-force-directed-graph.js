@@ -288,6 +288,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         shiftKey = false;
         brushMode = false;
 
+        
         if (!gBrush)
             return;
 
