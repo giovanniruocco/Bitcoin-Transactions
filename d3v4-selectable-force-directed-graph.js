@@ -675,8 +675,9 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     .data(label)
     .enter()
     .append('text')
-    .attr('x', 200)
+    .attr('x', 10)
     .attr('y', 20)
+    .style('text-anchor', 'start')
     .attr('id', function(d,i) { return 'text' + i;})
     .text(function(d) { return d; });
 
