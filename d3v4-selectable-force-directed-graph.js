@@ -345,7 +345,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
 
     var search;
 
-    function fillInputs(search) {
+    /* function fillInputs(search) {
 
         var aux = search[0].inputs;
 
@@ -393,9 +393,9 @@ function createV4SelectableForceDirectedGraph(svg, data) {
 
 
 
-    }
+    } */
 
-    function fillOutputs(search) {
+    /* function fillOutputs(search) {
 
         var aux = search[0].outputs;
 
@@ -441,13 +441,13 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             
         }
 
-    }
+    } */
 
     function wrap() {
         var self = d3.select(this),
             textLength = self.node().getComputedTextLength(),
             text = self.text();
-            console.log(textLength);
+            //console.log(textLength);
         while (textLength > (90) && text.length > 0) {
             text = text.slice(0, -1);
             self.text(text + '...');
@@ -455,7 +455,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         }
     } 
 
-      // create a tooltip
+/*       // create a tooltip
       var tooltip = d3.select("#d3_selectable_force_directed_graph")
       .append("div")
         .style("opacity", 0)
@@ -465,7 +465,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .style("font-size", "16px")
 
         var toolOver = function(d) {
-            console.log(d);
+            //console.log(d);
             tooltip
               .transition()
               .duration(200)
@@ -495,7 +495,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
               .duration(200)
               .style("opacity", 0)
               .style("display", "none")
-          }
+          } */
 
     function selectNode(d){
 
@@ -510,12 +510,12 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             if (search.length==0) {
                 
                 search = data.filter( x => x.hash === nodo.id.slice(0, -3));
-                console.log(search);
+                //console.log(search);
             };
 
-        fillInputs(search);
+/*         fillInputs(search);
 
-        fillOutputs(search);
+        fillOutputs(search); */
 
 
             second.select("#trans_id")
@@ -532,7 +532,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .attr('text-anchor', 'middle')
         .attr('role', 'row'); */
 
-        trans.selectAll("text[role='row']")
+/*     trans.selectAll("text[role='row']")
         .append("tspan")
         .attr('x', 100)
         .attr('y',function(d,i){ return 30*(2+i);})
@@ -570,7 +570,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .attr('x', 500)
         .attr('y',function(d,i){ return 30*(2+i);})
         .attr('role', function(d,i){ return 'cell4';})
-        .text(search[0].output_value);
+        .text(search[0].output_value); */
 
 /*         trans.selectAll("text")
         .selectAll("tspan[role='cell']")
@@ -582,15 +582,100 @@ function createV4SelectableForceDirectedGraph(svg, data) {
             }
         }); */
 
+        var table = d3.select('table');
+        table.remove();
+
+        var div = d3.select('.view-content');
+        div.remove();
+
+        var aux = [];
+
+        var lastChar
+
+        //console.log(search);
+        //console.log(d);
+
+        if (d.name && d.id.includes("-i")) {
+
+            lastChar = d.id.substr(d.id.length - 1);
+
+            aux[0] = search[0].inputs[lastChar];
+
+            //console.log(search[0].inputs);
+            tabulate(aux, ['addresses','index','value']);
+
+        } else if (d.name && d.id.includes("-o")) {
+
+            lastChar = d.id.substr(d.id.length - 1);
+
+            aux[0] = search[0].outputs[lastChar];
+
+            //console.log(aux[0]);
+            tabulate(aux, ['addresses','index','value']);
+
+        } else {
+
+            //console.log("trans");
+            // render the table(s)
+	        tabulate(search, ['hash','input_count','input_value','output_count', 'output_value']); // 2 column table
+
+        }
+
     }
 
+    function tabulate(data, columns) {
+		var div = d3.select('#d3_selectable_force_directed_graph').append('div')
+        var table = div.append('table')
+		var thead = table.append('thead')
+		var	tbody = table.append('tbody');
 
+        div.attr('class','view-content');
+
+        div.style("position","absolute");
+        div.style("border", "1px solid black")
+        div.style("top","30px");
+        div.style("right","10%");
+
+/*      table.style("position","absolute");
+        table.style("top","30px");
+        table.style("right","10%"); */
+
+		// append the header row
+		thead.append('tr')
+		  .selectAll('th')
+		  .data(columns).enter()
+		  .append('th')
+		    .text(function (column) { return column; });
+
+		// create a row for each object in the data
+		var rows = tbody.selectAll('tr')
+		  .data(data)
+		  .enter()
+		  .append('tr');
+
+		// create a cell in each row for each column
+		var cells = rows.selectAll('td')
+		  .data(function (row) {
+		    return columns.map(function (column) {
+		      return {column: column, value: row[column]};
+		    });
+		  })
+		  .enter()
+		  .append('td')
+          .append('span')
+          .attr('title', function(d) {
+              return d.value;
+          })
+		    .text(function (d) { return d.value; });
+
+	  return table;
+	}
 
     svg.selectAll('text')
     .data(label)
     .enter()
     .append('text')
-    .attr('x', 950)
+    .attr('x', 200)
     .attr('y', 20)
     .attr('id', function(d,i) { return 'text' + i;})
     .text(function(d) { return d; });
@@ -599,7 +684,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
         .data(texts)
         .enter()
         .append('text')
-        .attr('x', 950)
+        .attr('x', 200)
         .attr('y', function(d,i) { return 440 + i * 18; })
         .text(function(d) { return d; });
 
@@ -607,7 +692,7 @@ function createV4SelectableForceDirectedGraph(svg, data) {
     .data(texts)
     .enter()
     .append('text')
-    .attr('x', 950)
+    .attr('x', 200)
     .attr('y', function(d,i) { return 440 + i * 18; })
     .text(function(d) { return d; });
 

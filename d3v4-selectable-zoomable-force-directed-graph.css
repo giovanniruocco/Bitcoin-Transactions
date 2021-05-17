@@ -30,3 +30,35 @@ tspan {
   text-align: left;
   color: white;
 }
+
+td{
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 200px;
+  text-align: left;
+}
+
+thead{
+
+    float:left
+
+}
+
+tbody{
+
+    float:right
+
+}
+
+thead th {
+
+    display: block;   
+
+}
+
+tbody td{
+
+    display: block;
+
+}
