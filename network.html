@@ -1,0 +1,89 @@
+
+<head>
+    <meta charset="utf-8" />   
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+     <link rel='stylesheet' href='network.css'>
+
+  </head>
+  <div class="row">
+  <div class="col-4">
+  </div>
+  <div class="col-4">
+    <select name="aa" onchange="setCentrality(this.value)">
+        <option value="bw" selected>betweenneess</option>
+        <option value="ev">eigenvector</option>
+    </select>
+  </div>
+</div>
+    <div class="row" style="margin: 0px; height: calc(50% - 26px);">
+
+        
+        <div class="col-4">
+            <svg class="h-100 w-100" id="transactionsGraph">
+                
+            </svg>
+            
+        </div>
+        <div class="col-4">
+            <svg class="h-100 w-100" id="network">
+            </svg>
+        </div>
+    </div>
+
+    <div class="row h-50" style="margin: 0px;">
+        <div class="col-4" id="bar_chart">
+            <svg class="h-100 w-100" id="barChart">
+            </svg>
+        </div>
+
+        <div class="col-4" id="line_chart_brush">
+            <svg class="h-100 w-100" id="lineChart">
+            </svg>
+        </div>
+        
+    </div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsnetworkx/0.3.4/jsnetworkx.js"></script>
+<script src="network.js"></script>
+<script src="https://d3js.org/queue.v1.min.js"></script>
+   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+<script>
+// var svg = d3.select('#d3_selectable_force_directed_graph');
+
+// d3.json('trans2010new.json', function(error, data) {
+//     if (!error) {
+//         //console.log('graph', graph);
+//         createNetwork(svg, data);
+//     } else {
+//         console.error(error);
+//     }
+// });
+//createNN('trans2010new');
+//createBarChart(2);
+//createLineChart(11);
+//createLineChart2();
+//createLineChartWithBrush(2);
+// Defining event listener function
+httpGet();
+function displayWindowSize(){
+    // Get width and height of the window excluding scrollbars
+    var w = document.documentElement.clientWidth;
+    var h = document.documentElement.clientHeight;
+    createBarChart(2);
+    createLineChartWithBrush(0);
+    createNN('trans2010new');
+    // Display result inside a div element
+    console.log(h, "resize")
+}
+    
+// Attaching the event listener function to window's resize event
+window.addEventListener("resize", displayWindowSize);
+
+// Calling the function for the first time
+displayWindowSize();
+</script>

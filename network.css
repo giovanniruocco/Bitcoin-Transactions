@@ -1,0 +1,58 @@
+.node .selected {
+  stroke: rgb(83, 185, 199);
+}
+
+.node {
+  stroke: rgb(158, 147, 147);
+}
+
+.link {
+  stroke: rgb(158, 147, 147);
+}
+
+.bar {
+  fill: steelblue;
+  opacity: 0.2;
+}
+
+/* .axis {
+	font: 10px sans-serif;
+} */
+
+.axis path,
+.axis line {
+  fill: none;
+  /* stroke: #D4D8DA; */
+  stroke-width: 0.5px;
+  shape-rendering: crispEdges;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: #72cccc;
+  /* stroke: steelblue;
+  stroke-width: 5px; */
+}
+  
+.hover-line {
+  stroke: steelblue;
+  stroke-width: 2px;
+  stroke-dasharray: 3,3;
+}
+
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+	clip-path: url(#clip);
+}
