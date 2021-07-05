@@ -56,3 +56,46 @@
   stroke-width: 2px;
 	clip-path: url(#clip);
 }
+
+
+#slider body {
+  font-family:"avenir next", Arial, sans-serif;
+  font-size: 12px;
+  color: #696969;
+}
+
+
+#slider .ticks {
+      font-size: 10px;
+    }
+
+    #slider  .track,
+    #slider  .track-inset,
+    #slider  .track-overlay {
+      stroke-linecap: round;
+    }
+
+    #slider .track {
+      stroke: #000;
+      stroke-opacity: 0.3;
+      stroke-width: 10px;
+    }
+
+    #slider  .track-inset {
+      stroke: #dcdcdc;
+      stroke-width: 8px;
+    }
+
+    #slider .track-overlay {
+      pointer-events: stroke;
+      stroke-width: 50px;
+      stroke: transparent;
+      cursor: crosshair;
+    }
+
+    #slider .handle {
+      fill: #fff;
+      stroke: #000;
+      stroke-opacity: 0.5;
+      stroke-width: 1.25px;
+    }

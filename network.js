@@ -58,6 +58,93 @@ var rect = gMain.append('rect')
 
 var gDraw = gMain.append('g');
 
+
+var formatDateIntoYear = d3.timeFormat("%d");
+var formatDate = d3.timeFormat("%d %b");
+var parseDate = d3.timeParse("%m/%d/%y");
+
+var startDate = new Date("2010-01-01"),
+    endDate = new Date("2010-01-31");
+
+    var margin = {top:0, right:50, bottom:0, left:50},
+    width = 500 - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
+
+var svgSlider = d3.select("#slider")
+    .append("svg")
+    .attr("class", "h-100")
+    .attr("class", "w-100")
+    /* .attr("width", width)
+    .attr("height", height) */
+    .attr("width","100%")
+    .attr("height","100%")
+    .attr("viewBox","0 0 600 450")
+    .attr("preserveAspectRatio","xMidYMid");
+/*  .attr("position", "absolute")
+    .attr("z-index", "8"); */
+    
+var x = d3.scaleTime()
+    /* .domain([1, 31]) */
+    .domain([startDate, endDate])
+    .range([0, width])
+    .clamp(true);
+
+var slider = svgSlider.append("g")
+    .attr("class", "slider")
+/*     .attr("class", "h-100")
+    .attr("class", "w-100") */
+    .attr("transform", "translate(" + 100 + "," + height / 2 + ")");
+
+slider.append("line")
+    .attr("class", "track")
+    .attr("x1", x.range()[0])
+    .attr("x2", x.range()[1])
+  .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+    .attr("class", "track-inset")
+  .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+    .attr("class", "track-overlay")
+    .call(d3.drag()
+        .on("start.interrupt", function() { slider.interrupt(); })
+        .on("start drag", function() { update(x.invert(d3.event.x)); }));
+
+
+
+slider.insert("g", ".track-overlay")
+    .attr("class", "ticks")
+    .attr("transform", "translate(0," + 18 + ")")
+  .selectAll("text")
+    .data(x.ticks(10))
+    .enter()
+    .append("text")
+    .attr("x", x)
+    .attr("y", 10)
+    .attr("text-anchor", "middle")
+    .text(function(d) { return formatDateIntoYear(d); });
+
+    var ticks = x.ticks();
+    ticks.push(new Date(2010, 1, 1));
+    console.log(ticks);
+
+var handle = slider.insert("circle", ".track-overlay")
+    .attr("class", "handle")
+    .attr("r", 9);
+
+var label = slider.append("text")  
+    .attr("class", "label")
+    .attr("text-anchor", "middle")
+    .text(formatDate(startDate))
+    .attr("transform", "translate(0," + (-25) + ")")
+
+    function update(h) {
+        console.log(h);
+        // update position and text of label according to slider scale
+        handle.attr("cx", x(h));
+        label
+          .attr("x", x(h))
+          .text(formatDate(h));
+      
+      }
+
 var zoom = d3v4.zoom()
 .on('zoom', zoomed)
 
@@ -743,6 +830,7 @@ gMain.selectAll(".bar")
             return (this === selected) ? 1.0 : 0.3;
         })
     createLineChartWithBrush(d.id)
+    createLineChartWithBrush2(d.id)
     
 
 });
@@ -777,249 +865,602 @@ gMain.append("text")
 
 function createLineChartWithBrush(month){
 
-queue()
-.defer(d3.csv, "prices.csv", type)
-.await(ready);
+    queue()
+    .defer(d3.csv, "prices.csv", type)
+    .await(ready);
 
-var parseDate = d3.timeParse("%Y-%m-%d");
-var bisectDate = d3.bisector(function(d) { return d.date; }).left;
-
-
-function ready(error, data) {
+    var parseDate = d3.timeParse("%Y-%m-%d");
+    var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
 
-if (error) throw error;
-var svg = d3.select('#lineChart');
-
-var h = parseInt(d3.select('#lineChart').style('height'), 10);
-var w = parseInt(d3.select('#lineChart').style('width'), 10);
-
-var margin = {top: 0, right: 0, bottom: h*28/100, left: w*11/100};
-var margin2 = {top: h*82/100, right: 0, bottom: h*8/100, left: w*11/100};
-var width = w - margin.left - margin.right;
-var height = h - margin.top - margin.bottom;
-var height2 = h - margin2.top - margin2.bottom;
-    
-var x = d3.scaleTime().range([0, width]);
-var x2 = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
-var y2 = d3.scaleLinear().range([height2, 0]);
-
-var xAxis = d3.axisBottom(x);
-var xAxis2 = d3.axisBottom(x2);
-var yAxis = d3.axisLeft(y);
-
-var line = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
-
-var line2 = d3.line()
-    .x(function(d) { return x2(d.date); })
-    .y(function(d) { return y2(d.close); });
-    
-// remove any previous graphs
-svg.selectAll("*").remove();
-
-svg.append("defs").append("clipPath")
-    .attr("id", "clip")
-  .append("rect")
-    .attr("width", width)
-    .attr("height", height);
-
-var focus = svg.append("g")
-    .attr("class", "focus")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .attr("width", width)
-    .attr("height", height);
-
-var focus2 = focus.append("g")
-    .attr("class", "focus2")
-    .style("display", "none")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    function ready(error, data) {
 
 
-var context = svg.append("g")
-    // <!-- .attr("class", "context") -->
-    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-    
-var currentExtent = [0,0]
+    if (error) throw error;
+    var svg = d3.select('#lineChart');
 
-var brush = d3.brushX()
-.extent([[0, 0], [width, height2]])
-.on("brush start", updateCurrentExtent)
-.on("brush end", brushed);
+    var h = parseInt(d3.select('#lineChart').style('height'), 10);
+    var w = parseInt(d3.select('#lineChart').style('width'), 10);
 
-var zoom = d3.zoom()
-.scaleExtent([1, Infinity])
-.translateExtent([[0, 0], [width, height]])
-.extent([[0, 0], [width, height]])
-.on("zoom", zoomed);
-
-x.domain(d3.extent(data, function(d) { return d.date; }));
-y.domain([0, d3.max(data, function(d) { return d.close; })]);
-x2.domain(x.domain());
-y2.domain(y.domain());
-
-focus.append("path")
-  .datum(data)
-  .attr("class", "line")
-  .attr("d", line);
-
-focus.append("g")
-  .attr("class", "axis axis--x")
-  .attr("transform", "translate(0," + height + ")")
-  .call(xAxis);
-
-  // text label for the x axis
-focus.append("text")
-    .attr("transform", "translate(" + (width/2) + " ," + (margin2.top) + ")")
-    .style("text-anchor", "middle")
-    .text("Date");
-
-focus.append("g")
-  .attr("class", "axis axis--y")
-  .call(yAxis);
-
-  // text label for the y axis
-focus.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left)
-      .attr("x",0 - (height / 2))
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Value ($)"); 
-
-focus2.append("line")
-  .attr("class", "x-hover-line hover-line")
-  .attr("y1", 0)
-  .attr("y2", height);
-
-focus2.append("line")
-  .attr("class", "y-hover-line hover-line")
-  .attr("x1", width)
-  .attr("x2", width);
-
-focus2.append("circle")
-  .attr("r", 4);
-
-focus2.append("text")
-  .attr("x", 15)
-    .attr("dy", ".31em");
-
-context.append("path")
-  .datum(data)
-  .attr("class", "line")
-  .attr("d", line2);
-
-context.append("g")
-  .attr("class", "axis axis--x")
-  .attr("transform", "translate(0," + height2 + ")")
-  .call(xAxis2.tickFormat(d3.timeFormat("%b")));
-
-context.append("g")
-  .attr("class", "brush")
-  .on("click", brushed)
-  .call(brush)
-  .call(brush.move, [new Date(2010,month,1),new Date(2010, parseInt(month)+1,0)].map(x));
-
-svg.append("rect")
-  .attr("class", "zoom")
-  .attr("width", width)
-  .attr("height", height)
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-  .on("mouseover", function() { focus2.style("display", null); })
-  .on("mouseout", function() { focus2.style("display", "none"); })
-  .on("mousemove", mousemove);
-  //.call(zoom);
-  
-function mousemove() {
-    d3.select(this).style("cursor", "default"); 
-    var x0 = x.invert(d3.mouse(this)[0]);
-    var i = bisectDate(data, x0, 1);
-    var d0 = data[i - 1];
-    var d = data[i];
-      //daaa = x0 - d0.year > d.year - x0 ? d : d0;
-    focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-  focus2.select("text").text(function() { return d.close; });
-  focus2.select(".x-hover-line").attr("y2", height - y(d.close));
-  focus2.select(".y-hover-line").attr("x2", width + width);
-}
-function updateCurrentExtent() {
-    currentExtent = d3.brushSelection(this);
-}
-
-function brushed() {
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    var s = d3.event.selection;	 
-    var p = currentExtent;
-    var start;
-    var end;
-    var startMonth;
-    var endMonth;
-
-    if (s) {
-        start = d3.min([s[0], s[1]])
-        end = d3.max([s[0], s[1]])
-        startMonth = x2.invert(start).getMonth()
-        endMonth = (x2.invert(end)).getMonth()
+    var margin = {top: 0, right: 0, bottom: h*28/100, left: w*11/100};
+    var margin2 = {top: h*82/100, right: 0, bottom: h*8/100, left: w*11/100};
+    var width = w - margin.left - margin.right;
+    var height = h - margin.top - margin.bottom;
+    var height2 = h - margin2.top - margin2.bottom;
         
-        if (startMonth != endMonth && ((p[0] == s[0]) || (p[1] == s[1])||(p[1] == s[0]) || (p[0] == s[1]))) {
-            var oldMonth = x2.invert(p[0]).getMonth()
-            if (startMonth == oldMonth) {
-                start = x2(new Date(2010, endMonth, 1))
-            } else {
-                end = x2(new Date(2010, startMonth+1, 0))
+    var x = d3.scaleTime().range([0, width]);
+    var x2 = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+    var y2 = d3.scaleLinear().range([height2, 0]);
+
+    var xAxis = d3.axisBottom(x);
+    var xAxis2 = d3.axisBottom(x2);
+    var yAxis = d3.axisLeft(y);
+
+    var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.close); });
+
+    var line2 = d3.line()
+        .x(function(d) { return x2(d.date); })
+        .y(function(d) { return y2(d.close); });
+        
+    // remove any previous graphs
+    svg.selectAll("*").remove();
+
+    svg.append("defs").append("clipPath")
+        .attr("id", "clip")
+    .append("rect")
+        .attr("width", width)
+        .attr("height", height);
+
+    var focus = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("width", width)
+        .attr("height", height);
+
+    var focus2 = focus.append("g")
+        .attr("class", "focus2")
+        .style("display", "none")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    var context = svg.append("g")
+        // <!-- .attr("class", "context") -->
+        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+        
+    var currentExtent = [0,0]
+
+    var brush = d3.brushX()
+    .extent([[0, 0], [width, height2]])
+    .on("brush start", updateCurrentExtent)
+    .on("brush end", brushed);
+
+    var zoom = d3.zoom()
+    .scaleExtent([1, Infinity])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoomed);
+
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+    x2.domain(x.domain());
+    y2.domain(y.domain());
+
+    focus.append("path")
+    .datum(data)
+    .attr("class", "line")
+    .attr("d", line);
+
+    focus.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+    // text label for the x axis
+    focus.append("text")
+        .attr("transform", "translate(" + (width/2) + " ," + (margin2.top) + ")")
+        .style("text-anchor", "middle")
+        .text("Date");
+
+    focus.append("g")
+    .attr("class", "axis axis--y")
+    .call(yAxis);
+
+    // text label for the y axis
+    focus.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Value ($)"); 
+
+    focus2.append("line")
+    .attr("class", "x-hover-line hover-line")
+    .attr("y1", 0)
+    .attr("y2", height);
+
+    focus2.append("line")
+    .attr("class", "y-hover-line hover-line")
+    .attr("x1", width)
+    .attr("x2", width);
+
+    focus2.append("circle")
+    .attr("r", 4);
+
+    focus2.append("text")
+    .attr("x", 15)
+        .attr("dy", ".31em");
+
+    context.append("path")
+    .datum(data)
+    .attr("class", "line")
+    .attr("d", line2);
+
+    context.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + height2 + ")")
+    .call(xAxis2.tickFormat(d3.timeFormat("%b")));
+
+    context.append("g")
+    .attr("class", "brush")
+    .on("click", brushed)
+    .call(brush)
+    .call(brush.move, [new Date(2010,month,1),new Date(2010, parseInt(month)+1,0)].map(x));
+
+    svg.append("rect")
+    .attr("class", "zoom")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .on("mouseover", function() { focus2.style("display", null); })
+    .on("mouseout", function() { focus2.style("display", "none"); })
+    .on("mousemove", mousemove);
+    //.call(zoom);
+    
+    function mousemove() {
+        d3.select(this).style("cursor", "default"); 
+        var x0 = x.invert(d3.mouse(this)[0]);
+        
+        var i = bisectDate(data, x0, 1);
+
+        var d0 = data[i - 1];
+        var d = data[i];
+        //daaa = x0 - d0.year > d.year - x0 ? d : d0;
+        focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+    focus2.select("text").text(function() { return d.close; });
+    focus2.select(".x-hover-line").attr("y2", height - y(d.close));
+    focus2.select(".y-hover-line").attr("x2", width + width);
+    }
+    function updateCurrentExtent() {
+        currentExtent = d3.brushSelection(this);
+    }
+
+    function brushed() {
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+        var s = d3.event.selection;	 
+        var p = currentExtent;
+        var start;
+        var end;
+        var startMonth;
+        var endMonth;
+
+        if (s) {
+            start = d3.min([s[0], s[1]])
+            end = d3.max([s[0], s[1]])
+            startMonth = x2.invert(start).getMonth()
+            endMonth = (x2.invert(end)).getMonth()
+            
+            if (startMonth != endMonth && ((p[0] == s[0]) || (p[1] == s[1])||(p[1] == s[0]) || (p[0] == s[1]))) {
+                var oldMonth = x2.invert(p[0]).getMonth()
+                if (startMonth == oldMonth) {
+                    start = x2(new Date(2010, endMonth, 1))
+                } else {
+                    end = x2(new Date(2010, startMonth+1, 0))
+                }
+            } else if (startMonth != endMonth) {
+                if (p[0]<s[0]) { //right
+                    start = x2(new Date(2010, endMonth, 1))
+                    end = s[1] + start - s[0]
+                } else { //left
+                    end = x2(new Date(2010, startMonth+1, 0))
+                    start = s[0] - (s[1] - end)
+                }
             }
-        } else if (startMonth != endMonth) {
-            if (p[0]<s[0]) { //right
-                start = x2(new Date(2010, endMonth, 1))
-                end = s[1] + start - s[0]
-            } else { //left
-                end = x2(new Date(2010, startMonth+1, 0))
-                start = s[0] - (s[1] - end)
+
+        } else { // if no selection took place and the brush was just clicked
+            var mouse = d3.mouse(this)[0];
+            selectedMonth = x2.invert(mouse).getMonth()
+            start = x2(new Date(2010, selectedMonth, 1))
+            end = x2(new Date(2010, selectedMonth+1, 0))
+        }
+        s = [start,end]
+
+    var diff = s[1]-s[0];
+    var limit = x2(new Date(2010, 2, 11)) - x2(new Date(2010, 2, 10));
+    if (diff < limit) {
+        diff = limit
+    }
+    
+    x.domain(s.map(x2.invert, x2));
+    focus.select(".line").attr("d", line);
+    focus.select(".axis--x").call(xAxis);
+    svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+                                                .scale(width / diff)
+                                                .translate(-s[0], 0));
+
+    var newMonth = x2.invert(start).getMonth();
+    changeBarChartMonth(newMonth)
+    }
+
+    function zoomed() {
+    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+    var t = d3.event.transform;
+    x.domain(t.rescaleX(x2).domain());
+    focus.select(".line").attr("d", line);
+    focus.select(".axis--x").call(xAxis);
+    context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+    }
+
+    }
+
+    function type(d) {
+    d.date = parseDate(d.date);
+    d.close = +d.close;
+    return d;
+    }
+
+}
+
+function createRadarChart() {
+    febbraio = 1264982400000;
+marzo = 1267401600000;
+aprile = 1270080000000;
+maggio= 1272672000000;
+giugno= 1275350400000;
+luglio = 1277942400000;
+agosto= 1280620800000;
+settembre= 1283299200000;
+ottobre = 1285891200000;
+novembre = 1288569600000;
+dicembre = 1291161600000;
+
+  setMeme("in")
+function setMeme(type) {
+
+
+  if(type == 'in'){
+      inputradar = true;
+  } else {
+     inputradar=false;
+  }
+
+best_in = ["","",""];
+best_out = ["","",""];
+i=0, x=0;
+countinput = 0, countoutput=0;
+count2=0;
+conto = [0,0,0,0]
+conto_input = [0,0,0,0]
+conto_output = [0,0,0,0]
+contatoreinput= 0, contatoreoutput=0;
+conto_output2 = [0,0,0,0]
+conto_input2 = [0,0,0,0]
+contatoreinput2= [0, 0, 0];
+contatoreoutput2=[0, 0, 0];
+mantieni=""; //19uf6F6EDijkH4ZUaqsi3pZ2SVD6A5RG8X
+primo="", primoinput=0, primonumtrans=0;
+secondo="", secondoinput=0, secondonumtrans=0;
+terzo="", terzoinput=0, terzonumtrans=0;
+numtrans=0;
+myDati="";
+var testArray = [];
+input_array = [];
+output_array= [];
+
+d3.json('trans2010new.json', function(error, data) {
+  if (!error) {
+      for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
+          if(data[j].block_timestamp >= febbraio && data[j].block_timestamp < marzo){
+            for (let w=0; w < data[j].input_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+            {
+              input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
+              //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
+              countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
+              i++ //incremento la posizione nell'input_array a ogni ciclo
             }
+            for (let w=0; w < data[j].output_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+            {
+              output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
+              //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
+              countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
+              x++ //incremento la posizione nell'input_array a ogni ciclo
+            }
+
+      }
+      }
+      console.log("Nel periodo scelto sono presenti: " + countinput + " input")
+      console.log("Nel periodo scelto sono presenti: " + countoutput + " output")
+
+      console.log("****************************************INPUT****************************************")
+      
+      for (let j=0; j<input_array.length; j++){
+        conto[0]=0
+        contatoreinput=0
+        numtrans=1
+        mantieni= input_array[j][0]; //prendo un indirizzo input di riferimento
+        for (let i = 0; i < input_array.length; i++) {
+            if(input_array[i][0] === mantieni){ //se l'input preso come riferimento lo ritrovo (almeno una volta si, perchè riscorro tutto l'input_array)
+              //console.log(mantieni + " is an input in " + input_array[i][4])
+              conto[0]+= input_array[i][1]
+              contatoreinput++
+            
+            }
+           
+      }
+        /*if (conto[0]>1)
+        console.log(conto[0])*/
+        if (conto[0] > conto[1] && conto[0] > conto[2] && conto[0] > conto[3]){
+          best_in[0] = mantieni
+          primo_cont_input = contatoreinput
+          primonumtrans=numtrans
+          conto[1]=conto[0]
+        }
+        else if (conto [0] < conto[1] && conto[0] > conto[2] && conto[0] > conto[3]){
+          best_in[1] = mantieni
+          secondo_cont_input = contatoreinput
+          secondonumtrans=numtrans
+          conto[2]=conto[0]
+        }
+        else if (conto [0] < conto[1] && conto[0] < conto[2] && conto[0] > conto[3]){
+          best_in[2] = mantieni
+          terzo_cont_input = contatoreinput
+          terzonumtrans=numtrans
+          conto[3]=conto[0]
+        }
+        
+      }
+      /*console.log("Il 1° è: " + best_in[0] + ";ha speso: " + conto[1] + ";è stato input " + primo_cont_input + " volte")
+      console.log("Il 2° è: " + best_in[1] + ";ha speso: " + conto[2] + ";è stato input " + secondo_cont_input + " volte")
+      console.log("Il 3° è: " + best_in[2] + ";ha speso: " + conto[3] + ";è stato input " + terzo_cont_input + " volte")
+*/
+
+
+      for (let j=0; j<3; j++){
+        //testArray=[];
+        conto_input2[j]=0
+        contatoreinput2[j]=0
+        for (let i = 0; i < output_array.length; i++) {
+          if(output_array[i][0] === best_in[j]){ //se l'input preso come riferimento lo ritrovo nell'output
+            conto_input2[j]+= output_array[i][1]
+            contatoreinput2[j]++
+          }
+        }
+        /* METODO SERIO PER NUMERO DI TRANSAZIONI IN CUI SONO CONVOLTI GLI INPUT
+        for (let i = 0; i < input_array.length; i++) {
+          if(input_array[i][0] === best_in[j]){ //se l'input preso come riferimento lo ritrovo nell'output
+            testArray.push(input_array[i][4])
+            console.log(best_in[j] + " is an input in " +testArray)
+            
+          }
+        }
+*/
+
+        //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
+      }
+  
+      console.log("Il 1° è: " + best_in[0] + "\nHa speso: " + conto[1] + ";è stato input " + primo_cont_input + " volte\n" + "ha ricev: " + conto_input2[0] + ";è stato output " + contatoreinput2[0] + " volte")
+      console.log("Il 2° è: " + best_in[1] + "\nHa speso: " + conto[2] + ";è stato input " + secondo_cont_input + " volte\n" + "ha ricev: " + conto_input2[1] + ";è stato output " + contatoreinput2[1] + " volte")
+      console.log("Il 3° è: " + best_in[2] + "\nHa speso: " + conto[3] + ";è stato input " + terzo_cont_input + " volte\n" + "ha ricev: " + conto_input2[2] + ";è stato output " + contatoreinput2[2] + " volte")
+  
+
+      /*********************************** OUTPUT **************************************** *********************************** OUTPUT **************************************** *********************************** OUTPUT **************************************** */
+
+      console.log("****************************************OUTPUT****************************************")
+      
+      for (let j=0; j<output_array.length; j++){
+        conto_output[0]=0
+        contatoreoutput=0
+        numtrans=1
+        mantieni= output_array[j][0]; //prendo un indirizzo output di riferimento
+        for (let i = 0; i < output_array.length; i++) {
+            if(output_array[i][0] === mantieni){ //se l'output preso come riferimento lo ritrovo (almeno una volta si, perchè riscorro tutto l'output_array)
+              //console.log(mantieni + " is an output in " + output_array[i][4])
+              conto_output[0]+= output_array[i][1]
+              contatoreoutput++
+            
+            }
+           
+      }
+        /*if (conto[0]>1)
+        console.log(conto[0])*/
+        if (conto_output[0] > conto_output[1] && conto_output[0] > conto_output[2] && conto_output[0] > conto_output[3]){
+          best_out[0] = mantieni
+          primo_cont_output = contatoreoutput
+          primonumtrans=numtrans
+          conto_output[1]=conto_output[0]
+        }
+        else if (conto_output [0] < conto_output[1] && conto_output[0] > conto_output[2] && conto_output[0] > conto_output[3]){
+          best_out[1] = mantieni
+          secondo_cont_output = contatoreoutput
+          secondonumtrans=numtrans
+          conto_output[2]=conto_output[0]
+        }
+        else if (conto_output [0] < conto_output[1] && conto_output[0] < conto_output[2] && conto_output[0] > conto_output[3]){
+          best_out[2] = mantieni
+          terzo_cont_output = contatoreoutput
+          terzonumtrans=numtrans
+          conto_output[3]=conto_output[0]
+        }
+        
+      }
+
+     
+
+
+      for (let j=0; j<3; j++){
+      conto_output2[j]=0
+      contatoreoutput2[j]=0
+      
+      for (let i = 0; i < input_array.length; i++) {
+        if(input_array[i][0] === best_out[j]){ //se l'output preso come riferimento lo ritrovo nell'input
+          //console.log(out_primo + " is an input in " + input_array[i][4])
+          conto_output2[j]+= input_array[i][1]
+          contatoreoutput2[j]++
+        }
+      }
+      //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
+    }
+
+    console.log("Il 1° è: " + best_out[0] + "\nHa ricev: " + conto_output[1] + ";è stato output " + primo_cont_output + " volte\n" + "ha speso: " + conto_output2[0] + ";è stato input " + contatoreoutput2[0] + " volte")
+    console.log("Il 2° è: " + best_out[1] + "\nHa ricev: " + conto_output[2] + ";è stato output " + secondo_cont_output + " volte\n" + "ha speso: " + conto_output2[1] + ";è stato input " + contatoreoutput2[1] + " volte")
+    console.log("Il 3° è: " + best_out[2] + "\nHa ricev: " + conto_output[3] + ";è stato output " + terzo_cont_output + " volte\n" + "ha speso: " + conto_output2[2] + ";è stato input " + contatoreoutput2[2] + " volte")
+
+    
+
+    var w = 500,
+    h = 500;
+  
+  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+  
+  //Legend titles
+  var LegendOptions = ['First','Second', 'Third'];
+  
+  if (inputradar){
+  let maxNumbInp = Math.max(primo_cont_input, secondo_cont_input, terzo_cont_input)
+  let maxInpVal = Math.max(conto[1], conto[2],conto[3])
+  let maxNumbOut = Math.max(contatoreinput2[0], contatoreinput2[1], contatoreinput2[2])
+  let maxOutVal = Math.max(conto_input2[0], conto_input2[1],conto_input2[2])
+  let maxOp = Math.max((primo_cont_input + contatoreinput2[0]), (secondo_cont_input + contatoreinput2[1]), (terzo_cont_input + contatoreinput2[2]))
+
+  //Data
+  var d = [
+        [
+        {axis:"Number of Inputs",value:(primo_cont_input / maxNumbInp)},
+        {axis:"Total Inputs value",value:(conto[1] / maxInpVal)},
+        {axis:"Number of Outputs",value:contatoreinput2[0] / maxNumbOut },
+        {axis:"Total Outputs Value",value:conto_input2[0] / maxOutVal },
+        {axis:"Number of operations",value:(primo_cont_input + contatoreinput2[0]) / maxOp }
+        ],[
+        {axis:"Number of Inputs",value:(secondo_cont_input / maxNumbInp) },
+        {axis:"Total Inputs value",value:(conto[2] / maxInpVal) },
+        {axis:"Number of Outputs",value:contatoreinput2[1] / maxNumbOut },
+        {axis:"Total Outputs Value",value:conto_input2[1] / maxOutVal },
+        {axis:"Number of operations",value:(secondo_cont_input + contatoreinput2[1]) / maxOp}
+        ]
+        ,[
+        {axis:"Number of Inputs",value:(terzo_cont_input / maxNumbInp) },
+        {axis:"Total Inputs value",value:(conto[3] / maxInpVal) },
+        {axis:"Number of Outputs",value:contatoreinput2[2] / maxNumbOut },
+        {axis:"Total Outputs Value",value:conto_input2[2] / maxOutVal },
+        {axis:"Number of operations",value:(terzo_cont_input + contatoreinput2[2]) / maxOp}
+          ]
+      ];
+    }
+
+    else{
+      let maxNumbInp = Math.max(contatoreoutput2[0], contatoreoutput2[1], contatoreoutput2[2])
+      let maxInpVal = Math.max(conto_output2[0], conto_output2[1],conto_output2[2])
+      let maxNumbOut = Math.max(primo_cont_output, secondo_cont_output, terzo_cont_output)
+      let maxOutVal = Math.max(conto_output[1], conto_output[2],conto_output[3])
+      let maxOp = Math.max((contatoreoutput2[0] + primo_cont_output), (contatoreoutput2[1] + secondo_cont_output), (contatoreoutput2[2] + terzo_cont_output))
+      //Data
+      var d = [
+            [
+            {axis:"Number of Inputs",value:((contatoreoutput2[0]+0.001) / (maxNumbInp + 0.001))},
+            {axis:"Total Inputs value",value:((conto_output2[0]+0.001) / (maxInpVal + 0.001))},
+            {axis:"Number of Outputs",value:(primo_cont_output+0.001)/ (maxNumbOut + 0.001) },
+            {axis:"Total Outputs Value",value:(conto_output[1]+0.001) / (maxOutVal + 0.001) },
+            {axis:"Number of operations",value:((contatoreoutput2[0]+0.001) + primo_cont_output) / (maxOp + 0.001) }
+            ],[
+            {axis:"Number of Inputs",value:((contatoreoutput2[1]+0.001) /  (maxNumbInp + 0.001)) },
+            {axis:"Total Inputs value",value:((conto_output2[1]+0.001) / (maxInpVal + 0.001)) },
+            {axis:"Number of Outputs",value:(secondo_cont_output +0.001)/ (maxNumbOut + 0.001) },
+            {axis:"Total Outputs Value",value:(conto_output[2]+0.001) / (maxOutVal + 0.001)},
+            {axis:"Number of operations",value:((contatoreoutput2[1]+0.001) + secondo_cont_output) / (maxOp + 0.001)}
+            ]
+            ,[
+            {axis:"Number of Inputs",value:((contatoreoutput2[2]+0.001) /  (maxNumbInp + 0.001))},
+            {axis:"Total Inputs value",value:((conto_output2[2]+0.001) / (maxInpVal + 0.001)) },
+            {axis:"Number of Outputs",value:(terzo_cont_output +0.001)/ (maxNumbOut + 0.001) },
+            {axis:"Total Outputs Value",value:(conto_output[3]+0.001) / (maxOutVal + 0.001) },
+            {axis:"Number of operations",value:((contatoreoutput2[2]+0.001) + terzo_cont_output) / (maxOp + 0.001)}
+              ]
+          ];
         }
 
-    } else { // if no selection took place and the brush was just clicked
-        var mouse = d3.mouse(this)[0];
-        selectedMonth = x2.invert(mouse).getMonth()
-        start = x2(new Date(2010, selectedMonth, 1))
-        end = x2(new Date(2010, selectedMonth+1, 0))
-    }
-    s = [start,end]
 
-  var diff = s[1]-s[0];
-  var limit = x2(new Date(2010, 2, 11)) - x2(new Date(2010, 2, 10));
-  if (diff < limit) {
-      diff = limit
+
+
+
+
+    
+
+  //Options for the Radar chart, other than default
+  var mycfg = {
+    w: w,
+    h: h,
+    maxValue: 0.6,
+    levels: 6,
+    ExtraWidthX: 300
   }
   
-  x.domain(s.map(x2.invert, x2));
-  focus.select(".line").attr("d", line);
-  focus.select(".axis--x").call(xAxis);
-  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-                                             .scale(width / diff)
-                                             .translate(-s[0], 0));
+  //Call function to draw the Radar chart
+  //Will expect that data is in %'s
+  RadarChart.draw("#chart", d, mycfg);
+  
+  ////////////////////////////////////////////
+  /////////// Initiate legend ////////////////
+  ////////////////////////////////////////////
+  
+  var svg = d3.select('#radar');
+  
+  //Create the title for the legend
+  var text = svg.append("text")
+    .attr("class", "title")
+    .attr('transform', 'translate(90,0)') 
+    .attr("x", w - 70)
+    .attr("y", 10)
+    .attr("font-size", "12px")
+    .attr("fill", "#404040")
+    .text("Memeeee");
+      
+  //Initiate Legend	
+  var legend = svg.append("g")
+    .attr("class", "legend")
+    .attr("height", 100)
+    .attr("width", 200)
+    .attr('transform', 'translate(90,20)') 
+    ;
+    //Create colour squares
+    legend.selectAll('rect')
+      .data(LegendOptions)
+      .enter()
+      .append("rect")
+      .attr("x", w - 65)
+      .attr("y", function(d, i){ return i * 20;})
+      .attr("width", 10)
+      .attr("height", 10)
+      .style("fill", function(d, i){ return colorscale(i);})
+      ;
+    //Create text next to squares
+    legend.selectAll('text')
+      .data(LegendOptions)
+      .enter()
+      .append("text")
+      .attr("x", w - 52)
+      .attr("y", function(d, i){ return i * 20 + 9;})
+      .attr("font-size", "15px")
+      .attr("fill", "#737373")
+      .text(function(d) { return d; })
+      ;	
 
-  var newMonth = x2.invert(start).getMonth();
-  changeBarChartMonth(newMonth)
-}
-
-function zoomed() {
-  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
-  var t = d3.event.transform;
-  x.domain(t.rescaleX(x2).domain());
-  focus.select(".line").attr("d", line);
-  focus.select(".axis--x").call(xAxis);
-  context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
-}
-
-}
-
-function type(d) {
-d.date = parseDate(d.date);
-d.close = +d.close;
-return d;
+  } else {
+      console.error(error);
+  }
+});
 }
 
 }

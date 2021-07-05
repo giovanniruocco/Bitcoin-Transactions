@@ -14,6 +14,13 @@
         <option value="ev">eigenvector</option>
     </select>
   </div>
+  <div class="col-4">
+    <select name="aa" onchange="setMeme(this.value)">
+        <option value="in" selected>input</option>
+        <option value="out">output</option>
+    </select>
+  </div>
+
 </div>
     <div class="row" style="margin: 0px; height: calc(50% - 26px);">
 
@@ -22,11 +29,20 @@
             <svg class="h-100 w-100" id="transactionsGraph">
                 
             </svg>
+
+            <div class="h-100 w-100" id="slider" style=" z-index: 7; position: absolute; top: -60px;"></div>
             
         </div>
         <div class="col-4">
             <svg class="h-100 w-100" id="network">
             </svg>
+        </div>
+
+        <div class="col-4">
+            <div class="h-100 w-100" id="chart">
+                <svg class="h-100 w-100" id="radar">
+                </svg>
+              </div>
         </div>
     </div>
 
@@ -40,11 +56,17 @@
             <svg class="h-100 w-100" id="lineChart">
             </svg>
         </div>
+
+<!--         <div class="col-4" id="line_chart_brush2">
+            <svg class="h-100 w-100" id="lineChart2">
+            </svg>
+        </div> -->
         
     </div>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsnetworkx/0.3.4/jsnetworkx.js"></script>
 <script src="network.js"></script>
+<script src="RadarChart.js"></script>
 <script src="https://d3js.org/queue.v1.min.js"></script>
    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -76,6 +98,7 @@ function displayWindowSize(){
     var h = document.documentElement.clientHeight;
     createBarChart(2);
     createLineChartWithBrush(0);
+    createRadarChart();
     createNN('trans2010new');
     // Display result inside a div element
     console.log(h, "resize")
