@@ -1,4 +1,4 @@
-function createNetwork(svg, data) {
+function createNetwork(svg, data, day) {
     febTimestamp = 1264982400000;
     inizioMar = 1267401600000;
     inizioApr = 1270080000000;
@@ -8,14 +8,20 @@ function createNetwork(svg, data) {
     inizioOtt = 1285891200000;
     if (typeof d3v4 == 'undefined')
     d3v4 = d3;
+    var svg = d3v4.select('#network')
 
+    // remove any previous graphs
+    svg.selectAll('.g-main').remove();
     var set = '{"nodes":[],"links":[]}';
     set = JSON.parse(set);
-    for (let j = 0; j < 20;/* data.length; */ j++) {
-
-    }
+    var selectedDate = new Date(day)
+    var selectedDay = selectedDate.getDay()
+    var selectedMonth = selectedDate.getMonth()
     for (let j = 0; j < data.length; j++) {
-        if(data[j].block_timestamp < febTimestamp){
+        var currentDay = new Date (data[j].block_timestamp).getDay()
+        var currentMonth = new Date (data[j].block_timestamp).getMonth()
+
+        if(currentMonth == selectedMonth && currentDay == selectedDay){
         for (let k = 0; k < data[j].outputs.length; k++) {
             if(set.nodes.filter(x => x.id === data[j].outputs[k].addresses[0]).length == 0)
                 set.nodes.push({'id': data[j].outputs[k].addresses[0], 'group': 5});   
@@ -31,7 +37,7 @@ function createNetwork(svg, data) {
 
     }
 
-    console.log("nodi:" + set.nodes.length)
+    console.log("nodi-network:" + set.nodes.length)
     // function createForceNetwork(nodes, edges) {
 
     //     //create a network from an edgelist
@@ -57,93 +63,6 @@ var rect = gMain.append('rect')
 .style('fill', '#343a40')
 
 var gDraw = gMain.append('g');
-
-
-var formatDateIntoYear = d3.timeFormat("%d");
-var formatDate = d3.timeFormat("%d %b");
-var parseDate = d3.timeParse("%m/%d/%y");
-
-var startDate = new Date("2010-01-01"),
-    endDate = new Date("2010-01-31");
-
-    var margin = {top:0, right:50, bottom:0, left:50},
-    width = 500 - margin.left - margin.right,
-    height = 200 - margin.top - margin.bottom;
-
-var svgSlider = d3.select("#slider")
-    .append("svg")
-    .attr("class", "h-100")
-    .attr("class", "w-100")
-    /* .attr("width", width)
-    .attr("height", height) */
-    .attr("width","100%")
-    .attr("height","100%")
-    .attr("viewBox","0 0 600 450")
-    .attr("preserveAspectRatio","xMidYMid");
-/*  .attr("position", "absolute")
-    .attr("z-index", "8"); */
-    
-var x = d3.scaleTime()
-    /* .domain([1, 31]) */
-    .domain([startDate, endDate])
-    .range([0, width])
-    .clamp(true);
-
-var slider = svgSlider.append("g")
-    .attr("class", "slider")
-/*     .attr("class", "h-100")
-    .attr("class", "w-100") */
-    .attr("transform", "translate(" + 100 + "," + height / 2 + ")");
-
-slider.append("line")
-    .attr("class", "track")
-    .attr("x1", x.range()[0])
-    .attr("x2", x.range()[1])
-  .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-    .attr("class", "track-inset")
-  .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-    .attr("class", "track-overlay")
-    .call(d3.drag()
-        .on("start.interrupt", function() { slider.interrupt(); })
-        .on("start drag", function() { update(x.invert(d3.event.x)); }));
-
-
-
-slider.insert("g", ".track-overlay")
-    .attr("class", "ticks")
-    .attr("transform", "translate(0," + 18 + ")")
-  .selectAll("text")
-    .data(x.ticks(10))
-    .enter()
-    .append("text")
-    .attr("x", x)
-    .attr("y", 10)
-    .attr("text-anchor", "middle")
-    .text(function(d) { return formatDateIntoYear(d); });
-
-    var ticks = x.ticks();
-    ticks.push(new Date(2010, 1, 1));
-    console.log(ticks);
-
-var handle = slider.insert("circle", ".track-overlay")
-    .attr("class", "handle")
-    .attr("r", 9);
-
-var label = slider.append("text")  
-    .attr("class", "label")
-    .attr("text-anchor", "middle")
-    .text(formatDate(startDate))
-    .attr("transform", "translate(0," + (-25) + ")")
-
-    function update(h) {
-        console.log(h);
-        // update position and text of label according to slider scale
-        handle.attr("cx", x(h));
-        label
-          .attr("x", x(h))
-          .text(formatDate(h));
-      
-      }
 
 var zoom = d3v4.zoom()
 .on('zoom', zoomed)
@@ -421,6 +340,74 @@ return set;
 
 }
 
+function createSlider(month) {
+    var svgSlider = d3.select("#slider")
+    svgSlider.selectAll("*").remove();
+    
+    createNN("trans2010new", new Date(2010, month, 1))
+
+    var formatDateIntoYear = d3.timeFormat("%d");
+    var formatDate = d3.timeFormat("%d %b");
+
+    var startDate = new Date(2010, month, 1);
+    var endDate = new Date(2010, parseInt(month)+1, 0);
+
+    var width = parseInt(d3.select('#slider').style('width'), 10)
+    var height = parseInt(d3.select('#slider').style('height'), 10);
+    
+    var x = d3.scaleTime()
+        .domain([startDate, endDate])
+        .range([0, width -50])
+        .clamp(true);
+
+    var slider = svgSlider.append("g")
+        .attr("class", "slider")
+        .attr("transform", "translate(" + 25 + "," + (height / 2) + ")");
+
+    slider.append("line")
+        .attr("class", "track")
+        .attr("x1", x.range()[0])
+        .attr("x2", x.range()[1])
+        .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-inset")
+        .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-overlay")
+        .call(d3.drag()
+            .on("start.interrupt", function() { slider.interrupt(); })
+            .on("start drag", function() { update(x.invert(d3.event.x)); }));
+
+    slider.insert("g", ".track-overlay")
+        .attr("class", "ticks")
+        .attr("transform", "translate(0," + 5 + ")")
+        .selectAll("text")
+        .data(x.ticks(10))
+        .enter()
+        .append("text")
+        .attr("x", x)
+        .attr("y", 10)
+        .attr("text-anchor", "middle")
+        .text(function(d) { return formatDateIntoYear(d); });
+
+    var handle = slider.insert("circle", ".track-overlay")
+        .attr("class", "handle")
+        .attr("r", 5);
+
+    var label = slider.append("text")  
+        .attr("class", "label")
+        .attr("text-anchor", "middle")
+        .text(formatDate(startDate))
+        .attr("transform", "translate(0," + (-10) + ")")
+
+    function update(h) {
+        // update position and text of label according to slider scale
+        handle.attr("cx", x(h));
+        label
+          .attr("x", x(h))
+          .text(formatDate(h));
+        createNN("trans2010new", h)
+    }
+}
+
 function setCentrality(type) {
     if(type == 'bw'){
         var centrality = jsnx.betweennessCentrality(G);
@@ -447,15 +434,15 @@ function setCentrality(type) {
       //.attr("r", 5)
 }
 
-function createNN(month){
+function createNN(month, day){
     var svgNet = d3.select('#network');
     var svgGraph = d3.select('#transactionsGraph');
 
 d3.json(month + '.json', function(error, data) {
     if (!error) {
         //console.log('graph', graph);
-        createNetwork(svgNet, data);
-        createTransactionsGraph(svgGraph, data)
+        createNetwork(svgNet, data, day);
+        createTransactionsGraph(svgGraph, data, day)
 
     } else {
         console.error(error);
@@ -463,14 +450,19 @@ d3.json(month + '.json', function(error, data) {
 });
 }
 
-function createTransactionsGraph(svg, data) {
+function createTransactionsGraph(svg, data, day) {
 
     var set = '{"nodes":[],"links":[]}';
 
     set = JSON.parse(set);
+    var selectedDate = new Date(day)
+    var selectedDay = selectedDate.getDay()
+    var selectedMonth = selectedDate.getMonth()
+    for (let j = 0; j < data.length; j++) {
+        var currentDay = new Date (data[j].block_timestamp).getDay()
+        var currentMonth = new Date (data[j].block_timestamp).getMonth()
 
-    for (let j = 0; j <  data.length; j++) {
-        if (data[j].block_timestamp < febTimestamp) {
+        if(currentMonth == selectedMonth && currentDay == selectedDay){
 
             set.nodes.push({"id": data[j].hash , "group": 1, "input_count": data[j].input_count, "output_count": data[j].output_count, "input_value": data[j].input_value, "output_value": data[j].output_value, "fee": data[j].fee});
 
@@ -491,6 +483,8 @@ function createTransactionsGraph(svg, data) {
             }
         }
     }
+    
+    console.log("nodi-txGraph:" + set.nodes.length)
 
     // if both d3v3 and d3v4 are loaded, we'll assume
     // that d3v4 is called d3v4, otherwise we'll assume
@@ -830,7 +824,7 @@ gMain.selectAll(".bar")
             return (this === selected) ? 1.0 : 0.3;
         })
     createLineChartWithBrush(d.id)
-    createLineChartWithBrush2(d.id)
+    createSlider(d.id)
     
 
 });
@@ -1093,6 +1087,7 @@ function createLineChartWithBrush(month){
 
     var newMonth = x2.invert(start).getMonth();
     changeBarChartMonth(newMonth)
+    createSlider(newMonth)
     }
 
     function zoomed() {

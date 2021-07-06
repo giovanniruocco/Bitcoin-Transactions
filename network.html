@@ -5,8 +5,10 @@
      <link rel='stylesheet' href='network.css'>
 
   </head>
-  <div class="row">
+  <div class="row" style="margin: 0px;">
   <div class="col-4">
+    <svg id="slider" class="w-100" style="height: 44px;">        
+    </svg>
   </div>
   <div class="col-4">
     <select name="aa" onchange="setCentrality(this.value)">
@@ -22,7 +24,7 @@
   </div>
 
 </div>
-    <div class="row" style="margin: 0px; height: calc(50% - 26px);">
+    <div class="row" style="margin: 0px; height: calc(50% - 44px);">
 
         
         <div class="col-4">
@@ -30,7 +32,7 @@
                 
             </svg>
 
-            <div class="h-100 w-100" id="slider" style=" z-index: 7; position: absolute; top: -60px;"></div>
+            <!-- <div class="h-100 w-100" id="slider" style=" z-index: 7; position: absolute; top: -60px;"></div> -->
             
         </div>
         <div class="col-4">
@@ -75,31 +77,18 @@
 
 
 <script>
-// var svg = d3.select('#d3_selectable_force_directed_graph');
 
-// d3.json('trans2010new.json', function(error, data) {
-//     if (!error) {
-//         //console.log('graph', graph);
-//         createNetwork(svg, data);
-//     } else {
-//         console.error(error);
-//     }
-// });
-//createNN('trans2010new');
-//createBarChart(2);
-//createLineChart(11);
-//createLineChart2();
-//createLineChartWithBrush(2);
 // Defining event listener function
 httpGet();
 function displayWindowSize(){
     // Get width and height of the window excluding scrollbars
     var w = document.documentElement.clientWidth;
     var h = document.documentElement.clientHeight;
-    createBarChart(2);
+    createSlider(0);
+    createBarChart(0);
     createLineChartWithBrush(0);
     createRadarChart();
-    createNN('trans2010new');
+    //createNN('trans2010new', new Date(2010, 0, 1));
     // Display result inside a div element
     console.log(h, "resize")
 }
