@@ -1366,24 +1366,24 @@ function setUserType(type, data) {
   //Data
   var d = [
         [
-        {axis:"Number of Inputs",value:(primo_cont_input+0.001 / maxNumbInp+0.001)},
-        {axis:"Total Inputs value",value:(conto[1]+0.001 / maxInpVal+0.001)},
-        {axis:"Number of Outputs",value:contatoreinput2[0]+0.001 / maxNumbOut+0.001 },
-        {axis:"Total Outputs Value",value:conto_input2[0]+0.001 / maxOutVal+0.001 },
-        {axis:"Number of operations",value:(primo_cont_input+0.001 + contatoreinput2[0]) / maxOp +0.001}
+        {axis:"Number of Inputs",value:((primo_cont_input+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Inputs value",value:((conto[1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Outputs",value:(contatoreinput2[0]+0.001) / (maxNumbOut+0.001) },
+        {axis:"Total Outputs Value",value:(conto_input2[0]+0.001) / (maxOutVal+0.001)},
+        {axis:"Number of operations",value:((primo_cont_input+0.001) + contatoreinput2[0]) /( maxOp +0.001)}
         ],[
-        {axis:"Number of Inputs",value:(secondo_cont_input+0.001 / maxNumbInp+0.001) },
-        {axis:"Total Inputs value",value:(conto[2]+0.001 / maxInpVal+0.001) },
-        {axis:"Number of Outputs",value:contatoreinput2[1]+0.001 / maxNumbOut+0.001 },
-        {axis:"Total Outputs Value",value:conto_input2[1]+0.001 / maxOutVal+0.001 },
-        {axis:"Number of operations",value:(secondo_cont_input+0.001 + contatoreinput2[1]) / maxOp+0.001}
+        {axis:"Number of Inputs",value:((secondo_cont_input+0.001) / (maxNumbInp+0.001)) },
+        {axis:"Total Inputs value",value:((conto[2]+0.001) / (maxInpVal+0.001)) },
+        {axis:"Number of Outputs",value:(contatoreinput2[1]+0.001) / (maxNumbOut+0.001) },
+        {axis:"Total Outputs Value",value:(conto_input2[1]+0.001) / (maxOutVal+0.001) },
+        {axis:"Number of operations",value:((secondo_cont_input+0.001) + contatoreinput2[1]) / (maxOp+0.001)}
         ]
         ,[
-        {axis:"Number of Inputs",value:(terzo_cont_input+0.001 / maxNumbInp+0.001) },
-        {axis:"Total Inputs value",value:(conto[3]+0.001 / maxInpVal+0.001) },
-        {axis:"Number of Outputs",value:contatoreinput2[2]+0.001 / maxNumbOut+0.001 },
-        {axis:"Total Outputs Value",value:conto_input2[2]+0.001 / maxOutVal+0.001 },
-        {axis:"Number of operations",value:(terzo_cont_input+0.001 + contatoreinput2[2]) / maxOp+0.001}
+        {axis:"Number of Inputs",value:((terzo_cont_input+0.001) / (maxNumbInp+0.001)) },
+        {axis:"Total Inputs value",value:((conto[3]+0.001) / (maxInpVal+0.001)) },
+        {axis:"Number of Outputs",value:(contatoreinput2[2]+0.001) / (maxNumbOut+0.001) },
+        {axis:"Total Outputs Value",value:(conto_input2[2]+0.001) / (maxOutVal+0.001) },
+        {axis:"Number of operations",value:((terzo_cont_input+0.001) + contatoreinput2[2]) / (maxOp+0.001)}
           ]
       ];
     }
