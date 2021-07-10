@@ -766,18 +766,21 @@ function createTransactionsGraph(svg, data) {
     return set;
 }
 
-function createBarChart(month){
-    // set the dimensions and margins of the graph
+function createBarChart(){
+
+// set the dimensions and margins of the graph
 // var margin = {top: 20, right: 20, bottom: 30, left: 40},
 // width = 960 - margin.left - margin.right,
 // height = 500 - margin.top - margin.bottom;
 var w = parseInt(d3.select('#barChart').style('width'), 10);
 var h = parseInt(d3.select('#barChart').style('height'), 10);
 var margin = {top: h*5/100, right: 0, bottom: h*8/100, left: w*11/100};
+var margin2 = {top: 230, right: 20, bottom: 30, left: 50};
 
 var width = parseInt(d3.select('#barChart').style('width'), 10) - margin.left;
 
 var height = parseInt(d3.select('#barChart').style('height'), 10) - margin.bottom - margin.top;
+var height2 = 300 - margin2.top - margin2.bottom;
 
 // set the ranges
 var x = d3.scaleBand()
@@ -785,7 +788,7 @@ var x = d3.scaleBand()
       .padding(0.1);
 var y = d3.scaleLinear()
       .range([height, 0]);
-      
+
 
 var svg = d3.select('#barChart');
 
@@ -797,9 +800,25 @@ var gMain = svg.append('g')
 .attr("transform", 
        "translate(" + margin.left + "," + 0 + ")");
 
+var context = svg.append("g")
+.attr("transform","translate("+margin2.left+","+(170+margin2.top)+")");
+
 // get the data
-d3.csv("monthly_data_2010.csv", function(error, data) {
+d3.csv("daily_data.csv", function(error, data) {
 if (error) throw error;
+
+var maxHeight=d3.max(data,function(d){return d.value});
+var minHeight=d3.min(data,function(d){return d.value});
+
+var yScale2 = d3.scaleLinear()
+.range([0,height2]);
+
+      //add x axis
+var xScale2 = d3.scaleBand().rangeRound([0,width]).padding(0.1);//scaleBand is used for  bar chart
+xScale2.domain(d3.range(0,data.length,1));
+
+var xAxis2 = d3.axisBottom(xScale2);
+	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
 
 // format the data
 data.forEach(function(d) {
@@ -807,20 +826,21 @@ d.value = +d.value;
 });
 
 // Scale the range of the data in the domains
-x.domain(data.map(function(d) { return d.month; }));
+x.domain(data.map(function(d) { return d.day; }));
 y.domain([0, d3.max(data, function(d) { return d.value; })]);
+yScale2.domain([maxHeight,0]);
 
 // append the rectangles for the bar chart
-gMain.selectAll(".bar")
+var bars1 =gMain.selectAll(".bar")
   .data(data)
 .enter().append("rect")
   .attr("class", "bar")
-  .attr("x", function(d) { return x(d.month); })
+  .attr("x", function(d) { return x(d.day); })
   .attr("width", x.bandwidth())
   .attr("y", function(a) { return y(a.value); })
   .attr("height", function(d) { return height - y(d.value); })
   .style("opacity", function(d) {
-    return (d.id == month) ? 1.0 : 0.3;
+    return (d.id == d.day) ? 1.0 : 0.3;
 })
   .on("click", function(d) {
     var selected = this;
@@ -829,16 +849,14 @@ gMain.selectAll(".bar")
         .style("opacity", function() {
             return (this === selected) ? 1.0 : 0.3;
         })
-    createLineChartWithBrush(d.id)
-    createLineChartWithBrush2(d.id)
+    createLineChartWithBrush(d.day)
     
-
 });
 
 // add the x Axis
-gMain.append("g")
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x));
+var xAxis = d3.axisBottom(x);
+
+var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")");
 
 // add the y Axis
 gMain.append("g")
@@ -848,7 +866,7 @@ gMain.append("g")
 gMain.append("text")
   .attr("transform", "translate(" + (width/2) + " ," + (h - margin.bottom/2) + ")")
   .style("text-anchor", "middle")
-  .text("Month");
+  .text("Days");
 
   // text label for the y axis
 gMain.append("text")
@@ -858,6 +876,95 @@ gMain.append("text")
   .attr("dy", "1em")
   .style("text-anchor", "middle")
   .text("# transactions"); 
+
+  var bars2 = context.selectAll("rect").data(data).enter().append("rect");
+  bars2.attr("x",function(d,i){
+      return xScale2(i);//i*(width/dataset.length);
+  })
+  .attr("y",function(a){
+        return (yScale2(a.value)/1);        //change value to normalize view
+  })//for bottom to top
+  .attr("width", xScale2.bandwidth()/*width/dataset.length-barpadding*/)
+  .attr("height", function(d){
+    if ((height2 - yScale2(d.value)) < 0)
+        return 0.1;
+    return (height2 - yScale2(d.value)/1);      //change value to normalize view
+  });
+  bars2.attr("fill",function(d){
+      return "steelblue";
+  });
+  
+  var brush = d3.brushX()
+  .extent([[0,0],[width,height2]])//(x0,y0)  (x1,y1)
+  .on("brush",brushed)//when mouse up, move the selection to the exact tick //start(mouse down), brush(mouse move), end(mouse up)
+  .on("end",brushend);
+  context.append("g")
+  .attr("class","brush")
+  .call(brush)
+  .call(brush.move,xScale2.range());
+
+  function brushed(){
+    if (!d3.event.sourceEvent) return; // Only transition after input.
+      if (!d3.event.selection) return; // Ignore empty selections.
+    if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-
+    //scaleBand of bar chart is not continuous. Thus we cannot use method in line chart.
+    //The idea here is to count all the bar chart in the brush area. And reset the domain
+    var newInput = [];
+    var brushArea = d3.event.selection;
+    if(brushArea === null) brushArea = x.range();
+    
+    xScale2.domain().forEach(function(d){
+        var pos = xScale2(d) + xScale2.bandwidth()/2;
+        if (pos >= brushArea[0] && pos <= brushArea[1]){
+          newInput.push(d);
+        }
+    });
+
+    x.domain(newInput);
+//	console.log(xScale.domain());
+    //realocate the bar chart
+    bars1.attr("x",function(d,i){//data set is still data
+        return x(i)/*xScale(xScale.domain().indexOf(i))*/;
+    })
+    .attr("y",function(d){
+        return y(d.value);
+    })//for bottom to top
+    .attr("width", x.bandwidth())//if you want to change the width of bar. Set the width to xScale.bandwidth(); If you want a fixed width, use xScale2.bandwidth(). Note because we use padding() in the scale, we should use xScale.bandwidth()
+    .attr("height", function(d,i){
+        if(x.domain().indexOf(i) === -1){
+            return 0;
+        }
+        else
+            return height - y(d.value);
+    });
+    
+    xAxisGroup.call(xAxis);
+
+}
+function brushend(){
+    if (!d3.event.sourceEvent) return; // Only transition after input.
+      if (!d3.event.selection) return; // Ignore empty selections.
+    if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-
+    //scaleBand of bar chart is not continuous. Thus we cannot use method in line chart.
+    //The idea here is to count all the bar chart in the brush area. And reset the domain
+    var newInput = [];
+    var brushArea = d3.event.selection;
+    if(brushArea === null) brushArea = x.range();
+    
+    
+    xScale2.domain().forEach(function(d){
+        var pos = xScale2(d) + xScale2.bandwidth()/2;
+        if (pos >= brushArea[0] && pos <= brushArea[1]){
+          newInput.push(d);
+        }
+    });
+    //relocate the position of brush area
+    var increment = 0;
+    var left=xScale2(d3.min(newInput));
+    var right = xScale2(d3.max(newInput))+xScale2.bandwidth();
+
+    d3.select(this).transition().call(d3.event.target.move,[left,right]);//The inner padding determines the ratio of the range that is reserved for blank space between bands.
+}
 
 });
 
