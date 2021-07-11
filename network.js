@@ -815,10 +815,9 @@ var yScale2 = d3.scaleLinear()
 
       //add x axis
 var xScale2 = d3.scaleBand().rangeRound([0,width]).padding(0.1);//scaleBand is used for  bar chart
-xScale2.domain(d3.range(0,data.length,1));
+xScale2.domain(d3.range(1,data.length+".5",1));
 
-var xAxis2 = d3.axisBottom(xScale2);
-	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
+
 
 // format the data
 data.forEach(function(d) {
@@ -834,6 +833,7 @@ yScale2.domain([maxHeight,0]);
 var bars1 =gMain.selectAll(".bar")
   .data(data)
 .enter().append("rect")
+  .attr("id", function(d) { return d.day; })
   .attr("class", "bar")
   .attr("x", function(d) { return x(d.day); })
   .attr("width", x.bandwidth())
@@ -849,7 +849,7 @@ var bars1 =gMain.selectAll(".bar")
         .style("opacity", function() {
             return (this === selected) ? 1.0 : 0.3;
         })
-    createLineChartWithBrush(d.day)
+    createLineChartWithBrush((d.day%12));
     
 });
 
@@ -857,6 +857,9 @@ var bars1 =gMain.selectAll(".bar")
 var xAxis = d3.axisBottom(x);
 
 var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")");
+
+var xAxis2 = d3.axisBottom(xScale2);
+	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
 
 // add the y Axis
 gMain.append("g")
@@ -879,8 +882,9 @@ gMain.append("text")
 
   var bars2 = context.selectAll("rect").data(data).enter().append("rect");
   bars2.attr("x",function(d,i){
-      return xScale2(i);//i*(width/dataset.length);
+      return xScale2(i+1);//i*(width/dataset.length);
   })
+  .attr("id", function(d) { return d.day; })
   .attr("y",function(a){
         return (yScale2(a.value)/1);        //change value to normalize view
   })//for bottom to top
