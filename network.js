@@ -1113,42 +1113,19 @@ function createLineChartWithBrush(month){
 
 }
 
-function createRadarChart() {
-    febbraio = 1264982400000;
-marzo = 1267401600000;
-aprile = 1270080000000;
-maggio= 1272672000000;
-giugno= 1275350400000;
-luglio = 1277942400000;
-agosto= 1280620800000;
-settembre= 1283299200000;
-ottobre = 1285891200000;
-novembre = 1288569600000;
-dicembre = 1291161600000;
-
-  setMeme("in")
-function setMeme(type) {
-
-
-  if(type == 'in'){
-      inputradar = true;
-  } else {
-     inputradar=false;
-  }
-
-best_in = ["","",""];
-best_out = ["","",""];
-i=0, x=0;
-countinput = 0, countoutput=0;
-count2=0;
-conto = [0,0,0,0]
-conto_input = [0,0,0,0]
-conto_output = [0,0,0,0]
-contatoreinput= 0, contatoreoutput=0;
-conto_output2 = [0,0,0,0]
-conto_input2 = [0,0,0,0]
-contatoreinput2= [0, 0, 0];
-contatoreoutput2=[0, 0, 0];
+let primo_cont_input, secondo_cont_input, terzo_cont_input;
+let best_in = ["","",""];
+let best_out = ["","",""];
+let countinput = 0, countoutput=0;
+let count2=0;
+let conto = [0,0,0,0]
+let conto_input = [0,0,0,0]
+let conto_output = [0,0,0,0]
+let contatoreinput= 0, contatoreoutput=0;
+let conto_output2 = [0,0,0,0]
+let conto_input2 = [0,0,0,0]
+let contatoreinput2= [0, 0, 0];
+let contatoreoutput2=[0, 0, 0];
 mantieni=""; //19uf6F6EDijkH4ZUaqsi3pZ2SVD6A5RG8X
 primo="", primoinput=0, primonumtrans=0;
 secondo="", secondoinput=0, secondonumtrans=0;
@@ -1159,6 +1136,20 @@ var testArray = [];
 input_array = [];
 output_array= [];
 
+function createRadarChart(){
+
+febbraio = 1264982400000;
+marzo = 1267401600000;
+aprile = 1270080000000;
+maggio= 1272672000000;
+giugno= 1275350400000;
+luglio = 1277942400000;
+agosto= 1280620800000;
+settembre= 1283299200000;
+ottobre = 1285891200000;
+novembre = 1288569600000;
+dicembre = 1291161600000;
+i=0, x=0;
 d3.json('trans2010new.json', function(error, data) {
   if (!error) {
       for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
@@ -1177,6 +1168,8 @@ d3.json('trans2010new.json', function(error, data) {
               countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
               x++ //incremento la posizione nell'input_array a ogni ciclo
             }
+
+
 
       }
       }
@@ -1247,6 +1240,8 @@ d3.json('trans2010new.json', function(error, data) {
         }
 */
 
+
+
         //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
       }
   
@@ -1254,6 +1249,15 @@ d3.json('trans2010new.json', function(error, data) {
       console.log("Il 2° è: " + best_in[1] + "\nHa speso: " + conto[2] + ";è stato input " + secondo_cont_input + " volte\n" + "ha ricev: " + conto_input2[1] + ";è stato output " + contatoreinput2[1] + " volte")
       console.log("Il 3° è: " + best_in[2] + "\nHa speso: " + conto[3] + ";è stato input " + terzo_cont_input + " volte\n" + "ha ricev: " + conto_input2[2] + ";è stato output " + contatoreinput2[2] + " volte")
   
+
+     
+     
+
+
+      
+      
+
+
 
       /*********************************** OUTPUT **************************************** *********************************** OUTPUT **************************************** *********************************** OUTPUT **************************************** */
 
@@ -1317,12 +1321,41 @@ d3.json('trans2010new.json', function(error, data) {
     console.log("Il 2° è: " + best_out[1] + "\nHa ricev: " + conto_output[2] + ";è stato output " + secondo_cont_output + " volte\n" + "ha speso: " + conto_output2[1] + ";è stato input " + contatoreoutput2[1] + " volte")
     console.log("Il 3° è: " + best_out[2] + "\nHa ricev: " + conto_output[3] + ";è stato output " + terzo_cont_output + " volte\n" + "ha speso: " + conto_output2[2] + ";è stato input " + contatoreoutput2[2] + " volte")
 
-    
+    var json = data;
+    setUserType("in",json)
+    graph(json);
+  } else {
+    console.error(error);
+}
+});
 
-    var w = 500,
+}
+//createRadarChart();
+//setMeme("in")
+
+function setUserType(type, data) {
+
+  if(type == 'in'){
+      inputradar = true;
+      console.log("input")
+      graph(data)
+      
+  } else {
+     inputradar=false;
+    console.log("output")
+    graph(data)
+    }
+}
+
+    //graph(data)
+    function graph(data){
+   
+    console.log("CIaoooo: " + primo_cont_input)
+  var w = 500,
     h = 500;
   
   var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+
   
   //Legend titles
   var LegendOptions = ['First','Second', 'Third'];
@@ -1337,24 +1370,24 @@ d3.json('trans2010new.json', function(error, data) {
   //Data
   var d = [
         [
-        {axis:"Number of Inputs",value:(primo_cont_input / maxNumbInp)},
-        {axis:"Total Inputs value",value:(conto[1] / maxInpVal)},
-        {axis:"Number of Outputs",value:contatoreinput2[0] / maxNumbOut },
-        {axis:"Total Outputs Value",value:conto_input2[0] / maxOutVal },
-        {axis:"Number of operations",value:(primo_cont_input + contatoreinput2[0]) / maxOp }
+        {axis:"Number of Inputs",value:((primo_cont_input+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Inputs value",value:((conto[1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Outputs",value:(contatoreinput2[0]+0.001) / (maxNumbOut+0.001) },
+        {axis:"Total Outputs Value",value:(conto_input2[0]+0.001) / (maxOutVal+0.001)},
+        {axis:"Number of operations",value:((primo_cont_input+0.001) + contatoreinput2[0]) /( maxOp +0.001)}
         ],[
-        {axis:"Number of Inputs",value:(secondo_cont_input / maxNumbInp) },
-        {axis:"Total Inputs value",value:(conto[2] / maxInpVal) },
-        {axis:"Number of Outputs",value:contatoreinput2[1] / maxNumbOut },
-        {axis:"Total Outputs Value",value:conto_input2[1] / maxOutVal },
-        {axis:"Number of operations",value:(secondo_cont_input + contatoreinput2[1]) / maxOp}
+        {axis:"Number of Inputs",value:((secondo_cont_input+0.001) / (maxNumbInp+0.001)) },
+        {axis:"Total Inputs value",value:((conto[2]+0.001) / (maxInpVal+0.001)) },
+        {axis:"Number of Outputs",value:(contatoreinput2[1]+0.001) / (maxNumbOut+0.001) },
+        {axis:"Total Outputs Value",value:(conto_input2[1]+0.001) / (maxOutVal+0.001) },
+        {axis:"Number of operations",value:((secondo_cont_input+0.001) + contatoreinput2[1]) / (maxOp+0.001)}
         ]
         ,[
-        {axis:"Number of Inputs",value:(terzo_cont_input / maxNumbInp) },
-        {axis:"Total Inputs value",value:(conto[3] / maxInpVal) },
-        {axis:"Number of Outputs",value:contatoreinput2[2] / maxNumbOut },
-        {axis:"Total Outputs Value",value:conto_input2[2] / maxOutVal },
-        {axis:"Number of operations",value:(terzo_cont_input + contatoreinput2[2]) / maxOp}
+        {axis:"Number of Inputs",value:((terzo_cont_input+0.001) / (maxNumbInp+0.001)) },
+        {axis:"Total Inputs value",value:((conto[3]+0.001) / (maxInpVal+0.001)) },
+        {axis:"Number of Outputs",value:(contatoreinput2[2]+0.001) / (maxNumbOut+0.001) },
+        {axis:"Total Outputs Value",value:(conto_input2[2]+0.001) / (maxOutVal+0.001) },
+        {axis:"Number of operations",value:((terzo_cont_input+0.001) + contatoreinput2[2]) / (maxOp+0.001)}
           ]
       ];
     }
@@ -1414,7 +1447,11 @@ d3.json('trans2010new.json', function(error, data) {
   /////////// Initiate legend ////////////////
   ////////////////////////////////////////////
   
-  var svg = d3.select('#radar');
+  var svg = d3.select('#body')
+    .selectAll('svg')
+    .append('svg')
+    .attr("width", w+300)
+    .attr("height", h)
   
   //Create the title for the legend
   var text = svg.append("text")
@@ -1451,18 +1488,14 @@ d3.json('trans2010new.json', function(error, data) {
       .append("text")
       .attr("x", w - 52)
       .attr("y", function(d, i){ return i * 20 + 9;})
-      .attr("font-size", "15px")
+      .attr("font-size", "11px")
       .attr("fill", "#737373")
       .text(function(d) { return d; })
       ;	
 
-  } else {
-      console.error(error);
-  }
-});
-}
 
-}
+    }
+  //}
 
 function createForceNetwork(nodes, edges) {
 
