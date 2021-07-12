@@ -456,17 +456,13 @@ function createTransactionsGraph(svg, data, day) {
 
     set = JSON.parse(set);
     var selectedDate = new Date(day)
-    console.log(day, "daY", selectedDate, "selected")
     var selectedDay = selectedDate.getDate()
-    console.log(selectedDay, "giorno selez")
     var selectedMonth = selectedDate.getMonth()
-    console.log("selected:", selectedDay, "/", selectedMonth)
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
 
         if(currentMonth == selectedMonth && currentDay == selectedDay){
-            console.log("curr:", currentDay, "/", currentMonth)
 
             set.nodes.push({"id": data[j].hash , "group": 1, "input_count": data[j].input_count, "output_count": data[j].output_count, "input_value": data[j].input_value, "output_value": data[j].output_value, "fee": data[j].fee});
 
