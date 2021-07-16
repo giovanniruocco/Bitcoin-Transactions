@@ -913,6 +913,16 @@ gMain.append("text")
     if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-
     //scaleBand of bar chart is not continuous. Thus we cannot use method in line chart.
     //The idea here is to count all the bar chart in the brush area. And reset the domain
+
+    var s = d3.event.selection;	 
+    var start;
+    var end;
+
+    start = d3.min([s[0], s[1]])
+    end = d3.max([s[0], s[1]])
+    /* startMonth = x2.invert(start).getMonth()
+    endMonth = (x2.invert(end)).getMonth() */
+
     var newInput = [];
     var brushArea = d3.event.selection;
     if(brushArea === null) brushArea = x.range();
