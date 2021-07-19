@@ -17,6 +17,7 @@ function createNetwork(svg, data, day) {
     var selectedDate = new Date(day)
     var selectedDay = selectedDate.getDate()
     var selectedMonth = selectedDate.getMonth()
+    console.log("Questo è il mese: " + selectedMonth)
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
@@ -339,11 +340,20 @@ function dragended(d) {
 return set;
 
 }
-
+//let conteggio=0;  //questo per cambiare il mese
 function createSlider(month) {
     var svgSlider = d3.select("#slider")
     svgSlider.selectAll("*").remove();
+    /*var actualdate = new Date();                          //sempre per cambiare il mese
+    var actualmonth = actualdate.getMonth();
+    if (conteggio <3)
+        {
+            (console.log("Ho cambiato il conteggio"))       //sempre per cambiare il mese
+            month=actualmonth;
+            conteggio++
+        }*/
     
+
     createNN("trans2010new", new Date(2010, month, 1))
 
     var formatDateIntoYear = d3.timeFormat("%d");
