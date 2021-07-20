@@ -84,13 +84,9 @@ function displayWindowSize(){
     // Get width and height of the window excluding scrollbars
     var w = document.documentElement.clientWidth;
     var h = document.documentElement.clientHeight;
-    createSlider(0);
     createBarChart(0);
     createLineChartWithBrush(0);
     createRadarChart();
-    //createNN('trans2010new', new Date(2010, 0, 1));
-    // Display result inside a div element
-    console.log(h, "resize")
 }
     
 // Attaching the event listener function to window's resize event

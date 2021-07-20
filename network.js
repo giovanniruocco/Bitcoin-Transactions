@@ -340,23 +340,20 @@ return set;
 
 }
 
-function createSlider(month) {
+function createSlider(start, end) {
     var svgSlider = d3.select("#slider")
     svgSlider.selectAll("*").remove();
     
-    createNN("trans2010new", new Date(2010, month, 1))
+    createNN("trans2010new", start)
 
-    var formatDateIntoYear = d3.timeFormat("%d");
+    var formatDateIntoDay = d3.timeFormat("%d");
     var formatDate = d3.timeFormat("%d %b");
-
-    var startDate = new Date(2010, month, 1);
-    var endDate = new Date(2010, parseInt(month)+1, 0);
 
     var width = parseInt(d3.select('#slider').style('width'), 10)
     var height = parseInt(d3.select('#slider').style('height'), 10);
     
     var x = d3.scaleTime()
-        .domain([startDate, endDate])
+        .domain([start, end])
         .range([0, width -50])
         .clamp(true);
 
@@ -374,7 +371,8 @@ function createSlider(month) {
         .attr("class", "track-overlay")
         .call(d3.drag()
             .on("start.interrupt", function() { slider.interrupt(); })
-            .on("start drag", function() { update(x.invert(d3.event.x)); }));
+            .on("start drag", function() { update(x.invert(d3.event.x)); })
+            .on("end", function(){ createNN("trans2010new", x.invert(d3.event.x)); }));
 
     slider.insert("g", ".track-overlay")
         .attr("class", "ticks")
@@ -386,7 +384,7 @@ function createSlider(month) {
         .attr("x", x)
         .attr("y", 10)
         .attr("text-anchor", "middle")
-        .text(function(d) { return formatDateIntoYear(d); });
+        .text(function(d) { return formatDateIntoDay(d); });
 
     var handle = slider.insert("circle", ".track-overlay")
         .attr("class", "handle")
@@ -395,7 +393,7 @@ function createSlider(month) {
     var label = slider.append("text")  
         .attr("class", "label")
         .attr("text-anchor", "middle")
-        .text(formatDate(startDate))
+        .text(formatDate(start))
         .attr("transform", "translate(0," + (-10) + ")")
 
     function update(h) {
@@ -404,7 +402,6 @@ function createSlider(month) {
         label
           .attr("x", x(h))
           .text(formatDate(h));
-        createNN("trans2010new", h)
     }
 }
 
@@ -824,9 +821,6 @@ gMain.selectAll(".bar")
             return (this === selected) ? 1.0 : 0.3;
         })
     createLineChartWithBrush(d.id)
-    createSlider(d.id)
-    
-
 });
 
 // add the x Axis
@@ -928,8 +922,8 @@ function createLineChartWithBrush(month){
 
     var brush = d3.brushX()
     .extent([[0, 0], [width, height2]])
-    .on("brush start", updateCurrentExtent)
-    .on("brush end", brushed);
+    .on("start", updateCurrentExtent)
+    .on("end", brushed);
 
     var zoom = d3.zoom()
     .scaleExtent([1, Infinity])
@@ -1000,7 +994,6 @@ function createLineChartWithBrush(month){
 
     context.append("g")
     .attr("class", "brush")
-    .on("click", brushed)
     .call(brush)
     .call(brush.move, [new Date(2010,month,1),new Date(2010, parseInt(month)+1,0)].map(x));
 
@@ -1040,6 +1033,7 @@ function createLineChartWithBrush(month){
         var end;
         var startMonth;
         var endMonth;
+        var oldMonth = x2.invert(p[0]).getMonth();
 
         if (s) {
             start = d3.min([s[0], s[1]])
@@ -1047,8 +1041,7 @@ function createLineChartWithBrush(month){
             startMonth = x2.invert(start).getMonth()
             endMonth = (x2.invert(end)).getMonth()
             
-            if (startMonth != endMonth && ((p[0] == s[0]) || (p[1] == s[1])||(p[1] == s[0]) || (p[0] == s[1]))) {
-                var oldMonth = x2.invert(p[0]).getMonth()
+            if (startMonth != endMonth && ((p[0] == s[0]) || (p[1] == s[1]) || (p[1] == s[0]) || (p[0] == s[1]))) {
                 if (startMonth == oldMonth) {
                     start = x2(new Date(2010, endMonth, 1))
                 } else {
@@ -1066,28 +1059,29 @@ function createLineChartWithBrush(month){
 
         } else { // if no selection took place and the brush was just clicked
             var mouse = d3.mouse(this)[0];
-            selectedMonth = x2.invert(mouse).getMonth()
+            var selectedMonth = x2.invert(mouse).getMonth();
             start = x2(new Date(2010, selectedMonth, 1))
             end = x2(new Date(2010, selectedMonth+1, 0))
         }
         s = [start,end]
 
-    var diff = s[1]-s[0];
-    var limit = x2(new Date(2010, 2, 11)) - x2(new Date(2010, 2, 10));
-    if (diff < limit) {
-        diff = limit
-    }
+        var diff = s[1]-s[0];
+        var limit = x2(new Date(2010, 2, 11)) - x2(new Date(2010, 2, 10));
+        if (diff < limit) {
+            diff = limit
+        }
     
-    x.domain(s.map(x2.invert, x2));
-    focus.select(".line").attr("d", line);
-    focus.select(".axis--x").call(xAxis);
-    svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+        x.domain(s.map(x2.invert, x2));
+        focus.select(".line").attr("d", line);
+        focus.select(".axis--x").call(xAxis);
+        svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
                                                 .scale(width / diff)
                                                 .translate(-s[0], 0));
 
-    var newMonth = x2.invert(start).getMonth();
-    changeBarChartMonth(newMonth)
-    createSlider(newMonth)
+        var newMonth = x2.invert(start).getMonth();
+        changeBarChartMonth(newMonth)
+        //createSlider(newMonth)
+        createSlider(x2.invert(start), x2.invert(end))
     }
 
     function zoomed() {
