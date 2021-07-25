@@ -991,6 +991,10 @@ var primo = false;
 
     var newInput = [];
 
+    if ((s[1]-s[0]) < limit) {
+        lastUpdate = s;
+    }
+
     console.log(s);
     console.log(lastUpdate);
     if ((s[1]-s[0]) > limit) {
@@ -1091,6 +1095,8 @@ function brushend(){
     });
 
     lastUpdate = brushArea;
+    lastUpdate[0] = Math.round(lastUpdate[0]);
+    lastUpdate[1] = Math.round(lastUpdate[1]);
     //relocate the position of brush area
     var increment = 0;
     var left=xScale2(d3.min(newInput));
