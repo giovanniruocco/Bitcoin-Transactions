@@ -78,12 +78,12 @@
     #slider .track {
       stroke: #000;
       stroke-opacity: 0.3;
-      stroke-width: 10px;
+      stroke-width: 5px;
     }
 
     #slider  .track-inset {
-      stroke: #dcdcdc;
-      stroke-width: 8px;
+      stroke: #e9ecef;
+      stroke-width: 4px;
     }
 
     #slider .track-overlay {
