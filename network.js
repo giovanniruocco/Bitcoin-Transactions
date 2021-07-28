@@ -21,7 +21,7 @@ function createNetwork(svg, data, day) {
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
-
+        
         if(currentMonth == selectedMonth && currentDay == selectedDay){
         for (let k = 0; k < data[j].outputs.length; k++) {
             if(set.nodes.filter(x => x.id === data[j].outputs[k].addresses[0]).length == 0)
@@ -353,8 +353,13 @@ function createSlider(start, end) {
             month=actualmonth;
             conteggio++
         }*/
-    
+        console.log("Ecco start: " + start)
+        //new Date(start.setMonth(start.getMonth()+5));
+        //new Date(end.setMonth(end.getMonth()+5));
     createNN("trans2010new", start)
+  
+    console.log("Ecco new date: " + start)
+    createRadarChart(start)
 
     var formatDateIntoDay = d3.timeFormat("%d");
     var formatDate = d3.timeFormat("%d %b");
@@ -382,7 +387,9 @@ function createSlider(start, end) {
         .call(d3.drag()
             .on("start.interrupt", function() { slider.interrupt(); })
             .on("start drag", function() { update(x.invert(d3.event.x)); })
-            .on("end", function(){ createNN("trans2010new", x.invert(d3.event.x)); }));
+            .on("end", function(){ 
+                createNN("trans2010new", x.invert(d3.event.x));
+                createRadarChart(x.invert(d3.event.x)); }));
 
     slider.insert("g", ".track-overlay")
         .attr("class", "ticks")
@@ -1112,10 +1119,29 @@ function createLineChartWithBrush(month){
     }
 
 }
-
 let primo_cont_input, secondo_cont_input, terzo_cont_input;
 let best_in = ["","",""];
 let best_out = ["","",""];
+let bestInputArray = [
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""]
+];
+let bestOutputArray =[
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""]
+  ];
+  let d = [
+    [
+    ""
+    ],[
+    ""
+    ]
+    ,[
+    ""
+      ]
+  ];
 let countinput = 0, countoutput=0;
 let count2=0;
 let conto = [0,0,0,0]
@@ -1126,6 +1152,8 @@ let conto_output2 = [0,0,0,0]
 let conto_input2 = [0,0,0,0]
 let contatoreinput2= [0, 0, 0];
 let contatoreoutput2=[0, 0, 0];
+let contatoreoutput1=[0, 0, 0];
+let contatoreinput1=[0, 0, 0];
 mantieni=""; //19uf6F6EDijkH4ZUaqsi3pZ2SVD6A5RG8X
 primo="", primoinput=0, primonumtrans=0;
 secondo="", secondoinput=0, secondonumtrans=0;
@@ -1136,7 +1164,65 @@ var testArray = [];
 input_array = [];
 output_array= [];
 
-function createRadarChart(){
+function createRadarChart(day){
+
+    primo_cont_input, secondo_cont_input, terzo_cont_input;
+    best_in = ["","",""];
+    best_out = ["","",""];
+    bestInputArray = [
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""]
+      ]; 
+    bestOutputArray = [
+        ["", "", "", "", ""],
+        ["", "", "", "", ""],
+        ["", "", "", "", ""]
+      ];
+      d= [
+        [
+        ""
+        ],[
+        ""
+        ]
+        ,[
+        ""
+          ]
+      ];
+      console.log("Mo stampo qualcosa: Il 1° è: " + bestInputArray[0][0] + "\nHa speso: " + bestInputArray[0][1] + ";è stato input " + bestInputArray[0][2] + " volte\n" + "ha ricev: " + bestInputArray[0][3] + ";è stato output " + bestInputArray[0][4] + " volte")
+     
+    countinput = 0, countoutput=0;
+    count2=0;
+    conto = [0,0,0,0]
+     conto_input = [0,0,0,0]
+     conto_output = []
+     contatoreinput= 0, contatoreoutput=0;
+     conto_output2 = [0,0,0,0]
+     conto_input2 = [0,0,0,0]
+     contatoreinput2= [0, 0, 0];
+    contatoreoutput2=[0, 0, 0];
+    contatoreoutput1=[0, 0, 0];
+    contatoreinput1=[0, 0, 0];
+    mantieni=""; //19uf6F6EDijkH4ZUaqsi3pZ2SVD6A5RG8X
+    primo="", primoinput=0, primonumtrans=0;
+    secondo="", secondoinput=0, secondonumtrans=0;
+    terzo="", terzoinput=0, terzonumtrans=0;
+    numtrans=0;
+    myDati="";
+     testArray = [];
+    input_array = [];
+    output_array= [];
+
+
+
+
+
+    var selectedDate = new Date(day)
+    var oggi = selectedDate.getTime() //+ 3600000
+    var domani = oggi + 86400000
+    console.log("Oggi:   " + oggi)
+    console.log("Domani: " + domani)
+
 
 febbraio = 1264982400000;
 marzo = 1267401600000;
@@ -1149,11 +1235,12 @@ settembre= 1283299200000;
 ottobre = 1285891200000;
 novembre = 1288569600000;
 dicembre = 1291161600000;
-i=0, x=0;
+i=0, x=0, numtrans=0;
 d3.json('trans2010new.json', function(error, data) {
   if (!error) {
       for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
-          if(data[j].block_timestamp >= febbraio && data[j].block_timestamp < marzo){
+          if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani){
+            numtrans++
             for (let w=0; w < data[j].input_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
             {
               input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
@@ -1173,11 +1260,13 @@ d3.json('trans2010new.json', function(error, data) {
 
       }
       }
+      console.log("Nel periodo scelto sono presenti: " + numtrans + " transazioni")
       console.log("Nel periodo scelto sono presenti: " + countinput + " input")
       console.log("Nel periodo scelto sono presenti: " + countoutput + " output")
 
       console.log("****************************************INPUT****************************************")
       
+      /*
       for (let j=0; j<input_array.length; j++){
         conto[0]=0
         contatoreinput=0
@@ -1185,28 +1274,30 @@ d3.json('trans2010new.json', function(error, data) {
         mantieni= input_array[j][0]; //prendo un indirizzo input di riferimento
         for (let i = 0; i < input_array.length; i++) {
             if(input_array[i][0] === mantieni){ //se l'input preso come riferimento lo ritrovo (almeno una volta si, perchè riscorro tutto l'input_array)
-              //console.log(mantieni + " is an input in " + input_array[i][4])
+              console.log(mantieni + " is an input in " + input_array[i][4])
               conto[0]+= input_array[i][1]
               contatoreinput++
             
             }
            
       }
-        /*if (conto[0]>1)
-        console.log(conto[0])*/
+        
         if (conto[0] > conto[1] && conto[0] > conto[2] && conto[0] > conto[3]){
+            console.log("Sono entratooo nel primo")
           best_in[0] = mantieni
           primo_cont_input = contatoreinput
           primonumtrans=numtrans
           conto[1]=conto[0]
+          console.log(conto[1])
         }
-        else if (conto [0] < conto[1] && conto[0] > conto[2] && conto[0] > conto[3]){
-          best_in[1] = mantieni
+        else if (conto [0] <= conto[1] && conto[0] > conto[2] && conto[0] > conto[3]){
+            console.log("Sono entratooo nel secondoooo")
+            best_in[1] = mantieni
           secondo_cont_input = contatoreinput
           secondonumtrans=numtrans
           conto[2]=conto[0]
         }
-        else if (conto [0] < conto[1] && conto[0] < conto[2] && conto[0] > conto[3]){
+        else if (conto [0] <= conto[1] && conto[0] <= conto[2] && conto[0] > conto[3]){
           best_in[2] = mantieni
           terzo_cont_input = contatoreinput
           terzonumtrans=numtrans
@@ -1220,36 +1311,87 @@ d3.json('trans2010new.json', function(error, data) {
 */
 
 
-      for (let j=0; j<3; j++){
-        //testArray=[];
-        conto_input2[j]=0
-        contatoreinput2[j]=0
-        for (let i = 0; i < output_array.length; i++) {
-          if(output_array[i][0] === best_in[j]){ //se l'input preso come riferimento lo ritrovo nell'output
-            conto_input2[j]+= output_array[i][1]
-            contatoreinput2[j]++
-          }
+for (let q = 0; q < input_array.length; q++) {
+    for (let z = 0; z < input_array.length-1; z++) {
+        
+        if (input_array[z][1] > input_array[z + 1][1]) {
+            //console.log("Ciao sono ioooooo: "+ input_array[z][1])
+            let tmp = input_array[z];
+            input_array[z] = input_array[z + 1];
+            input_array[z + 1] = tmp;
         }
-        /* METODO SERIO PER NUMERO DI TRANSAZIONI IN CUI SONO CONVOLTI GLI INPUT
-        for (let i = 0; i < input_array.length; i++) {
-          if(input_array[i][0] === best_in[j]){ //se l'input preso come riferimento lo ritrovo nell'output
-            testArray.push(input_array[i][4])
-            console.log(best_in[j] + " is an input in " +testArray)
-            
-          }
-        }
-*/
+    }
+}
+
+   
+    
+  
+  console.log ("Ho: " + input_array.length + " input_arrayput!!!!!*****!!!!!*****!!!")
+  for (let q = input_array.length-1; q >=0; q--) {
+    console.log("Il numero " + (q+1) + " è: " + input_array[q][0] + " e ha questo input: " + input_array[q][1])
+}
+best_in[0] = input_array[input_array.length-1]
+console.log("Numero di input qui dentro: " + input_array.length)
+if (input_array.length ==1 ){
+    best_in[1]=0
+    best_in[2]=0
+}
+else if(input_array.length ==2){
+    best_in[1]=input_array[input_array.length-2]
+    best_in[2]=0
+}
+else{
+best_in[1]=input_array[input_array.length-2]
+best_in[2]=input_array[input_array.length-3]
+}
+
+console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
+console.log("Il secondo è: " + best_in[1][0] + ", che ha questo input: " + best_in[1][1] )
+console.log("Il terzo è: " + best_in[2][0] + ", che ha questo input: " + best_in[2][1] )
 
 
+    
+for (let j=0; j<3; j++){
+    conto_input2[j]=0
+    contatoreinput2[j]=0
+    contatoreinput1[j]=0
 
-        //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
+    for (let i = 0; i < input_array.length; i++) {
+      if(input_array[i][0] === best_in[j][0]){ //se l'input preso come riferimento lo ritrovo tra gli input
+        //console.log(in_primo + " is an input in " + input_array[i][4])
+        if (input_array[i][3]!=best_in[j][3])
+          best_in[j][1]+= input_array[i][1]
+        contatoreinput1[j]++
       }
-  
-      console.log("Il 1° è: " + best_in[0] + "\nHa speso: " + conto[1] + ";è stato input " + primo_cont_input + " volte\n" + "ha ricev: " + conto_input2[0] + ";è stato output " + contatoreinput2[0] + " volte")
-      console.log("Il 2° è: " + best_in[1] + "\nHa speso: " + conto[2] + ";è stato input " + secondo_cont_input + " volte\n" + "ha ricev: " + conto_input2[1] + ";è stato output " + contatoreinput2[1] + " volte")
-      console.log("Il 3° è: " + best_in[2] + "\nHa speso: " + conto[3] + ";è stato input " + terzo_cont_input + " volte\n" + "ha ricev: " + conto_input2[2] + ";è stato output " + contatoreinput2[2] + " volte")
+    }
+    //console.log("L'indirizzo: " + best_in[j] + ";ha speso: " + conto_input2[j] + ";è stato input " + contatoreinput2[j] + " volte") 
   
 
+    
+    for (let i = 0; i < output_array.length; i++) {
+      if(output_array[i][0] === best_in[j][0]){ //se l'input preso come riferimento lo ritrovo nell'output
+        //console.log(out_primo + " is an input in " + input_array[i][4])
+        conto_input2[j]+= output_array[i][1]
+        contatoreinput2[j]++
+      }
+    }
+    //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
+
+    bestInputArray[j][0] = best_in[j][0]        //HASH
+    bestInputArray[j][1] = best_in[j][1]        //TOTAL INPUT VALUE
+    bestInputArray[j][2] = contatoreinput1[j]   //TOTAL INPUT COUNT
+    bestInputArray[j][3] = conto_input2[j]      //TOTAL OUTPUT VALUE
+    bestInputArray[j][4] = contatoreinput2[j]   //TOTAL OUTPU COUNT
+
+  }
+      /* 
+      console.log("Il 1° è: " + best_in[0][0] + "\nHa speso: " + best_in[0][1] + ";è stato input " + contatoreinput1[0] + " volte\n" + "ha ricev: " + conto_input2[0] + ";è stato output " + contatoreinput2[0] + " volte")
+      console.log("Il 2° è: " + best_in[1][0] + "\nHa speso: " + best_in[1][1] + ";è stato input " + contatoreinput1[1] + " volte\n" + "ha ricev: " + conto_input2[1] + ";è stato output " + contatoreinput2[1] + " volte")
+      console.log("Il 3° è: " + best_in[2][0] + "\nHa speso: " + best_in[2][1] + ";è stato input " + contatoreinput1[2] + " volte\n" + "ha ricev: " + conto_input2[2] + ";è stato output " + contatoreinput2[2] + " volte")
+  */
+      console.log("Il 1° è: " + bestInputArray[0][0] + "\nHa speso: " + bestInputArray[0][1] + ";è stato input " + bestInputArray[0][2] + " volte\n" + "ha ricev: " + bestInputArray[0][3] + ";è stato output " + bestInputArray[0][4] + " volte")
+      console.log("Il 2° è: " + bestInputArray[1][0] + "\nHa speso: " + bestInputArray[1][1] + ";è stato input " + bestInputArray[1][2] + " volte\n" + "ha ricev: " + bestInputArray[1][3] + ";è stato output " + bestInputArray[1][4] + " volte")
+      console.log("Il 3° è: " + bestInputArray[2][0] + "\nHa speso: " + bestInputArray[2][1] + ";è stato input " + bestInputArray[2][2] + " volte\n" + "ha ricev: " + bestInputArray[2][3] + ";è stato output " + bestInputArray[2][4] + " volte")
      
      
 
@@ -1263,63 +1405,139 @@ d3.json('trans2010new.json', function(error, data) {
 
       console.log("****************************************OUTPUT****************************************")
       
-      for (let j=0; j<output_array.length; j++){
-        conto_output[0]=0
-        contatoreoutput=0
-        numtrans=1
-        mantieni= output_array[j][0]; //prendo un indirizzo output di riferimento
-        for (let i = 0; i < output_array.length; i++) {
-            if(output_array[i][0] === mantieni){ //se l'output preso come riferimento lo ritrovo (almeno una volta si, perchè riscorro tutto l'output_array)
-              //console.log(mantieni + " is an output in " + output_array[i][4])
-              conto_output[0]+= output_array[i][1]
-              contatoreoutput++
+
+      for (let q = 0; q < output_array.length; q++) {
+        for (let z = 0; z < output_array.length-1; z++) {
             
+            if (output_array[z][1] > output_array[z + 1][1]) {
+                //console.log("Ciao sono ioooooo: "+ output_array[z][1])
+                let tmp = output_array[z];
+                output_array[z] = output_array[z + 1];
+                output_array[z + 1] = tmp;
             }
-           
-      }
-        /*if (conto[0]>1)
-        console.log(conto[0])*/
+        }
+    }
+
+        /*
         if (conto_output[0] > conto_output[1] && conto_output[0] > conto_output[2] && conto_output[0] > conto_output[3]){
           best_out[0] = mantieni
           primo_cont_output = contatoreoutput
           primonumtrans=numtrans
           conto_output[1]=conto_output[0]
+          console.log("Dopo questo il conto_output0 è: " + conto_output[0] + "il conto_output1 è: " + conto_output[1] + " e il conto_output2 è: " + conto_output[2])
         }
-        else if (conto_output [0] < conto_output[1] && conto_output[0] > conto_output[2] && conto_output[0] > conto_output[3]){
+        
+        else if (conto_output[0] <= conto_output[1] && conto_output[0] > conto_output[2] && conto_output[0] > conto_output[3]){
+            console.log("Sono entrato nel secondo outpuuuut")
+            console.log("Dopo quest'altro il conto_output0 è: " + conto_output[0] + "il conto_output1 è: " + conto_output[1] + " e il conto_output2 è: " + conto_output[2])
           best_out[1] = mantieni
           secondo_cont_output = contatoreoutput
           secondonumtrans=numtrans
           conto_output[2]=conto_output[0]
         }
-        else if (conto_output [0] < conto_output[1] && conto_output[0] < conto_output[2] && conto_output[0] > conto_output[3]){
+        else if (conto_output[0] <= conto_output[1] && conto_output[0] <= conto_output[2] && conto_output[0] > conto_output[3]){
           best_out[2] = mantieni
           terzo_cont_output = contatoreoutput
           terzonumtrans=numtrans
           conto_output[3]=conto_output[0]
         }
+        */
         
-      }
+      
+      console.log ("Ho: " + output_array.length + " output!!!!!*****!!!!!*****!!!")
+      for (let q = output_array.length-1; q >=0; q--) {
+        console.log("Il numero " + (q+1) + " è: " + output_array[q][0] + " e ha questo output: " + output_array[q][1])
+    }
+    
+    best_out[0] = output_array[output_array.length-1]
+    console.log("Numero di output qui dentro: " + output_array.length)
+if (output_array.length ==1 ){
+    best_out[1]=0
+    best_out[2]=0
+}else if(output_array.length == 2){
+    best_out[1]= output_array[output_array.length-2]
+    best_out[2]=0 
+}
+    else{
+    best_out[1]= output_array[output_array.length-2]
+    best_out[2]= output_array[output_array.length-3]
+    }
+   
 
-     
+    console.log("Il primo è: " + best_out[0][0] + ", che ha questo output: " + best_out[0][1] )
+    console.log("Il secondo è: " + best_out[1][0] + ", che ha questo output: " + best_out[1][1] )
+    console.log("Il terzo è: " + best_out[2][0] + ", che ha questo output: " + best_out[2][1] )
+
+
 
 
       for (let j=0; j<3; j++){
       conto_output2[j]=0
       contatoreoutput2[j]=0
+      contatoreoutput1[j]=0
+
+      for (let i = 0; i < output_array.length; i++) {
+        if(output_array[i][0] === best_out[j][0]){ //se l'output preso come riferimento lo ritrovo tra gli output
+          //console.log(out_primo + " is an input in " + input_array[i][4])
+          if (output_array[i][3]!=best_out[j][3])
+            best_out[j][1]+= output_array[i][1]
+          contatoreoutput1[j]++
+        }
+      }
+      //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
+    
+
       
       for (let i = 0; i < input_array.length; i++) {
-        if(input_array[i][0] === best_out[j]){ //se l'output preso come riferimento lo ritrovo nell'input
+        if(input_array[i][0] === best_out[j][0]){ //se l'output preso come riferimento lo ritrovo nell'input
           //console.log(out_primo + " is an input in " + input_array[i][4])
           conto_output2[j]+= input_array[i][1]
           contatoreoutput2[j]++
         }
       }
-      //console.log("L'indirizzo: " + best_out[j] + ";ha speso: " + conto_output2[j] + ";è stato input " + contatoreoutput2[j] + " volte") 
+      bestOutputArray[j][0] = best_out[j][0]       //HASH
+      bestOutputArray[j][1] = conto_output2[j]    //TOTAL INPUT VALUE
+      bestOutputArray[j][2] = contatoreoutput2[j]  //TOTAL INPUT COUNT
+      bestOutputArray[j][3] = best_out[j][1]       //TOTAL OUTPUT VALUE
+      bestOutputArray[j][4] = contatoreoutput1[j]  //TOTAL OUTPUT COUNT
+  
     }
 
-    console.log("Il 1° è: " + best_out[0] + "\nHa ricev: " + conto_output[1] + ";è stato output " + primo_cont_output + " volte\n" + "ha speso: " + conto_output2[0] + ";è stato input " + contatoreoutput2[0] + " volte")
-    console.log("Il 2° è: " + best_out[1] + "\nHa ricev: " + conto_output[2] + ";è stato output " + secondo_cont_output + " volte\n" + "ha speso: " + conto_output2[1] + ";è stato input " + contatoreoutput2[1] + " volte")
-    console.log("Il 3° è: " + best_out[2] + "\nHa ricev: " + conto_output[3] + ";è stato output " + terzo_cont_output + " volte\n" + "ha speso: " + conto_output2[2] + ";è stato input " + contatoreoutput2[2] + " volte")
+    if (input_array.length == 1){
+        for (var q=0;q<5;q++){
+            bestInputArray[1][q] = -0.001
+            bestInputArray[2][q] = -0.001
+        }
+    }
+    else if (input_array.length == 2){
+        for (var q=0;q<5;q++){
+            bestInputArray[2][q] = -0.001
+        }
+    }
+
+    if (output_array.length == 1){
+        for (var q=0;q<5;q++){
+            bestOutputArray[1][q] = -0.001
+            bestOutputArray[2][q] = -0.001
+        }
+    }
+    else if (output_array.length == 2){
+        for (var q=0;q<5;q++){
+            bestOutputArray[2][q] = -0.001
+        }
+    }
+
+    /*
+    console.log("Il 1° è: " + best_out[0][0] + "\nHa ricev: " + best_out[0][1] + ";è stato output " + contatoreoutput1[0] + " volte\n" + "ha speso: " + conto_output2[0] + ";è stato input " + contatoreoutput2[0] + " volte")
+    console.log("Il 2° è: " + best_out[1][0] + "\nHa ricev: " + best_out[1][1] + ";è stato output " + contatoreoutput1[1] + " volte\n" + "ha speso: " + conto_output2[1] + ";è stato input " + contatoreoutput2[1] + " volte")
+    console.log("Il 3° è: " + best_out[2][0] + "\nHa ricev: " + best_out[2][1] + ";è stato output " + contatoreoutput1[2] + " volte\n" + "ha speso: " + conto_output2[2] + ";è stato input " + contatoreoutput2[2] + " volte")
+*/
+    
+    console.log("Il 1° è: " + bestOutputArray[0][0] + "\nHa speso: " + bestOutputArray[0][1] + ";è stato input " + bestOutputArray[0][2] + " volte\n" + "ha ricev: " + bestOutputArray[0][3] + ";è stato output " + bestOutputArray[0][4] + " volte")
+    console.log("Il 2° è: " + bestOutputArray[1][0] + "\nHa speso: " + bestOutputArray[1][1] + ";è stato input " + bestOutputArray[1][2] + " volte\n" + "ha ricev: " + bestOutputArray[1][3] + ";è stato output " + bestOutputArray[1][4] + " volte")
+    console.log("Il 3° è: " + bestOutputArray[2][0] + "\nHa speso: " + bestOutputArray[2][1] + ";è stato input " + bestOutputArray[2][2] + " volte\n" + "ha ricev: " + bestOutputArray[2][3] + ";è stato output " + bestOutputArray[2][4] + " volte")
+       
+       
 
     var json = data;
     setUserType("in",json)
@@ -1337,20 +1555,17 @@ function setUserType(type, data) {
 
   if(type == 'in'){
       inputradar = true;
-      console.log("input")
       graph(data)
       
   } else {
      inputradar=false;
-    console.log("output")
     graph(data)
     }
 }
 
     //graph(data)
     function graph(data){
-   
-    console.log("CIaoooo: " + primo_cont_input)
+
   var w = 500,
     h = 500;
   
@@ -1360,69 +1575,89 @@ function setUserType(type, data) {
   //Legend titles
   var LegendOptions = ['First','Second', 'Third'];
   
+   
   if (inputradar){
-  let maxNumbInp = Math.max(primo_cont_input, secondo_cont_input, terzo_cont_input)
-  let maxInpVal = Math.max(conto[1], conto[2],conto[3])
-  let maxNumbOut = Math.max(contatoreinput2[0], contatoreinput2[1], contatoreinput2[2])
-  let maxOutVal = Math.max(conto_input2[0], conto_input2[1],conto_input2[2])
-  let maxOp = Math.max((primo_cont_input + contatoreinput2[0]), (secondo_cont_input + contatoreinput2[1]), (terzo_cont_input + contatoreinput2[2]))
+
+    console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
+    maxInpVal = Math.max(bestInputArray[0][1], bestInputArray[1][1], bestInputArray[2][1])+0.00001
+    console.log("Massimo tra i total input value: " + maxInpVal)
+    console.log("Il primo input è: " + bestInputArray[0][1])
+    console.log("Il secondo input è: " + bestInputArray[1][1])
+    console.log("Il terzo input è: " + bestInputArray[2][1])
+    maxNumbInp = Math.max(bestInputArray[0][2], bestInputArray[1][2], bestInputArray[2][2])+0.00001
+    console.log("Massimo tra i total input count: " + maxNumbInp)
+    maxOutVal = Math.max(bestInputArray[0][3], bestInputArray[1][3], bestInputArray[2][3])+0.00001
+    console.log("Massimo tra i total output value: " + maxOutVal)
+    maxNumbOut = Math.max(bestInputArray[0][4], bestInputArray[1][4], bestInputArray[2][4])+0.00001
+    console.log("Massimo tra i total output count: " + maxNumbOut)
+    maxOp = Math.max((bestInputArray[0][2] + bestInputArray[0][4]), (bestInputArray[1][2] + bestInputArray[1][4]), (bestInputArray[2][2] + bestInputArray[2][4]))+0.00001
+    console.log("Massimo tra i numeri di operazioni: " + maxOp)
+
+    console.log("I Due fuori usciti sono questi: " + bestInputArray[1][1])
 
   //Data
-  var d = [
+  d = [
         [
-        {axis:"Number of Inputs",value:((primo_cont_input+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Inputs value",value:((conto[1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Outputs",value:(contatoreinput2[0]+0.001) / (maxNumbOut+0.001) },
-        {axis:"Total Outputs Value",value:(conto_input2[0]+0.001) / (maxOutVal+0.001)},
-        {axis:"Number of operations",value:((primo_cont_input+0.001) + contatoreinput2[0]) /( maxOp +0.001)}
+        {axis:"Total Inputs value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001))},
+        {axis:"Number of Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001))},
+        {axis:"Number of operations",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001)}
         ],[
-        {axis:"Number of Inputs",value:((secondo_cont_input+0.001) / (maxNumbInp+0.001)) },
-        {axis:"Total Inputs value",value:((conto[2]+0.001) / (maxInpVal+0.001)) },
-        {axis:"Number of Outputs",value:(contatoreinput2[1]+0.001) / (maxNumbOut+0.001) },
-        {axis:"Total Outputs Value",value:(conto_input2[1]+0.001) / (maxOutVal+0.001) },
-        {axis:"Number of operations",value:((secondo_cont_input+0.001) + contatoreinput2[1]) / (maxOp+0.001)}
+        {axis:"Total Inputs value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001))},
+        {axis:"Number of Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001))},
+        {axis:"Number of operations",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001)}
         ]
         ,[
-        {axis:"Number of Inputs",value:((terzo_cont_input+0.001) / (maxNumbInp+0.001)) },
-        {axis:"Total Inputs value",value:((conto[3]+0.001) / (maxInpVal+0.001)) },
-        {axis:"Number of Outputs",value:(contatoreinput2[2]+0.001) / (maxNumbOut+0.001) },
-        {axis:"Total Outputs Value",value:(conto_input2[2]+0.001) / (maxOutVal+0.001) },
-        {axis:"Number of operations",value:((terzo_cont_input+0.001) + contatoreinput2[2]) / (maxOp+0.001)}
+        {axis:"Total Inputs value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001))},
+        {axis:"Number of Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001))},
+        {axis:"Number of operations",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001)}
           ]
       ];
     }
 
-    else{
-      let maxNumbInp = Math.max(contatoreoutput2[0], contatoreoutput2[1], contatoreoutput2[2])
-      let maxInpVal = Math.max(conto_output2[0], conto_output2[1],conto_output2[2])
-      let maxNumbOut = Math.max(primo_cont_output, secondo_cont_output, terzo_cont_output)
-      let maxOutVal = Math.max(conto_output[1], conto_output[2],conto_output[3])
-      let maxOp = Math.max((contatoreoutput2[0] + primo_cont_output), (contatoreoutput2[1] + secondo_cont_output), (contatoreoutput2[2] + terzo_cont_output))
-      //Data
-      var d = [
+    else{    
+        console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
+        
+        maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
+        console.log("Massimo tra i total input value: " + maxInpVal)
+        maxNumbInp = Math.max(bestOutputArray[0][2], bestOutputArray[1][2], bestOutputArray[2][2])+0.00001
+        console.log("Massimo tra i total input count: " + maxNumbInp)
+        maxOutVal = Math.max(bestOutputArray[0][3], bestOutputArray[1][3], bestOutputArray[2][3])+0.00001
+        console.log("Massimo tra i total output value: " + maxOutVal)
+        maxNumbOut = Math.max(bestOutputArray[0][4], bestOutputArray[1][4], bestOutputArray[2][4])+0.00001
+        console.log("Massimo tra i total output count: " + maxNumbOut)
+        maxOp = Math.max((bestOutputArray[0][2] + bestOutputArray[0][4]), (bestOutputArray[1][2] + bestOutputArray[1][4]), (bestOutputArray[2][2] + bestOutputArray[2][4]))+0.00001
+        console.log("Massimo tra i numeri di operazioni: " + maxOp)
+    
+       //Data
+       d = [
             [
-            {axis:"Number of Inputs",value:((contatoreoutput2[0]+0.001) / (maxNumbInp + 0.001))},
-            {axis:"Total Inputs value",value:((conto_output2[0]+0.001) / (maxInpVal + 0.001))},
-            {axis:"Number of Outputs",value:(primo_cont_output+0.001)/ (maxNumbOut + 0.001) },
-            {axis:"Total Outputs Value",value:(conto_output[1]+0.001) / (maxOutVal + 0.001) },
-            {axis:"Number of operations",value:((contatoreoutput2[0]+0.001) + primo_cont_output) / (maxOp + 0.001) }
+            {axis:"Total Inputs value" + i ,value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001))},
+            {axis:"Number of Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001))},
+            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001))},
+            {axis:"Number of Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001))},
+            {axis:"Number of operations",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001)}
             ],[
-            {axis:"Number of Inputs",value:((contatoreoutput2[1]+0.001) /  (maxNumbInp + 0.001)) },
-            {axis:"Total Inputs value",value:((conto_output2[1]+0.001) / (maxInpVal + 0.001)) },
-            {axis:"Number of Outputs",value:(secondo_cont_output +0.001)/ (maxNumbOut + 0.001) },
-            {axis:"Total Outputs Value",value:(conto_output[2]+0.001) / (maxOutVal + 0.001)},
-            {axis:"Number of operations",value:((contatoreoutput2[1]+0.001) + secondo_cont_output) / (maxOp + 0.001)}
+            {axis:"Total Inputs value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001))},
+            {axis:"Number of Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001))},
+            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001))},
+            {axis:"Number of Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001))},
+            {axis:"Number of operations",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001)}
             ]
             ,[
-            {axis:"Number of Inputs",value:((contatoreoutput2[2]+0.001) /  (maxNumbInp + 0.001))},
-            {axis:"Total Inputs value",value:((conto_output2[2]+0.001) / (maxInpVal + 0.001)) },
-            {axis:"Number of Outputs",value:(terzo_cont_output +0.001)/ (maxNumbOut + 0.001) },
-            {axis:"Total Outputs Value",value:(conto_output[3]+0.001) / (maxOutVal + 0.001) },
-            {axis:"Number of operations",value:((contatoreoutput2[2]+0.001) + terzo_cont_output) / (maxOp + 0.001)}
+            {axis:"Total Inputs value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001))},
+            {axis:"Number of Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001))},
+            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001))},
+            {axis:"Number of Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001))},
+            {axis:"Number of operations",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001)}
               ]
           ];
         }
-
 
 
 
