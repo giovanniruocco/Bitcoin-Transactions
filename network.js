@@ -2142,3 +2142,88 @@ function httpGet()
     console.log(response)
 }
 
+function createPCA(){
+    // set the dimensions and margins of the graph
+var h = parseInt(d3.select('#pca').style('height'), 10);
+var w = parseInt(d3.select('#pca').style('width'), 10);
+
+var margin = {top: h*5/100, right: w*5/100, bottom: h*15/100, left: w*15/100};
+var width = w - margin.left - margin.right;
+var height = h - margin.top - margin.bottom;
+
+var x = d3.scaleLinear()
+    .range([0, width]);
+
+var y = d3.scaleLinear()
+    .range([height, 0]);
+
+var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+var xAxis = d3.axisBottom(x);
+
+var yAxis = d3.axisLeft(y);
+
+var svgPca = d3.select('#pca');
+
+svgPca.selectAll("*").remove();
+
+var svg = svgPca
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Define the div for the tooltip
+var div = d3.select("#pca_div").append("div")	
+    .attr("class", "tooltip")
+    .style("visibility", "hidden");				
+    // .style("opacity", 0);
+
+d3.csv("pca_giorni.csv", function(error, data) {
+  if (error) throw error;
+
+  data.forEach(function(d) {
+    d.y = +d.y;
+    d.x = +d.x;
+  });
+
+  x.domain(d3.extent(data, function(d) { return d.x; })).nice();
+  y.domain(d3.extent(data, function(d) { return d.y; })).nice();
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis);
+
+  svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 3.5)
+      .attr("cx", function(d) { return x(d.x); })
+      .attr("cy", function(d) { return y(d.y); })
+      .style("fill", "#69b3a2")
+      .on("mouseover", function(d) {		
+        div.transition()		
+            .duration(500)		
+            .style("opacity", .9);		
+        div	.html(d.hash)	
+            .style("visibility", "visible")
+            .style("left", d3.select(this).attr("cx") + "px")		
+            .style("top", d3.select(this).attr("cy") + "px");	
+        })					
+    .on("mouseout", function(d) {		
+        div.transition()		
+            .duration(1000)
+            .style("opacity", 0);
+        div.style("visibility", "hidden");	
+    });
+
+});
+
+
+
+}
+

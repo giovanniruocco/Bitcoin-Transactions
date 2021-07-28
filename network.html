@@ -59,6 +59,11 @@
             </svg>
         </div>
 
+        <div class="col-4" id="pca_div">
+            <svg class="h-100 w-100" id="pca">
+            </svg>
+        </div>
+
 <!--         <div class="col-4" id="line_chart_brush2">
             <svg class="h-100 w-100" id="lineChart2">
             </svg>
@@ -85,6 +90,7 @@ function displayWindowSize(){
     var h = document.documentElement.clientHeight;
     createBarChart(30);
     createLineChartWithBrush(0);
+    createPCA();
     //createRadarChart(new Date(2010, 0, 1));
 }
     

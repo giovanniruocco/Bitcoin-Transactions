@@ -99,3 +99,15 @@
       stroke-opacity: 0.5;
       stroke-width: 1.25px;
     }
+
+    div.tooltip {	
+      text-align: center;			
+      width: 200px;					
+      height: 28px;					
+      padding: 2px;				
+      font: 12px sans-serif;		
+      background: rgb(220, 223, 226);	
+      border: 0px;		
+      border-radius: 8px;			
+      pointer-events: none;
+  }
