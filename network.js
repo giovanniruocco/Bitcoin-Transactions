@@ -1119,6 +1119,7 @@ function createLineChartWithBrush(month){
     }
 
 }
+let inputradar=true
 let primo_cont_input, secondo_cont_input, terzo_cont_input;
 let best_in = ["","",""];
 let best_out = ["","",""];
@@ -1540,7 +1541,10 @@ if (output_array.length ==1 ){
        
 
     var json = data;
-    setUserType("in",json)
+    if (inputradar==true)
+        setUserType("in",json)
+    else
+        setUserType("out",json)
     graph(json);
   } else {
     console.error(error);
