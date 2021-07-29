@@ -1908,10 +1908,11 @@ function setUserType(type, data) {
 
   
   //Legend titles
-  var LegendOptions = ['First','Second', 'Third'];
+  
   
    
   if (inputradar){
+    var LegendOptions = ['First: ' + bestInputArray[0][0] ,' Second: ' + bestInputArray[1][0], 'Third: ' + bestInputArray[2][0] ];
 
     console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
     maxInpVal = Math.max(bestInputArray[0][1], bestInputArray[1][1], bestInputArray[2][1])+0.00001
@@ -1957,7 +1958,7 @@ function setUserType(type, data) {
 
     else{    
         console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
-        
+        var LegendOptions = ['First: ' + bestOutputArray[0][0] ,' Second: ' + bestOutputArray[1][0], 'Third: ' + bestOutputArray[2][0] ];
         maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
         console.log("Massimo tra i total input value: " + maxInpVal)
         maxNumbInp = Math.max(bestOutputArray[0][2], bestOutputArray[1][2], bestOutputArray[2][2])+0.00001
@@ -2017,11 +2018,11 @@ function setUserType(type, data) {
   /////////// Initiate legend ////////////////
   ////////////////////////////////////////////
   
-  var svg = d3.select('#body')
+  var svg = d3.select('#chart')/*
     .selectAll('svg')
     .append('svg')
     .attr("width", w+300)
-    .attr("height", h)
+    .attr("height", h)*/
   
   //Create the title for the legend
   var text = svg.append("text")
@@ -2031,7 +2032,7 @@ function setUserType(type, data) {
     .attr("y", 10)
     .attr("font-size", "12px")
     .attr("fill", "#404040")
-    .text("Memeeee");
+    .text("LEGENDA:");
       
   //Initiate Legend	
   var legend = svg.append("g")
