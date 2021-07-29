@@ -820,8 +820,7 @@ function createTransactionsGraph(svg, data, day) {
 
 function createBarChart(myDay){
 
-var parseDate = d3.timeParse("%Y-%m-%d");
-var bisectDate = d3.bisector(function(d) { return d.date; }).left;
+var formatTime =  d3.timeFormat("%d %b");
 var lastUpdate = [0,0];
 
 var h = parseInt(d3.select('#barChart').style('height'), 10);
@@ -2185,13 +2184,25 @@ d3.csv("pca_giorni.csv", function(error, data) {
     d.x = +d.x;
   });
 
-  x.domain(d3.extent(data, function(d) { return d.x; })).nice();
-  y.domain(d3.extent(data, function(d) { return d.y; })).nice();
+  const colorValue = d => d.day;
 
-  svg.append("g")
+  x.domain([d3.min(data,function(d){return d.x}), d3.max(data,function(d){return d.x})]).nice();
+  y.domain([d3.min(data,function(d){return d.y}), d3.max(data,function(d){return d.y})]).nice();
+
+/*   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+      .call(xAxis); */
+
+      svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .selectAll("text")  
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "rotate(-45)");
 
   svg.append("g")
       .attr("class", "y axis")
@@ -2204,7 +2215,8 @@ d3.csv("pca_giorni.csv", function(error, data) {
       .attr("r", 3.5)
       .attr("cx", function(d) { return x(d.x); })
       .attr("cy", function(d) { return y(d.y); })
-      .style("fill", "#69b3a2")
+      .attr('fill', d => color(colorValue(d)))
+      .attr('fill-opacity', 0.6)
       .on("mouseover", function(d) {		
         div.transition()		
             .duration(500)		
