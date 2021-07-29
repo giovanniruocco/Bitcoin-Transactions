@@ -1632,11 +1632,31 @@ if (input_array.length ==1 ){
 }
 else if(input_array.length ==2){
     best_in[1]=input_array[input_array.length-2]
+    m=0;
+    while (best_in[1][0]===best_in[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_in[1]=input_array[input_array.length-(3+m)]
+        m++
+    }
     best_in[2]=0
 }
 else{
 best_in[1]=input_array[input_array.length-2]
+m=0;
+while (best_in[1][0]===best_in[0][0]){//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+    console.log("Ce ne sono 2 uguali, vado avanti.")
+    best_in[1]=input_array[input_array.length-(3+m)]
+    m++
+}
 best_in[2]=input_array[input_array.length-3]
+m=0;
+while (best_in[2][0]===best_in[1][0] || best_in[2][0]===best_in[0][0])//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+{
+    console.log("Ce ne sono 2 uguali, vado avanti.")
+    best_in[2]=input_array[input_array.length-(4+m)]
+    m++
+}
+
 }
 
 console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
@@ -1750,11 +1770,29 @@ if (output_array.length ==1 ){
     best_out[2]=0
 }else if(output_array.length == 2){
     best_out[1]= output_array[output_array.length-2]
+    m=0;
+    while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_out[1]=output_array[output_array.length-(3+m)]
+        m++
+    }
     best_out[2]=0 
 }
     else{
     best_out[1]= output_array[output_array.length-2]
+    m=0;
+    while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_out[1]=output_array[output_array.length-(3+m)]
+        m++
+    }
     best_out[2]= output_array[output_array.length-3]
+    m=0;
+    while (best_out[2][0]===best_out[1][0] || best_out[2][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_out[2]=output_array[output_array.length-(4+m)]
+        m++
+    }
     }
    
 
@@ -1895,24 +1933,24 @@ function setUserType(type, data) {
   //Data
   d = [
         [
-        {axis:"Total Inputs value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001))},
-        {axis:"Number of Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001))},
-        {axis:"Number of operations",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001)}
+        {axis:"Total Inputs Value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[0][1]},
+        {axis:"Number of Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[0][3]},
+        {axis:"Number of Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
+        {axis:"Number of Operations",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
         ],[
-        {axis:"Total Inputs value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001))},
-        {axis:"Number of Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001))},
-        {axis:"Number of operations",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001)}
+        {axis:"Total Inputs Value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[1][1]},
+        {axis:"Number of Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[1][3]},
+        {axis:"Number of Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
+        {axis:"Number of Operations",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
         ]
         ,[
-        {axis:"Total Inputs value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001))},
-        {axis:"Number of Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001))},
-        {axis:"Number of operations",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001)}
+        {axis:"Total Inputs Value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[2][1]},
+        {axis:"Number of Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[2][3]},
+        {axis:"Number of Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
+        {axis:"Number of Operations",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
           ]
       ];
     }
@@ -1934,24 +1972,24 @@ function setUserType(type, data) {
        //Data
        d = [
             [
-            {axis:"Total Inputs value" + i ,value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001))},
-            {axis:"Number of Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001))},
-            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001))},
-            {axis:"Number of Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001))},
-            {axis:"Number of operations",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001)}
+            {axis:"Total Inputs Value",value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[0][1]},
+            {axis:"Number of Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[0][3]},
+            {axis:"Number of Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
+            {axis:"Number of Operations",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
             ],[
-            {axis:"Total Inputs value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001))},
-            {axis:"Number of Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001))},
-            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001))},
-            {axis:"Number of Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001))},
-            {axis:"Number of operations",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001)}
+            {axis:"Total Inputs Value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[1][1]},
+            {axis:"Number of Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[1][3]},
+            {axis:"Number of Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
+            {axis:"Number of Operations",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
             ]
             ,[
-            {axis:"Total Inputs value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001))},
-            {axis:"Number of Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001))},
-            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001))},
-            {axis:"Number of Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001))},
-            {axis:"Number of operations",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001)}
+            {axis:"Total Inputs Value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[2][1]},
+            {axis:"Number of Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[2][3]},
+            {axis:"Number of Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
+            {axis:"Number of Operations",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
               ]
           ];
         }

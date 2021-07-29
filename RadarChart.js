@@ -189,7 +189,7 @@ var RadarChart = {
 					  tooltip
 						  .attr('x', newX)
 						  .attr('y', newY)
-						  .text(Format(d.value))
+						  //.text("Percentage: " + Format(d.value) + "\nValue: " + "Poi ce lo metto") // qua metto il tooltip 
 						  .transition(200)
 						  .style('opacity', 1);
 						  
@@ -210,8 +210,34 @@ var RadarChart = {
 						  .style("fill-opacity", cfg.opacityArea);
 					})
 		  .append("svg:title")
-		  .text(function(j){return Math.max(j.value, 0)});
-  
+		  .text(function(j){
+			if (j.axis === "Total Inputs Value" || j.axis === "Total Outputs Value" ){
+			  	return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0)/100000000 + " BTC";
+			 }
+			else if(j.axis === "Number of Inputs"){	
+				var input_num
+				if(j.realvalue==1)
+					input_num=" Input"
+				else
+					input_num=" Inputs"
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + input_num;
+			}
+			else if(j.axis === "Number of Outputs"){
+				if(j.realvalue==1)
+					output_num=" Output"
+				else
+					output_num=" Outputs"	
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + output_num;
+			}
+			else if(j.axis === "Number of Operations"){	
+				if(j.realvalue==1)
+					op_num=" Operation"
+				else
+					op_num=" Operations"	
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + op_num;
+			}
+		
+		})
 		series++;
 	  });
 	  //Tooltip
