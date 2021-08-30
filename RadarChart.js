@@ -86,7 +86,8 @@ var RadarChart = {
 		 .style("font-size", "10px")
 		 .attr("transform", "translate(" + (cfg.w/2-levelFactor + cfg.ToRight) + ", " + (cfg.h/2-levelFactor) + ")")
 		 .attr("fill", "#737373")
-		 .text(Format((j+1)*cfg.maxValue/cfg.levels));
+		 .text(Math.round(((j+1)*(cfg.maxValue/cfg.levels))*100) + "%");
+		 //.text(Format((j+1)*(cfg.maxValue/cfg.levels)));
 	  }
 	  
 	  series = 0;
@@ -117,7 +118,84 @@ var RadarChart = {
 		  .attr("x", function(d, i){return cfg.w/2*(1-cfg.factorLegend*Math.sin(i*cfg.radians/total))-60*Math.sin(i*cfg.radians/total);})
 		  .attr("y", function(d, i){return cfg.h/2*(1-Math.cos(i*cfg.radians/total))-20*Math.cos(i*cfg.radians/total);});
   
-   
+
+		  //leggendaaaaa
+
+	
+		  
+		  var LegendOptions = ['\nFirst: ' + bestInputArray[0][0] ,'\nSecond: ' + bestInputArray[1][0], '\nThird: ' + bestInputArray[2][0] ];
+		  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+		  
+		
+		//Create the title for the legend
+		var svg = d3.select('#chart')
+			.selectAll('svg')
+			.append('svg')
+			.attr("width", 800)
+			.attr("height", 600)
+
+		var text = svg.append("text")
+		  .attr("class", "title")
+		  .attr('transform', 'translate(-50,0)') 
+		  .attr("x", 200 - 70)
+		  .attr("y", 10)
+		  .attr("font-size", "12px")
+		  .attr("fill", "#404040")
+		  .text("LEGENDA:");
+			
+		//Initiate Legend	
+		var legend = svg.append("g")
+		  .attr("class", "legend")
+		  .attr("height", 100)
+		  .attr("width", 200)
+		  .attr('transform', 'translate(-50,20)')
+		  ;
+		  //Create colour squares
+	  
+		  legend.selectAll('rect')
+			.data(LegendOptions)
+			.enter()
+			.append("rect")
+			.attr("x", 200 - 65)
+			.attr("y", function(d, i){ return i * 20;})
+			.attr("width", 10)
+			.attr("height", 10)
+			.style("fill", function(d, i){
+			return colorscale(i);})
+			.on('mouseover', function (d,i){
+				if (colorscale(i) === "#1f77b4" )
+					z = "polygon.radar-chart-serie0";
+				else if (colorscale(i) === "#ff7f0e" )
+					z = "polygon.radar-chart-serie1";
+				else if (colorscale(i) === "#2ca02c" )
+					z = "polygon.radar-chart-serie2";
+				g.selectAll("polygon")
+				 .transition(200)
+				 .style("fill-opacity", 0.1); 
+				g.selectAll(z)
+				 .transition(200)
+				 .style("fill-opacity", .7);
+			  })
+			.on('mouseout', function(){
+				g.selectAll("polygon")
+				 .transition(200)
+				 .style("fill-opacity", cfg.opacityArea);
+})
+			;
+		  //Create text next to squares
+		  legend.selectAll('text')
+			.data(LegendOptions)
+			.enter()
+			.append("text")
+			.attr("x", 200 - 52)
+			.attr("y", function(d, i){ return i * 20 + 9;})
+			.attr("font-size", "11px")
+			.attr("fill", "#737373")
+			.text(function(d) { return d; })
+			;	
+	  
+
+
 	  d.forEach(function(y, x){
 		dataValues = [];
 		g.selectAll(".nodes")
@@ -163,6 +241,8 @@ var RadarChart = {
 	  series=0;
   
   
+
+	  
 	  d.forEach(function(y, x){
 		g.selectAll(".nodes")
 		  .data(y).enter()
@@ -185,6 +265,7 @@ var RadarChart = {
 		  .on('mouseover', function (d){
 					  newX =  parseFloat(d3.select(this).attr('cx')) - 10;
 					  newY =  parseFloat(d3.select(this).attr('cy')) - 5;
+					  
 					  
 					  tooltip
 						  .attr('x', newX)
@@ -234,7 +315,7 @@ var RadarChart = {
 					op_num=" Operation"
 				else
 					op_num=" Operations"	
-				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + op_num;
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\nValue: " + Math.max(j.realvalue, 0) + op_num;
 			}
 		
 		})
@@ -246,6 +327,7 @@ var RadarChart = {
 				 .style('font-family', 'sans-serif')
 				 .style('font-size', '13px');
 	}
+	
   };
   
   
