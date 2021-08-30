@@ -76,7 +76,6 @@ var link = gDraw.append("g")
     .data(set.links)
     .enter().append("line")
     .style("stroke-width", "1px")
-    //.style("stroke", "#CC9999")
     .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
 var node = gDraw.append("g")
@@ -92,9 +91,7 @@ var node = gDraw.append("g")
             return color(d.group); 
     })
     .on('click', function(d) {
-        var selected = []
-        selected.push(d.id)
-        filterTransactions(selected)
+        filterTransactions(d.id)
         node.style("opacity", function(o) {
             return neighboring(d.id, o) ? 1 : 0.3;
           });
@@ -107,8 +104,7 @@ var node = gDraw.append("g")
           });
 
       })
-      .on("mouseover", function(d) {
-        
+    .on("mouseover", function(d) {  
         d3v4.select(this).transition()
         .duration(750)
         .attr("r", 10);    
@@ -169,7 +165,7 @@ simulation
     .nodes(set.nodes)
     .on("tick", ticked)
     .on("end", 
-    zoomFit(2000));;
+    zoomFit(2000));
 
 simulation.force("link")
     .links(set.links);
@@ -247,7 +243,6 @@ rect.on('click', () => {
         d.previouslySelected = false;
     });
     node.classed("selected", false);
-
     resetTransactions();
 });
 
@@ -285,20 +280,22 @@ function brushended() {
         selectedList.push(d.id)
     }) 
     filterTransactions(selectedList)
+    if(selectedList.length != 0){
+        node.style("opacity", function(o) {
+            var isNeigh = false;
+            var i = 0;
+            while(isNeigh == false && i < selectedList.length) {
+                isNeigh = neighboring(selectedList[i], o);
+                i++;
+            }
+            return isNeigh ? 1 : 0.3;
+          });
+    
+        link.style('opacity', function (l) {
+            return selectedList.includes(l.target.id) || selectedList.includes(l.source.id) ? 1 : 0.3;
+        })
+    }
 
-    node.style("opacity", function(o) {
-        var isNeigh = false;
-        var i = 0;
-        while(isNeigh == false && i < selectedList.length) {
-            isNeigh = neighboring(selectedList[i], o);
-            i++;
-        }
-        return isNeigh ? 1 : 0.3;
-      });
-
-    link.style('opacity', function (l) {
-        return selectedList.includes(l.target.id) || selectedList.includes(l.source.id) ? 1 : 0.3;
-    })
 }
 
 gMain.on('keydown', keydown);
@@ -318,7 +315,7 @@ function keydown() {
         brushMode = true;
 
         if (!gBrush) {
-            gBrush = gBrushHolder.append('g').classed('g-brush', true);
+            gBrush = gBrushHolder.append('g');
             gBrush.call(brush);
         }
     }
@@ -492,13 +489,12 @@ function setCentrality(type) {
 }
 
 function createNN(month, day){
-    var svgGraph = d3.select('#transactionsGraph');
 
 d3.json(month + '.json', function(error, data) {
     if (!error) {
         //console.log('graph', graph);
         createNetwork(data, day);
-        createTransactionsGraph(svgGraph, data, day)
+        createTransactionsGraph(data, day)
 
     } else {
         console.error(error);
@@ -506,7 +502,7 @@ d3.json(month + '.json', function(error, data) {
 });
 }
 
-function createTransactionsGraph(svg, data, day) {
+function createTransactionsGraph(data, day) {
 
     var set = '{"nodes":[],"links":[]}';
 
@@ -548,10 +544,9 @@ function createTransactionsGraph(svg, data, day) {
     if (typeof d3v4 == 'undefined')
         var d3v4 = d3;
 
-    let parentWidth = d3v4.select('#transactionsGraph').node().parentNode.clientWidth;
-    let parentHeight = d3v4.select('#transactionsGraph').node().parentNode.clientHeight;
-
-    var svg = d3v4.select('#transactionsGraph')
+    var svg = d3v4.select('#transactionsGraph');
+    var svgWidth = parseInt(svg.style('width'), 10);
+    var svgHeight = parseInt(svg.style('height'), 10);
   
     // remove any previous graphs
     svg.selectAll('.g-main').remove();
@@ -561,8 +556,8 @@ function createTransactionsGraph(svg, data, day) {
     .attr('tabindex', 0);
 
     var rect = gMain.append('rect')
-    .attr('width', parseInt(d3.select('#transactionsGraph').style('width'), 10))
-    .attr('height', parseInt(d3.select('#transactionsGraph').style('height'), 10))
+    .attr('width', svgWidth)
+    .attr('height', svgHeight)
     .style('fill', 'white')
     .style('stroke', 'black')
 
@@ -571,12 +566,7 @@ function createTransactionsGraph(svg, data, day) {
     var zoom = d3v4.zoom()
     .on('zoom', zoomed)
 
-    //gMain.call(zoom).on("dblclick.zoom", null);
     gMain.call(zoom);
-    // .call(zoom.transform, d3.zoomIdentity.translate(100, 50).scale(0.5))
-    // .append("svg:g")
-    // .attr("transform","translate(100,50) scale(.5,.5)");
-
 
     function zoomed() {
         gDraw.attr('transform', d3v4.event.transform);
@@ -591,7 +581,7 @@ function createTransactionsGraph(svg, data, day) {
 
     // the brush needs to go before the nodes so that it doesn't
     // get called when the mouse is over a node
-    var gBrushHolder = gMain.append('g');
+    var gBrushHolder = gDraw.append('g');
     var gBrush = null;
 
     var link = gDraw.append("g")
@@ -621,10 +611,47 @@ function createTransactionsGraph(svg, data, day) {
             else
                 return color(d.group); 
         })
+        .on('click', function(d) {
+            var txNode = d.tx_hash ? d.tx_hash : d.id;
+            filterNetwork([txNode], data)
+            node.style("opacity", function(o) {
+                return neighboring(txNode, o) ? 1 : 0.3;
+              });
+            link.style('opacity', function (l) {
+                return l.target.id == txNode || l.source.id == txNode ? 1 : 0.3;
+            })
+    
+            node.classed('selected', function(o) {
+                return o == d;
+              });
+    
+          })
+        .on("mouseover", function(d) {
+            d3v4.select(this).transition()
+            .duration(750)
+            .attr("r", 10);    
+        })
+        .on("mouseout", function(d) {
+            d3v4.select(this).transition()
+            .duration(750)
+            .attr("r", 5);        
+        })
         .call(d3v4.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended));
+
+    // Make object of all neighboring nodes.
+    var linkedByIndex = {};
+    set.links.forEach(function(d) {
+	    linkedByIndex[d.source + ',' + d.target] = 1;
+	    linkedByIndex[d.target + ',' + d.source] = 1;
+    });
+
+  // A function to test if two nodes are neighboring.
+  function neighboring(a, b) {
+	  return linkedByIndex[a + ',' + b.id] || a == b.id;
+  }
 
       
     // add titles for mouseover blurbs
@@ -635,18 +662,6 @@ function createTransactionsGraph(svg, data, day) {
             else
                 return d.id;       
         });
-
-    svg.selectAll("circle").on('mouseover', function(d) {
-        
-        if ('name' in d) {
-            svg.select('#text0')
-            .text(d.name)
-        }
-        else {
-            svg.select('#text0')
-            .text(d.id)
-        }
-      });
 
     var simulation = d3v4.forceSimulation()
         .force("link", d3v4.forceLink()
@@ -660,16 +675,48 @@ function createTransactionsGraph(svg, data, day) {
                 })
               )
         .force("charge", d3v4.forceManyBody())
-        .force("center", d3v4.forceCenter(parentWidth / 2, parentHeight / 2))
-        .force("x", d3v4.forceX(parentWidth/2))
-        .force("y", d3v4.forceY(parentHeight/2));
+        .force("center", d3v4.forceCenter(svgWidth / 2, svgHeight / 2))
+        .force("x", d3v4.forceX(svgWidth/2))
+        .force("y", d3v4.forceY(svgHeight/2));
 
     simulation
         .nodes(set.nodes)
-        .on("tick", ticked);
+        .on("tick", ticked)
+        .on("end", 
+        zoomFit(2000));
 
     simulation.force("link")
         .links(set.links);
+
+    function zoomFit(transitionDuration) {
+        setTimeout(function(){
+            var bounds = gMain.node().getBBox();
+            var parent = gMain.node().parentElement;
+            var fullWidth = parent.clientWidth || parent.parentNode.clientWidth;
+            var fullHeight = parent.clientHeight || parent.parentNode.clientHeight;
+            var width = bounds.width;
+            var height = bounds.height;
+            var midX = bounds.x + width / 2;
+            var midY = bounds.y + height / 2;
+            if (width == 0 || height == 0) return; // nothing to fit
+            var scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
+            var translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+                
+            //console.trace("zoomFit", translate, scale);
+                
+            var transform = d3.zoomIdentity
+                .translate(translate[0], translate[1])
+                .scale(scale);
+            
+            gMain
+                .transition()
+                .duration(transitionDuration || 0) // milliseconds
+                .call(zoom.transform, transform);
+                
+            setBrushExtent(width, height)
+            }, 3000)
+                
+        }
 
     function ticked() {
         // update node and line positions at every step of 
@@ -690,6 +737,10 @@ function createTransactionsGraph(svg, data, day) {
         .on("start", brushstarted)
         .on("brush", brushed)
         .on("end", brushended);
+    
+    function setBrushExtent(w, h){
+        brush.extent([[-w, -h], [w, h]])
+    }
 
     function brushstarted() {
         // keep track of whether we're actively brushing so that we
@@ -702,11 +753,15 @@ function createTransactionsGraph(svg, data, day) {
     }
 
     rect.on('click', () => {
+        // Restore nodes and links to normal opacity.
+        link.style('opacity', 1);
+        node.style('opacity', 1);
         node.each(function(d) {
             d.selected = false;
             d.previouslySelected = false;
         });
         node.classed("selected", false);
+        resetNetwork();
     });
 
     function brushed() {
@@ -736,6 +791,29 @@ function createTransactionsGraph(svg, data, day) {
         }
 
         brushing = false;
+
+        var selectedList = []
+        node.filter(function(d) { return d.selected; })
+        .each(function(d) { 
+            selectedList.push(d.tx_hash ? d.tx_hash : d.id)
+        }) 
+        filterNetwork(selectedList, data)
+        if(selectedList.length != 0){
+            node.style("opacity", function(o) {
+                var isNeigh = false;
+                var i = 0;
+                while(isNeigh == false && i < selectedList.length) {
+                    isNeigh = neighboring(selectedList[i], o);
+                    i++;
+                }
+                return isNeigh ? 1 : 0.3;
+              });
+        
+            link.style('opacity', function (l) {
+                return selectedList.includes(l.target.id) || selectedList.includes(l.source.id) ? 1 : 0.3;
+            })
+        }
+    
     }
 
     gMain.on('keydown', keydown);
@@ -856,9 +934,7 @@ var y = d3.scaleLinear()
 
 
 var svg = d3.select('#barChart');
-
-// remove any previous graphs
-svg.selectAll('.g-main').remove();
+svg.selectAll("*").remove();
 
 var gMain = svg.append('g')
 .classed('g-main', true)
@@ -2083,45 +2159,105 @@ function createForceNetwork(nodes, edges) {
     setCentrality("bw");
 }
 
-function filterTransactions(id){
-    var svg = d3v4.select('#transactionsGraph')
+function filterNetwork(ids, data){
+    if (ids.length==0){
+        resetNetwork();
+        resetTransactions();
+    } else {
+        var svg = d3v4.select('#network');
 
-    var txs = []
-    var insOuts = []
+        var filtered = data.filter(function(d) { return ids.includes(d.hash); })
+    
+        var addresses = [];
+        filtered.forEach(function(d) {
+            d.inputs.forEach(function(i){
+                addresses.push.apply(addresses, i.addresses);
+            })
+            d.outputs.forEach(function(o){
+                addresses.push.apply(addresses, o.addresses);
+            })
+        });
+    
+    
+    var connections = []
+        svg.selectAll("line")
+        .style('opacity', function (l) {
+            if(addresses.includes(l.target.id) || addresses.includes(l.source.id)){
+                connections.push(l.target.id)
+                connections.push(l.source.id)
+            }
+            return addresses.includes(l.target.id) || addresses.includes(l.source.id) ? 1 : 0.3;
+        })
+    
+        svg.selectAll("circle")
+        .style("opacity", function(o) {
+            return connections.includes(o.id) ? 1 : 0.3;
+          })
+        .classed("selected", false);
+    }
 
-    svg.selectAll("circle").each(function (d){
-        if(id.includes(d.name)){
-            txs.push(d.tx_hash)
-        }
-    })
 
-    svg.selectAll("line")
-    .style('opacity', function (l) {
-        if(txs.includes(l.source.id)){
-            insOuts.push(l.target.id)
-        }
-        return txs.includes(l.source.id) ? 1 : 0.3;
-        
-    })
-
-    svg.selectAll("circle")
-    .style("opacity", function(o) {
-        return txs.includes(o.id) || insOuts.includes(o.id) ? 1 : 0.3;
-      });
 
 }
+function filterTransactions(ids){
+    if (ids.length==0){
+        resetNetwork();
+        resetTransactions();
+    } else {
+        var svg = d3v4.select('#transactionsGraph');
 
-function resetTransactions(){
+        var txs = []
+        var insOuts = []
+    
+        svg.selectAll("circle").each(function (d){
+            if(ids.includes(d.name)){
+                txs.push(d.tx_hash)
+            }
+        })
+    
+        svg.selectAll("line")
+        .style('opacity', function (l) {
+            if(txs.includes(l.source.id)){
+                insOuts.push(l.target.id)
+            }
+            return txs.includes(l.source.id) ? 1 : 0.3;
+            
+        })
+    
+        svg.selectAll("circle")
+        .style("opacity", function(o) {
+            return txs.includes(o.id) || insOuts.includes(o.id) ? 1 : 0.3;
+          })
+        .classed("selected", false);
+    }
+
+
+}
+function resetNetwork() {
+    var svg = d3v4.select('#network');
+
+    svg.selectAll("line")
+    .style('opacity', 1);
+
+    svg.selectAll("circle")
+    .style("opacity", 1)
+    .classed("selected", false);
+
+}
+function resetTransactions() {
     var svg = d3v4.select('#transactionsGraph');
 
     svg.selectAll("line")
     .style('opacity', 1);
 
     svg.selectAll("circle")
-    .style("opacity", 1);
+    .style("opacity", 1)
+    .classed("selected", false);
+
+
 }
 
-function changeBarChartMonth(month){
+function changeBarChartMonth(month) {
     d3.select('#barChart').selectAll(".bar")
     .style("opacity", function(d) {
         return (d.id == month) ? 1.0 : 0.3;
