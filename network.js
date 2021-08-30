@@ -561,7 +561,7 @@ function createTransactionsGraph(data, day) {
     .style('fill', 'white')
     .style('stroke', 'black')
 
-    var gDraw = gMain.append('g');
+    var gDraw = gMain.append('g').classed('gDraw', true);
 
     var zoom = d3v4.zoom()
     .on('zoom', zoomed)
@@ -893,7 +893,18 @@ function createTransactionsGraph(data, day) {
         })
     }
 
+    var leg = gMain.append('g')
+    leg.append("rect").attr('width', 87).attr('height', 50).style("fill", 'white').style("opacity", 0.8).attr("transform", 
+    "translate(" + 5 + "," + 5 + ")");
+    leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#1f77b4")
+    leg.append("circle").attr("cx", 15).attr("cy",30).attr("r", 5).style("fill", "#ff7f0e")
+    leg.append("circle").attr("cx", 15).attr("cy",45).attr("r", 5).style("fill", "#aec7e8")
+
+    leg.append("text").attr("x", 28).attr("y", 15).text("transaction").style("font-size", "12px").attr("alignment-baseline","middle")
+    leg.append("text").attr("x", 28).attr("y", 30).text("input").style("font-size", "12px").attr("alignment-baseline","middle")
+    leg.append("text").attr("x", 28).attr("y", 45).text("output").style("font-size", "12px").attr("alignment-baseline","middle")
     return set;
+    
 }
 
 function createBarChart(myDay){
@@ -2205,13 +2216,13 @@ function filterTransactions(ids){
         var txs = []
         var insOuts = []
     
-        svg.selectAll("circle").each(function (d){
+        svg.select('.gDraw').selectAll("circle").each(function (d){
             if(ids.includes(d.name)){
                 txs.push(d.tx_hash)
             }
         })
     
-        svg.selectAll("line")
+        svg.select('.gDraw').selectAll("line")
         .style('opacity', function (l) {
             if(txs.includes(l.source.id)){
                 insOuts.push(l.target.id)
@@ -2220,7 +2231,7 @@ function filterTransactions(ids){
             
         })
     
-        svg.selectAll("circle")
+        svg.select('.gDraw').selectAll("circle")
         .style("opacity", function(o) {
             return txs.includes(o.id) || insOuts.includes(o.id) ? 1 : 0.3;
           })
@@ -2243,10 +2254,10 @@ function resetNetwork() {
 function resetTransactions() {
     var svg = d3v4.select('#transactionsGraph');
 
-    svg.selectAll("line")
+    svg.select('.gDraw').selectAll("line")
     .style('opacity', 1);
 
-    svg.selectAll("circle")
+    svg.select('.gDraw').selectAll("circle")
     .style("opacity", 1)
     .classed("selected", false);
 
