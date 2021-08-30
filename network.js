@@ -2176,7 +2176,7 @@ var div = d3.select("#pca_div").append("div")
     .style("visibility", "hidden");				
     // .style("opacity", 0);
 
-d3.csv("pca_giorni.csv", function(error, data) {
+d3.csv("pca_finale2.csv", function(error, data) {
   if (error) throw error;
 
   data.forEach(function(d) {
@@ -2184,7 +2184,7 @@ d3.csv("pca_giorni.csv", function(error, data) {
     d.x = +d.x;
   });
 
-  const colorValue = d => d.day;
+  const colorValue = d => d.month;
 
   x.domain([d3.min(data,function(d){return d.x}), d3.max(data,function(d){return d.x})]).nice();
   y.domain([d3.min(data,function(d){return d.y}), d3.max(data,function(d){return d.y})]).nice();
