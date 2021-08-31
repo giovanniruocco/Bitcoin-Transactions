@@ -12,19 +12,19 @@ var RadarChart = {
 	draw: function(id, d, options){
 	var cfg = {
 	   radius: 5,
-	   w: 600,
-	   h: 600,
+	   w: 300,
+	   h: 300,
 	   factor: 1,
-	   factorLegend: .85,
-	   levels: 3,
-	   maxValue: 0,
+	   factorLegend: .9,
+	   levels: 6,
+	   maxValue: 0.6,
 	   radians: 2 * Math.PI,
 	   opacityArea: 0.5,
 	   ToRight: 5,
-	   TranslateX: 80,
-	   TranslateY: 30,
-	   ExtraWidthX: 100,
-	   ExtraWidthY: 100,
+	   TranslateX: 0,
+	   TranslateY: 0,
+	   ExtraWidthX: 0,
+	   ExtraWidthY: 0,
 	   color: d3.scaleOrdinal(d3.schemeCategory10)
 	  };
 	  
@@ -35,21 +35,16 @@ var RadarChart = {
 		  }
 		}
 	  }
-	  cfg.maxValue = Math.max(cfg.maxValue, d3.max(d, function(i){return d3.max(i.map(function(o){return o.value;}))}));
+	  //cfg.maxValue = Math.max(cfg.maxValue, d3.max(d, function(i){return d3.max(i.map(function(o){return o.value;}))}));
 	  var allAxis = (d[0].map(function(i, j){return i.axis}));
 	  var total = allAxis.length;
 	  var radius = cfg.factor*Math.min(cfg.w/2, cfg.h/2);
 	  var Format = d3.format('%');
-	  d3.select(id).select("svg").remove();
+	  d3.select("#radar").selectAll("*").remove();
 	  
-	  var g = d3.select(id)
-	  .append("svg")
-	  .attr("width", "100%")
-	  .attr("height", "100%")
+	  var g = d3.select("#radar")
 	  .append("g")
-	  .attr("class", "h-100")
-	  .attr("class", "w-100")
-	  .attr("transform", "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ") scale(0.70)")
+	.attr("transform", "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ")")
 	  ;
   
 	  var tooltip;
@@ -86,7 +81,8 @@ var RadarChart = {
 		 .style("font-size", "10px")
 		 .attr("transform", "translate(" + (cfg.w/2-levelFactor + cfg.ToRight) + ", " + (cfg.h/2-levelFactor) + ")")
 		 .attr("fill", "#737373")
-		 .text(Format((j+1)*cfg.maxValue/cfg.levels));
+		 //.text(Math.round(((j+1)*(cfg.maxValue/cfg.levels))*100) + "%");
+		 //.text(Format((j+1)*(cfg.maxValue/cfg.levels)));
 	  }
 	  
 	  series = 0;
@@ -117,7 +113,76 @@ var RadarChart = {
 		  .attr("x", function(d, i){return cfg.w/2*(1-cfg.factorLegend*Math.sin(i*cfg.radians/total))-60*Math.sin(i*cfg.radians/total);})
 		  .attr("y", function(d, i){return cfg.h/2*(1-Math.cos(i*cfg.radians/total))-20*Math.cos(i*cfg.radians/total);});
   
-   
+
+		  //leggendaaaaa
+
+	
+		  
+		  var LegendOptions = ['\n1°: ' + bestInputArray[0][0] ,'\n2°: ' + bestInputArray[1][0], '\n3°: ' + bestInputArray[2][0] ];
+		  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+		  
+		
+		// //Create the title for the legend
+		// var svg = d3.select('#chart')
+		// 	.selectAll('svg')
+		// 	.append('svg')
+		// 	.attr("width", 800)
+		// 	.attr("height", 600)
+
+			
+		//Initiate Legend	
+		var legend = d3.select("#radar").append("g")
+		  .attr("class", "legend")
+		//   .attr("height", 100)
+		//   .attr("width", 200)
+		//   .attr('transform', 'translate(-50,20)')
+		  ;
+		  //Create colour squares
+	  
+		  legend.selectAll('rect')
+			.data(LegendOptions)
+			.enter()
+			.append("rect")
+			.attr("x", 0)
+			.attr("y", function(d, i){ return i * 15;})
+			.attr("width", 10)
+			.attr("height", 10)
+			.style("fill", function(d, i){
+			return colorscale(i);})
+			.on('mouseover', function (d,i){
+				if (colorscale(i) === "#1f77b4" )
+					z = "polygon.radar-chart-serie0";
+				else if (colorscale(i) === "#ff7f0e" )
+					z = "polygon.radar-chart-serie1";
+				else if (colorscale(i) === "#2ca02c" )
+					z = "polygon.radar-chart-serie2";
+				g.selectAll("polygon")
+				 .transition(200)
+				 .style("fill-opacity", 0.1); 
+				g.selectAll(z)
+				 .transition(200)
+				 .style("fill-opacity", .7);
+			  })
+			.on('mouseout', function(){
+				g.selectAll("polygon")
+				 .transition(200)
+				 .style("fill-opacity", cfg.opacityArea);
+})
+			;
+		  //Create text next to squares
+		  legend.selectAll('text')
+			.data(LegendOptions)
+			.enter()
+			.append("text")
+			.attr("x", 15)
+			.attr("y", function(d, i){ return i * 15 + 9;})
+			.attr("font-size", "11px")
+			.attr("fill", "#737373")
+			.text(function(d) { return d; })
+			;	
+	  
+
+
 	  d.forEach(function(y, x){
 		dataValues = [];
 		g.selectAll(".nodes")
@@ -163,6 +228,8 @@ var RadarChart = {
 	  series=0;
   
   
+
+	  
 	  d.forEach(function(y, x){
 		g.selectAll(".nodes")
 		  .data(y).enter()
@@ -186,10 +253,11 @@ var RadarChart = {
 					  newX =  parseFloat(d3.select(this).attr('cx')) - 10;
 					  newY =  parseFloat(d3.select(this).attr('cy')) - 5;
 					  
+					  
 					  tooltip
 						  .attr('x', newX)
 						  .attr('y', newY)
-						  .text(Format(d.value))
+						  //.text("Percentage: " + Format(d.value) + "\nValue: " + "Poi ce lo metto") // qua metto il tooltip 
 						  .transition(200)
 						  .style('opacity', 1);
 						  
@@ -210,8 +278,34 @@ var RadarChart = {
 						  .style("fill-opacity", cfg.opacityArea);
 					})
 		  .append("svg:title")
-		  .text(function(j){return Math.max(j.value, 0)});
-  
+		  .text(function(j){
+			if (j.axis === "Total Inputs Value" || j.axis === "Total Outputs Value" ){
+			  	return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0)/100000000 + " BTC";
+			 }
+			else if(j.axis === "# Inputs"){	
+				var input_num
+				if(j.realvalue==1)
+					input_num=" Input"
+				else
+					input_num=" Inputs"
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + input_num;
+			}
+			else if(j.axis === "# Outputs"){
+				if(j.realvalue==1)
+					output_num=" Output"
+				else
+					output_num=" Outputs"	
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + output_num;
+			}
+			else if(j.axis === "# Transactions"){	
+				if(j.realvalue==1)
+					op_num=" Transaction"
+				else
+					op_num=" Transactions"	
+				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\nValue: " + Math.max(j.realvalue, 0) + op_num;
+			}
+		
+		})
 		series++;
 	  });
 	  //Tooltip
@@ -220,6 +314,7 @@ var RadarChart = {
 				 .style('font-family', 'sans-serif')
 				 .style('font-size', '13px');
 	}
+	
   };
   
   
