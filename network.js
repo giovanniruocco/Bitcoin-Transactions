@@ -897,8 +897,8 @@ function createTransactionsGraph(data, day) {
     leg.append("rect").attr('width', 87).attr('height', 50).style("fill", 'white').style("opacity", 0.8).attr("transform", 
     "translate(" + 5 + "," + 5 + ")");
     leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#1f77b4")
-    leg.append("circle").attr("cx", 15).attr("cy",30).attr("r", 5).style("fill", "#ff7f0e")
-    leg.append("circle").attr("cx", 15).attr("cy",45).attr("r", 5).style("fill", "#aec7e8")
+    leg.append("circle").attr("cx", 15).attr("cy",30).attr("r", 5).style("fill", "#aec7e8")
+    leg.append("circle").attr("cx", 15).attr("cy",45).attr("r", 5).style("fill", "#ff7f0e")
 
     leg.append("text").attr("x", 28).attr("y", 15).text("transaction").style("font-size", "12px").attr("alignment-baseline","middle")
     leg.append("text").attr("x", 28).attr("y", 30).text("input").style("font-size", "12px").attr("alignment-baseline","middle")
@@ -1986,12 +1986,17 @@ function setUserType(type, data) {
 }
 
     //graph(data)
-    function graph(data){
+function graph(data){
+    var w = parseInt(d3.select('#radar').style('width'), 10)
+    var h = parseInt(d3.select('#radar').style('height'), 10) -45;
 
-  var w = 500,
-    h = 500;
-  
-  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+    var size = Math.min(w,h);
+
+    var margin = {top: size*7/100, right: size*7/100, bottom: size*7/100, left: size*7/100};
+    var width = size - margin.left - margin.right;
+    var height = size - margin.top - margin.bottom;
+
+    var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
 
   
   //Legend titles
@@ -2025,23 +2030,23 @@ function setUserType(type, data) {
   d = [
         [
         {axis:"Total Inputs Value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[0][1]},
-        {axis:"Number of Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
+        {axis:"# Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
         {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[0][3]},
-        {axis:"Number of Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
-        {axis:"Number of Operations",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
+        {axis:"# Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
+        {axis:"# Transactions",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
         ],[
         {axis:"Total Inputs Value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[1][1]},
-        {axis:"Number of Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
+        {axis:"# Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
         {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[1][3]},
-        {axis:"Number of Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
-        {axis:"Number of Operations",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
+        {axis:"# Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
+        {axis:"# Transactions",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
         ]
         ,[
         {axis:"Total Inputs Value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[2][1]},
-        {axis:"Number of Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
+        {axis:"# Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
         {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[2][3]},
-        {axis:"Number of Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
-        {axis:"Number of Operations",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
+        {axis:"# Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
+        {axis:"# Transactions",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
           ]
       ];
     }
@@ -2064,23 +2069,23 @@ function setUserType(type, data) {
        d = [
             [
             {axis:"Total Inputs Value",value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[0][1]},
-            {axis:"Number of Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
+            {axis:"# Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
             {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[0][3]},
-            {axis:"Number of Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
-            {axis:"Number of Operations",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
+            {axis:"# Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
+            {axis:"# Transactions",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
             ],[
             {axis:"Total Inputs Value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[1][1]},
-            {axis:"Number of Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
+            {axis:"# Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
             {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[1][3]},
-            {axis:"Number of Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
-            {axis:"Number of Operations",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
+            {axis:"# Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
+            {axis:"# Transactions",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
             ]
             ,[
             {axis:"Total Inputs Value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[2][1]},
-            {axis:"Number of Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
+            {axis:"# Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
             {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[2][3]},
-            {axis:"Number of Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
-            {axis:"Number of Operations",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
+            {axis:"# Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
+            {axis:"# Transactions",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
               ]
           ];
         }
@@ -2093,11 +2098,13 @@ function setUserType(type, data) {
 
   //Options for the Radar chart, other than default
   var mycfg = {
-    w: w,
-    h: h,
-    maxValue: 0.6,
-    levels: 6,
-    ExtraWidthX: 300
+    w: width,
+    h: height,
+    maxValue: 1,
+    levels: 4,
+    ExtraWidthX: 300,
+    TranslateX: (w - width)/2,
+    TranslateY: 45 + ((h - height + (height/2 - (height/2 * (Math.sqrt(5)+1))/4))/2)
   }
   
   //Call function to draw the Radar chart

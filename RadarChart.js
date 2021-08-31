@@ -12,19 +12,19 @@ var RadarChart = {
 	draw: function(id, d, options){
 	var cfg = {
 	   radius: 5,
-	   w: 600,
-	   h: 600,
+	   w: 300,
+	   h: 300,
 	   factor: 1,
-	   factorLegend: .85,
-	   levels: 3,
-	   maxValue: 0,
+	   factorLegend: .9,
+	   levels: 6,
+	   maxValue: 0.6,
 	   radians: 2 * Math.PI,
 	   opacityArea: 0.5,
 	   ToRight: 5,
-	   TranslateX: 80,
-	   TranslateY: 30,
-	   ExtraWidthX: 100,
-	   ExtraWidthY: 100,
+	   TranslateX: 0,
+	   TranslateY: 0,
+	   ExtraWidthX: 0,
+	   ExtraWidthY: 0,
 	   color: d3.scaleOrdinal(d3.schemeCategory10)
 	  };
 	  
@@ -35,21 +35,16 @@ var RadarChart = {
 		  }
 		}
 	  }
-	  cfg.maxValue = Math.max(cfg.maxValue, d3.max(d, function(i){return d3.max(i.map(function(o){return o.value;}))}));
+	  //cfg.maxValue = Math.max(cfg.maxValue, d3.max(d, function(i){return d3.max(i.map(function(o){return o.value;}))}));
 	  var allAxis = (d[0].map(function(i, j){return i.axis}));
 	  var total = allAxis.length;
 	  var radius = cfg.factor*Math.min(cfg.w/2, cfg.h/2);
 	  var Format = d3.format('%');
-	  d3.select(id).select("svg").remove();
+	  d3.select("#radar").selectAll("*").remove();
 	  
-	  var g = d3.select(id)
-	  .append("svg")
-	  .attr("width", "100%")
-	  .attr("height", "100%")
+	  var g = d3.select("#radar")
 	  .append("g")
-	  .attr("class", "h-100")
-	  .attr("class", "w-100")
-	  .attr("transform", "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ") scale(0.70)")
+	.attr("transform", "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ")")
 	  ;
   
 	  var tooltip;
@@ -86,7 +81,7 @@ var RadarChart = {
 		 .style("font-size", "10px")
 		 .attr("transform", "translate(" + (cfg.w/2-levelFactor + cfg.ToRight) + ", " + (cfg.h/2-levelFactor) + ")")
 		 .attr("fill", "#737373")
-		 .text(Math.round(((j+1)*(cfg.maxValue/cfg.levels))*100) + "%");
+		 //.text(Math.round(((j+1)*(cfg.maxValue/cfg.levels))*100) + "%");
 		 //.text(Format((j+1)*(cfg.maxValue/cfg.levels)));
 	  }
 	  
@@ -123,32 +118,24 @@ var RadarChart = {
 
 	
 		  
-		  var LegendOptions = ['\nFirst: ' + bestInputArray[0][0] ,'\nSecond: ' + bestInputArray[1][0], '\nThird: ' + bestInputArray[2][0] ];
+		  var LegendOptions = ['\n1°: ' + bestInputArray[0][0] ,'\n2°: ' + bestInputArray[1][0], '\n3°: ' + bestInputArray[2][0] ];
 		  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
 		  
 		
-		//Create the title for the legend
-		var svg = d3.select('#chart')
-			.selectAll('svg')
-			.append('svg')
-			.attr("width", 800)
-			.attr("height", 600)
+		// //Create the title for the legend
+		// var svg = d3.select('#chart')
+		// 	.selectAll('svg')
+		// 	.append('svg')
+		// 	.attr("width", 800)
+		// 	.attr("height", 600)
 
-		var text = svg.append("text")
-		  .attr("class", "title")
-		  .attr('transform', 'translate(-50,0)') 
-		  .attr("x", 200 - 70)
-		  .attr("y", 10)
-		  .attr("font-size", "12px")
-		  .attr("fill", "#404040")
-		  .text("LEGENDA:");
 			
 		//Initiate Legend	
-		var legend = svg.append("g")
+		var legend = d3.select("#radar").append("g")
 		  .attr("class", "legend")
-		  .attr("height", 100)
-		  .attr("width", 200)
-		  .attr('transform', 'translate(-50,20)')
+		//   .attr("height", 100)
+		//   .attr("width", 200)
+		//   .attr('transform', 'translate(-50,20)')
 		  ;
 		  //Create colour squares
 	  
@@ -156,8 +143,8 @@ var RadarChart = {
 			.data(LegendOptions)
 			.enter()
 			.append("rect")
-			.attr("x", 200 - 65)
-			.attr("y", function(d, i){ return i * 20;})
+			.attr("x", 0)
+			.attr("y", function(d, i){ return i * 15;})
 			.attr("width", 10)
 			.attr("height", 10)
 			.style("fill", function(d, i){
@@ -187,8 +174,8 @@ var RadarChart = {
 			.data(LegendOptions)
 			.enter()
 			.append("text")
-			.attr("x", 200 - 52)
-			.attr("y", function(d, i){ return i * 20 + 9;})
+			.attr("x", 15)
+			.attr("y", function(d, i){ return i * 15 + 9;})
 			.attr("font-size", "11px")
 			.attr("fill", "#737373")
 			.text(function(d) { return d; })
@@ -295,7 +282,7 @@ var RadarChart = {
 			if (j.axis === "Total Inputs Value" || j.axis === "Total Outputs Value" ){
 			  	return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0)/100000000 + " BTC";
 			 }
-			else if(j.axis === "Number of Inputs"){	
+			else if(j.axis === "# Inputs"){	
 				var input_num
 				if(j.realvalue==1)
 					input_num=" Input"
@@ -303,18 +290,18 @@ var RadarChart = {
 					input_num=" Inputs"
 				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + input_num;
 			}
-			else if(j.axis === "Number of Outputs"){
+			else if(j.axis === "# Outputs"){
 				if(j.realvalue==1)
 					output_num=" Output"
 				else
 					output_num=" Outputs"	
 				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\n" + Math.max(j.realvalue, 0) + output_num;
 			}
-			else if(j.axis === "Number of Operations"){	
+			else if(j.axis === "# Transactions"){	
 				if(j.realvalue==1)
-					op_num=" Operation"
+					op_num=" Transaction"
 				else
-					op_num=" Operations"	
+					op_num=" Transactions"	
 				return "Percentage: " + Math.round(Math.max(j.value, 0)*100) + "%\nValue: " + Math.max(j.realvalue, 0) + op_num;
 			}
 		
