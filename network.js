@@ -2395,7 +2395,13 @@ d3.csv("pca_finale2.csv", function(error, data) {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
-      .selectAll("text")  
+      .selectAll("text")
+      .text(function(d){
+          if (d == 0) {
+              return d;
+          }
+        return (d/1000000000000 + "k Billions");
+      })
       .style("text-anchor", "end")
       .attr("dx", "-.8em")
       .attr("dy", ".15em")
@@ -2403,7 +2409,14 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
   svg.append("g")
       .attr("class", "y axis")
-      .call(yAxis);
+      .call(yAxis)
+      .selectAll("text")
+      .text(function(d){
+          if (d == 0) {
+              return d;
+          }
+        return (d/1000000000 + "k Billions");
+      });
 
   svg.selectAll(".dot")
       .data(data)
