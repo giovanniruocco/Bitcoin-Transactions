@@ -2051,6 +2051,9 @@ function graph(data){
     }
 
     else{    
+        if (!(isNaN(bestOutputArray[j][0]))) 
+             bestOutputArray[j][0] = ""
+        }  
         console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
         var LegendOptions = ['First: ' + bestOutputArray[0][0] ,' Second: ' + bestOutputArray[1][0], 'Third: ' + bestOutputArray[2][0] ];
         maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
