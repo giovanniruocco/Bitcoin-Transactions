@@ -2165,7 +2165,7 @@ function graph(data){
 //       ;	
 
 
-    }
+    
   //}
 
 function createForceNetwork(nodes, edges) {
