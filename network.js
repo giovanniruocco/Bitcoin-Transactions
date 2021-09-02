@@ -929,9 +929,7 @@ var height2 = h - margin2.top - margin2.bottom;
 var h = parseInt(d3.select('#barChart').style('height'), 10);
 var margin = {top: h*5/100, right: 0, bottom: h*8/100, left: w*11/100};
 var margin2 = {top: 230, right: 20, bottom: 30, left: 50};
-
 var width = parseInt(d3.select('#barChart').style('width'), 10) - margin.left;
-
 var height = parseInt(d3.select('#barChart').style('height'), 10) - margin.bottom - margin.top;
 var height2 = 300 - margin2.top - margin2.bottom; */
 
@@ -2051,9 +2049,6 @@ function graph(data){
     }
 
     else{    
-        if (!(isNaN(bestOutputArray[j][0]))) 
-             bestOutputArray[j][0] = ""
-        }  
         console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
         var LegendOptions = ['First: ' + bestOutputArray[0][0] ,' Second: ' + bestOutputArray[1][0], 'Third: ' + bestOutputArray[2][0] ];
         maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
@@ -2165,7 +2160,7 @@ function graph(data){
 //       ;	
 
 
-    
+    }
   //}
 
 function createForceNetwork(nodes, edges) {
@@ -2451,4 +2446,3 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
 
 }
-
