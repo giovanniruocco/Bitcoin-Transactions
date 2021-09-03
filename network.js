@@ -1543,6 +1543,7 @@ myDati="";
 var testArray = [];
 input_array = [];
 output_array= [];
+var brushArray = [];
 
 function createRadarChart(day){
 
@@ -1618,30 +1619,64 @@ ottobre = 1285891200000;
 novembre = 1288569600000;
 dicembre = 1291161600000;
 i=0, x=0, numtrans=0;
+
+
+
+//brushArray = ["d407989570b3c0e09209836a72ac87e8f2e5a71c3f73bbb330ebb896e6081937","22a66d452f67315db6918965b4681b734bc62b8fa1dd42f9156a876b9b186a40"]
+
+// hash del 1 maggio: 
+//d407989570b3c0e09209836a72ac87e8f2e5a71c3f73bbb330ebb896e6081937      (1 input)
+//70c4ffa9a8dbec2feb1cb687155f4e0e9c1007eea6d92c1cb1073c007c709fd3      (1 input)
+//22a66d452f67315db6918965b4681b734bc62b8fa1dd42f9156a876b9b186a40      (2 input)
+
+
 d3.json('trans2010new.json', function(error, data) {
   if (!error) {
-      for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
-          if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani){
-            numtrans++
-            for (let w=0; w < data[j].input_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
-            {
-              input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
-              //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
-              countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
-              i++ //incremento la posizione nell'input_array a ogni ciclo
+      if (brushArray == ""){
+        for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
+            if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani){
+                //console.log("Ammor stampo l'hash che trovo: " + data[j].hash)
+                numtrans++
+                for (let w=0; w < data[j].input_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
+                    countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
+                    i++ //incremento la posizione nell'input_array a ogni ciclo
+                }
+                for (let w=0; w < data[j].output_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
+                    countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
+                    x++ //incremento la posizione nell'input_array a ogni ciclo
+                }
             }
-            for (let w=0; w < data[j].output_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
-            {
-              output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
-              //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
-              countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
-              x++ //incremento la posizione nell'input_array a ogni ciclo
+        }
+    }
+    else{
+        for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
+            if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani && brushArray.includes(data[j].hash)){
+                //console.log("Ammor stampo l'hash che trovo: " + data[j].hash)
+                numtrans++
+                for (let w=0; w < data[j].input_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
+                    countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
+                    i++ //incremento la posizione nell'input_array a ogni ciclo
+                }
+                for (let w=0; w < data[j].output_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
+                    countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
+                    x++ //incremento la posizione nell'input_array a ogni ciclo
+                }
             }
-
-
-
-      }
-      }
+        }
+    }
+      
+    
+    
+    
+    
       console.log("Nel periodo scelto sono presenti: " + numtrans + " transazioni")
       console.log("Nel periodo scelto sono presenti: " + countinput + " input")
       console.log("Nel periodo scelto sono presenti: " + countoutput + " output")
