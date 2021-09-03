@@ -119,9 +119,9 @@ var RadarChart = {
 	
 		  
 		  if (inputradar){
-		  var LegendOptions = ['\n1°: ' + bestInputArray[0][0] ,'\n2°: ' + bestInputArray[1][0], '\n3°: ' + bestInputArray[2][0] ];}
+		  var LegendOptions = ['\n1°: ' + bestInputArray[0][0] ,'\n2°: ' + bestInputArray[1][0], '\n3°: ' + bestInputArray[2][0], '\nAverage' ];}
 		  else{
-		  var LegendOptions = ['\n1°: ' + bestOutputArray[0][0] ,'\n2°: ' + bestOutputArray[1][0], '\n3°: ' + bestOutputArray[2][0] ];}
+		  var LegendOptions = ['\n1°: ' + bestOutputArray[0][0] ,'\n2°: ' + bestOutputArray[1][0], '\n3°: ' + bestOutputArray[2][0], '\nAverage' ];}
 		  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
 		  
 		
@@ -159,6 +159,8 @@ var RadarChart = {
 					z = "polygon.radar-chart-serie1";
 				else if (colorscale(i) === "#2ca02c" )
 					z = "polygon.radar-chart-serie2";
+				else if (colorscale(i) === "#d62728" )
+					z = "polygon.radar-chart-serie3";
 				g.selectAll("polygon")
 				 .transition(200)
 				 .style("fill-opacity", 0.1); 
