@@ -119,9 +119,9 @@ var RadarChart = {
 	
 		  
 		  if (inputradar){
-		  var LegendOptions = ['\nFirst: ' + bestInputArray[0][0] ,'\nSecond: ' + bestInputArray[1][0], '\nThird: ' + bestInputArray[2][0] ];}
+		  var LegendOptions = ['\n1°: ' + bestInputArray[0][0] ,'\n2°: ' + bestInputArray[1][0], '\n3°: ' + bestInputArray[2][0] ];}
 		  else{
-		  var LegendOptions = ['\nFirst: ' + bestOutputArray[0][0] ,'\nSecond: ' + bestOutputArray[1][0], '\nThird: ' + bestOutputArray[2][0] ];}
+		  var LegendOptions = ['\n1°: ' + bestOutputArray[0][0] ,'\n2°: ' + bestOutputArray[1][0], '\n3°: ' + bestOutputArray[2][0] ];}
 		  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
 		  
 		
