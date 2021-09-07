@@ -76,6 +76,7 @@ var link = gDraw.append("g")
     .data(set.links)
     .enter().append("line")
     .style("stroke-width", "1px")
+    //.style("stroke", "#CC9999")
     .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
 var node = gDraw.append("g")
@@ -91,7 +92,9 @@ var node = gDraw.append("g")
             return color(d.group); 
     })
     .on('click', function(d) {
-        filterTransactions(d.id)
+        var selected = []
+        selected.push(d.id)
+        filterTransactions(selected)
         node.style("opacity", function(o) {
             return neighboring(d.id, o) ? 1 : 0.3;
           });
@@ -104,7 +107,8 @@ var node = gDraw.append("g")
           });
 
       })
-    .on("mouseover", function(d) {  
+      .on("mouseover", function(d) {
+        
         d3v4.select(this).transition()
         .duration(750)
         .attr("r", 10);    
@@ -165,7 +169,7 @@ simulation
     .nodes(set.nodes)
     .on("tick", ticked)
     .on("end", 
-    zoomFit(2000));
+    zoomFit(2000));;
 
 simulation.force("link")
     .links(set.links);
@@ -243,6 +247,7 @@ rect.on('click', () => {
         d.previouslySelected = false;
     });
     node.classed("selected", false);
+
     resetTransactions();
 });
 
@@ -280,22 +285,20 @@ function brushended() {
         selectedList.push(d.id)
     }) 
     filterTransactions(selectedList)
-    if(selectedList.length != 0){
-        node.style("opacity", function(o) {
-            var isNeigh = false;
-            var i = 0;
-            while(isNeigh == false && i < selectedList.length) {
-                isNeigh = neighboring(selectedList[i], o);
-                i++;
-            }
-            return isNeigh ? 1 : 0.3;
-          });
-    
-        link.style('opacity', function (l) {
-            return selectedList.includes(l.target.id) || selectedList.includes(l.source.id) ? 1 : 0.3;
-        })
-    }
 
+    node.style("opacity", function(o) {
+        var isNeigh = false;
+        var i = 0;
+        while(isNeigh == false && i < selectedList.length) {
+            isNeigh = neighboring(selectedList[i], o);
+            i++;
+        }
+        return isNeigh ? 1 : 0.3;
+      });
+
+    link.style('opacity', function (l) {
+        return selectedList.includes(l.target.id) || selectedList.includes(l.source.id) ? 1 : 0.3;
+    })
 }
 
 gMain.on('keydown', keydown);
@@ -315,7 +318,7 @@ function keydown() {
         brushMode = true;
 
         if (!gBrush) {
-            gBrush = gBrushHolder.append('g');
+            gBrush = gBrushHolder.append('g').classed('g-brush', true);
             gBrush.call(brush);
         }
     }
@@ -489,12 +492,13 @@ function setCentrality(type) {
 }
 
 function createNN(month, day){
+    var svgGraph = d3.select('#transactionsGraph');
 
 d3.json(month + '.json', function(error, data) {
     if (!error) {
         //console.log('graph', graph);
         createNetwork(data, day);
-        createTransactionsGraph(data, day)
+        createTransactionsGraph(svgGraph, data, day)
 
     } else {
         console.error(error);
@@ -502,7 +506,7 @@ d3.json(month + '.json', function(error, data) {
 });
 }
 
-function createTransactionsGraph(data, day) {
+function createTransactionsGraph(svg, data, day) {
 
     var set = '{"nodes":[],"links":[]}';
 
@@ -544,9 +548,10 @@ function createTransactionsGraph(data, day) {
     if (typeof d3v4 == 'undefined')
         var d3v4 = d3;
 
-    var svg = d3v4.select('#transactionsGraph');
-    var svgWidth = parseInt(svg.style('width'), 10);
-    var svgHeight = parseInt(svg.style('height'), 10);
+    let parentWidth = d3v4.select('#transactionsGraph').node().parentNode.clientWidth;
+    let parentHeight = d3v4.select('#transactionsGraph').node().parentNode.clientHeight;
+
+    var svg = d3v4.select('#transactionsGraph')
   
     // remove any previous graphs
     svg.selectAll('.g-main').remove();
@@ -556,17 +561,22 @@ function createTransactionsGraph(data, day) {
     .attr('tabindex', 0);
 
     var rect = gMain.append('rect')
-    .attr('width', svgWidth)
-    .attr('height', svgHeight)
+    .attr('width', parseInt(d3.select('#transactionsGraph').style('width'), 10))
+    .attr('height', parseInt(d3.select('#transactionsGraph').style('height'), 10))
     .style('fill', 'white')
     .style('stroke', 'black')
 
-    var gDraw = gMain.append('g').classed('gDraw', true);
+    var gDraw = gMain.append('g');
 
     var zoom = d3v4.zoom()
     .on('zoom', zoomed)
 
+    //gMain.call(zoom).on("dblclick.zoom", null);
     gMain.call(zoom);
+    // .call(zoom.transform, d3.zoomIdentity.translate(100, 50).scale(0.5))
+    // .append("svg:g")
+    // .attr("transform","translate(100,50) scale(.5,.5)");
+
 
     function zoomed() {
         gDraw.attr('transform', d3v4.event.transform);
@@ -581,7 +591,7 @@ function createTransactionsGraph(data, day) {
 
     // the brush needs to go before the nodes so that it doesn't
     // get called when the mouse is over a node
-    var gBrushHolder = gDraw.append('g');
+    var gBrushHolder = gMain.append('g');
     var gBrush = null;
 
     var link = gDraw.append("g")
@@ -611,47 +621,10 @@ function createTransactionsGraph(data, day) {
             else
                 return color(d.group); 
         })
-        .on('click', function(d) {
-            var txNode = d.tx_hash ? d.tx_hash : d.id;
-            filterNetwork([txNode], data)
-            node.style("opacity", function(o) {
-                return neighboring(txNode, o) ? 1 : 0.3;
-              });
-            link.style('opacity', function (l) {
-                return l.target.id == txNode || l.source.id == txNode ? 1 : 0.3;
-            })
-    
-            node.classed('selected', function(o) {
-                return o == d;
-              });
-    
-          })
-        .on("mouseover", function(d) {
-            d3v4.select(this).transition()
-            .duration(750)
-            .attr("r", 10);    
-        })
-        .on("mouseout", function(d) {
-            d3v4.select(this).transition()
-            .duration(750)
-            .attr("r", 5);        
-        })
         .call(d3v4.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended));
-
-    // Make object of all neighboring nodes.
-    var linkedByIndex = {};
-    set.links.forEach(function(d) {
-	    linkedByIndex[d.source + ',' + d.target] = 1;
-	    linkedByIndex[d.target + ',' + d.source] = 1;
-    });
-
-  // A function to test if two nodes are neighboring.
-  function neighboring(a, b) {
-	  return linkedByIndex[a + ',' + b.id] || a == b.id;
-  }
 
       
     // add titles for mouseover blurbs
@@ -662,6 +635,18 @@ function createTransactionsGraph(data, day) {
             else
                 return d.id;       
         });
+
+    svg.selectAll("circle").on('mouseover', function(d) {
+        
+        if ('name' in d) {
+            svg.select('#text0')
+            .text(d.name)
+        }
+        else {
+            svg.select('#text0')
+            .text(d.id)
+        }
+      });
 
     var simulation = d3v4.forceSimulation()
         .force("link", d3v4.forceLink()
@@ -675,48 +660,16 @@ function createTransactionsGraph(data, day) {
                 })
               )
         .force("charge", d3v4.forceManyBody())
-        .force("center", d3v4.forceCenter(svgWidth / 2, svgHeight / 2))
-        .force("x", d3v4.forceX(svgWidth/2))
-        .force("y", d3v4.forceY(svgHeight/2));
+        .force("center", d3v4.forceCenter(parentWidth / 2, parentHeight / 2))
+        .force("x", d3v4.forceX(parentWidth/2))
+        .force("y", d3v4.forceY(parentHeight/2));
 
     simulation
         .nodes(set.nodes)
-        .on("tick", ticked)
-        .on("end", 
-        zoomFit(2000));
+        .on("tick", ticked);
 
     simulation.force("link")
         .links(set.links);
-
-    function zoomFit(transitionDuration) {
-        setTimeout(function(){
-            var bounds = gMain.node().getBBox();
-            var parent = gMain.node().parentElement;
-            var fullWidth = parent.clientWidth || parent.parentNode.clientWidth;
-            var fullHeight = parent.clientHeight || parent.parentNode.clientHeight;
-            var width = bounds.width;
-            var height = bounds.height;
-            var midX = bounds.x + width / 2;
-            var midY = bounds.y + height / 2;
-            if (width == 0 || height == 0) return; // nothing to fit
-            var scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
-            var translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
-                
-            //console.trace("zoomFit", translate, scale);
-                
-            var transform = d3.zoomIdentity
-                .translate(translate[0], translate[1])
-                .scale(scale);
-            
-            gMain
-                .transition()
-                .duration(transitionDuration || 0) // milliseconds
-                .call(zoom.transform, transform);
-                
-            setBrushExtent(width, height)
-            }, 3000)
-                
-        }
 
     function ticked() {
         // update node and line positions at every step of 
@@ -737,10 +690,6 @@ function createTransactionsGraph(data, day) {
         .on("start", brushstarted)
         .on("brush", brushed)
         .on("end", brushended);
-    
-    function setBrushExtent(w, h){
-        brush.extent([[-w, -h], [w, h]])
-    }
 
     function brushstarted() {
         // keep track of whether we're actively brushing so that we
@@ -753,15 +702,11 @@ function createTransactionsGraph(data, day) {
     }
 
     rect.on('click', () => {
-        // Restore nodes and links to normal opacity.
-        link.style('opacity', 1);
-        node.style('opacity', 1);
         node.each(function(d) {
             d.selected = false;
             d.previouslySelected = false;
         });
         node.classed("selected", false);
-        resetNetwork();
     });
 
     function brushed() {
@@ -791,29 +736,6 @@ function createTransactionsGraph(data, day) {
         }
 
         brushing = false;
-
-        var selectedList = []
-        node.filter(function(d) { return d.selected; })
-        .each(function(d) { 
-            selectedList.push(d.tx_hash ? d.tx_hash : d.id)
-        }) 
-        filterNetwork(selectedList, data)
-        if(selectedList.length != 0){
-            node.style("opacity", function(o) {
-                var isNeigh = false;
-                var i = 0;
-                while(isNeigh == false && i < selectedList.length) {
-                    isNeigh = neighboring(selectedList[i], o);
-                    i++;
-                }
-                return isNeigh ? 1 : 0.3;
-              });
-        
-            link.style('opacity', function (l) {
-                return selectedList.includes(l.target.id) || selectedList.includes(l.source.id) ? 1 : 0.3;
-            })
-        }
-    
     }
 
     gMain.on('keydown', keydown);
@@ -893,18 +815,7 @@ function createTransactionsGraph(data, day) {
         })
     }
 
-    var leg = gMain.append('g')
-    leg.append("rect").attr('width', 87).attr('height', 50).style("fill", 'white').style("opacity", 0.8).attr("transform", 
-    "translate(" + 5 + "," + 5 + ")");
-    leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#1f77b4")
-    leg.append("circle").attr("cx", 15).attr("cy",30).attr("r", 5).style("fill", "#aec7e8")
-    leg.append("circle").attr("cx", 15).attr("cy",45).attr("r", 5).style("fill", "#ff7f0e")
-
-    leg.append("text").attr("x", 28).attr("y", 15).text("transaction").style("font-size", "12px").attr("alignment-baseline","middle")
-    leg.append("text").attr("x", 28).attr("y", 30).text("input").style("font-size", "12px").attr("alignment-baseline","middle")
-    leg.append("text").attr("x", 28).attr("y", 45).text("output").style("font-size", "12px").attr("alignment-baseline","middle")
     return set;
-    
 }
 
 function createBarChart(myDay){
@@ -943,7 +854,9 @@ var y = d3.scaleLog()
 
 
 var svg = d3.select('#barChart');
-svg.selectAll("*").remove();
+
+// remove any previous graphs
+svg.selectAll('.g-main').remove();
 
 var gMain = svg.append('g')
 .classed('g-main', true)
@@ -958,7 +871,7 @@ var context = svg.append("g")
 d3.csv("daily_data.csv", function(error, data) {
 if (error) throw error;
 
-const parseTime = d3.timeParse("%Y-%m-%d");
+const parseTime = d3.timeParse("%d-%m-%Y");
 
 const parseToMonth = d3.timeParse("%d %b");
 
@@ -978,8 +891,8 @@ data.forEach(function(d) {
 var maxHeight=d3.max(data,function(d){return d.value});
 var minHeight=d3.min(data,function(d){return d.value});
 
-var yScale2 = d3.scaleLinear()
-.range([0,height2]);
+var yScale2 = d3.scaleLog()
+.range([1, height2]);
 
       //add x axis
 var xScale2 = d3.scaleBand().rangeRound([0,width]).padding(0.1);//scaleBand is used for  bar chart
@@ -988,7 +901,7 @@ xScale2.domain(d3.range(1,data.length+".5",1));
 // Scale the range of the data in the domains
 x.domain(d3.range(0,data.length,1));
 y.domain([maxHeight, 1]);
-yScale2.domain([maxHeight,0]);
+yScale2.domain([maxHeight,1]);
 
 // append the rectangles for the bar chart
 var bars1 =gMain.selectAll(".bar")
@@ -1749,31 +1662,11 @@ if (input_array.length ==1 ){
 }
 else if(input_array.length ==2){
     best_in[1]=input_array[input_array.length-2]
-    m=0;
-    while (best_in[1][0]===best_in[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
-        best_in[1]=input_array[input_array.length-(3+m)]
-        m++
-    }
     best_in[2]=0
 }
 else{
 best_in[1]=input_array[input_array.length-2]
-m=0;
-while (best_in[1][0]===best_in[0][0]){//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-    console.log("Ce ne sono 2 uguali, vado avanti.")
-    best_in[1]=input_array[input_array.length-(3+m)]
-    m++
-}
 best_in[2]=input_array[input_array.length-3]
-m=0;
-while (best_in[2][0]===best_in[1][0] || best_in[2][0]===best_in[0][0])//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-{
-    console.log("Ce ne sono 2 uguali, vado avanti.")
-    best_in[2]=input_array[input_array.length-(4+m)]
-    m++
-}
-
 }
 
 console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
@@ -1887,29 +1780,11 @@ if (output_array.length ==1 ){
     best_out[2]=0
 }else if(output_array.length == 2){
     best_out[1]= output_array[output_array.length-2]
-    m=0;
-    while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
-        best_out[1]=output_array[output_array.length-(3+m)]
-        m++
-    }
     best_out[2]=0 
 }
     else{
     best_out[1]= output_array[output_array.length-2]
-    m=0;
-    while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
-        best_out[1]=output_array[output_array.length-(3+m)]
-        m++
-    }
     best_out[2]= output_array[output_array.length-3]
-    m=0;
-    while (best_out[2][0]===best_out[1][0] || best_out[2][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
-        best_out[2]=output_array[output_array.length-(4+m)]
-        m++
-    }
     }
    
 
@@ -2016,28 +1891,19 @@ function setUserType(type, data) {
 }
 
     //graph(data)
-function graph(data){
-    var w = parseInt(d3.select('#radar').style('width'), 10)
-    var h = parseInt(d3.select('#radar').style('height'), 10) -45;
+    function graph(data){
 
-    var size = Math.min(w,h);
-
-    var margin = {top: size*7/100, right: size*7/100, bottom: size*7/100, left: size*7/100};
-    var width = size - margin.left - margin.right;
-    var height = size - margin.top - margin.bottom;
-
-    var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+  var w = 500,
+    h = 500;
+  
+  var colorscale = d3.scaleOrdinal(d3.schemeCategory10);
 
   
   //Legend titles
+  var LegendOptions = ['First','Second', 'Third'];
   
-  
+   
   if (inputradar){
-    for (var j=0; j<3; j++){
-        if (!(isNaN(bestInputArray[j][0]))) 
-             bestInputArray[j][0] = ""
-         }
-    var LegendOptions = ['\nFirst: ' + bestInputArray[0][0] ,'\nSecond: ' + bestInputArray[1][0], '\nThird: ' + bestInputArray[2][0] ];
 
     console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
     maxInpVal = Math.max(bestInputArray[0][1], bestInputArray[1][1], bestInputArray[2][1])+0.00001
@@ -2059,31 +1925,31 @@ function graph(data){
   //Data
   d = [
         [
-        {axis:"Total Inputs Value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[0][1]},
-        {axis:"# Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[0][3]},
-        {axis:"# Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
-        {axis:"# Transactions",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
+        {axis:"Total Inputs value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001))},
+        {axis:"Number of Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001))},
+        {axis:"Number of operations",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001)}
         ],[
-        {axis:"Total Inputs Value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[1][1]},
-        {axis:"# Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[1][3]},
-        {axis:"# Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
-        {axis:"# Transactions",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
+        {axis:"Total Inputs value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001))},
+        {axis:"Number of Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001))},
+        {axis:"Number of operations",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001)}
         ]
         ,[
-        {axis:"Total Inputs Value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[2][1]},
-        {axis:"# Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[2][3]},
-        {axis:"# Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
-        {axis:"# Transactions",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
+        {axis:"Total Inputs value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001))},
+        {axis:"Number of Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001))},
+        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001))},
+        {axis:"Number of Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001))},
+        {axis:"Number of operations",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001)}
           ]
       ];
     }
 
     else{    
         console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
-        var LegendOptions = ['First: ' + bestOutputArray[0][0] ,' Second: ' + bestOutputArray[1][0], 'Third: ' + bestOutputArray[2][0] ];
+        
         maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
         console.log("Massimo tra i total input value: " + maxInpVal)
         maxNumbInp = Math.max(bestOutputArray[0][2], bestOutputArray[1][2], bestOutputArray[2][2])+0.00001
@@ -2098,24 +1964,24 @@ function graph(data){
        //Data
        d = [
             [
-            {axis:"Total Inputs Value",value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[0][1]},
-            {axis:"# Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[0][3]},
-            {axis:"# Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
-            {axis:"# Transactions",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
+            {axis:"Total Inputs value" + i ,value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001))},
+            {axis:"Number of Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001))},
+            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001))},
+            {axis:"Number of Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001))},
+            {axis:"Number of operations",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001)}
             ],[
-            {axis:"Total Inputs Value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[1][1]},
-            {axis:"# Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[1][3]},
-            {axis:"# Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
-            {axis:"# Transactions",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
+            {axis:"Total Inputs value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001))},
+            {axis:"Number of Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001))},
+            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001))},
+            {axis:"Number of Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001))},
+            {axis:"Number of operations",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001)}
             ]
             ,[
-            {axis:"Total Inputs Value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[2][1]},
-            {axis:"# Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[2][3]},
-            {axis:"# Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
-            {axis:"# Transactions",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
+            {axis:"Total Inputs value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001))},
+            {axis:"Number of Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001))},
+            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001))},
+            {axis:"Number of Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001))},
+            {axis:"Number of operations",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001)}
               ]
           ];
         }
@@ -2128,13 +1994,11 @@ function graph(data){
 
   //Options for the Radar chart, other than default
   var mycfg = {
-    w: width,
-    h: height,
-    maxValue: 1,
-    levels: 4,
-    ExtraWidthX: 300,
-    TranslateX: (w - width)/2,
-    TranslateY: 45 + ((h - height + (height/2 - (height/2 * (Math.sqrt(5)+1))/4))/2)
+    w: w,
+    h: h,
+    maxValue: 0.6,
+    levels: 6,
+    ExtraWidthX: 300
   }
   
   //Call function to draw the Radar chart
@@ -2145,52 +2009,51 @@ function graph(data){
   /////////// Initiate legend ////////////////
   ////////////////////////////////////////////
   
-//   var svg = d3.select('#chart')
-//     .selectAll('svg')
-//     .append('svg')
-//     .attr("width", w)
-//     .attr("height", h)
+  var svg = d3.select('#body')
+    .selectAll('svg')
+    .append('svg')
+    .attr("width", w+300)
+    .attr("height", h)
   
-//   //Create the title for the legend
-//   var text = svg.append("text")
-//     .attr("class", "title")
-//     .attr('transform', 'translate(-400,0)') 
-//     .attr("x", w - 70)
-//     .attr("y", 10)
-//     .attr("font-size", "12px")
-//     .attr("fill", "#404040")
-//     .text("LEGENDA:");
+  //Create the title for the legend
+  var text = svg.append("text")
+    .attr("class", "title")
+    .attr('transform', 'translate(90,0)') 
+    .attr("x", w - 70)
+    .attr("y", 10)
+    .attr("font-size", "12px")
+    .attr("fill", "#404040")
+    .text("Memeeee");
       
-//   //Initiate Legend	
-//   var legend = svg.append("g")
-//     .attr("class", "legend")
-//     .attr("height", 100)
-//     .attr("width", 200)
-//     .attr('transform', 'translate(-400,20)')
-//     ;
-//     //Create colour squares
-
-//     legend.selectAll('rect')
-//       .data(LegendOptions)
-//       .enter()
-//       .append("rect")
-//       .attr("x", w - 65)
-//       .attr("y", function(d, i){ return i * 20;})
-//       .attr("width", 10)
-//       .attr("height", 10)
-//       .style("fill", function(d, i){ return colorscale(i);})
-//       ;
-//     //Create text next to squares
-//     legend.selectAll('text')
-//       .data(LegendOptions)
-//       .enter()
-//       .append("text")
-//       .attr("x", w - 52)
-//       .attr("y", function(d, i){ return i * 20 + 9;})
-//       .attr("font-size", "11px")
-//       .attr("fill", "#737373")
-//       .text(function(d) { return d; })
-//       ;	
+  //Initiate Legend	
+  var legend = svg.append("g")
+    .attr("class", "legend")
+    .attr("height", 100)
+    .attr("width", 200)
+    .attr('transform', 'translate(90,20)') 
+    ;
+    //Create colour squares
+    legend.selectAll('rect')
+      .data(LegendOptions)
+      .enter()
+      .append("rect")
+      .attr("x", w - 65)
+      .attr("y", function(d, i){ return i * 20;})
+      .attr("width", 10)
+      .attr("height", 10)
+      .style("fill", function(d, i){ return colorscale(i);})
+      ;
+    //Create text next to squares
+    legend.selectAll('text')
+      .data(LegendOptions)
+      .enter()
+      .append("text")
+      .attr("x", w - 52)
+      .attr("y", function(d, i){ return i * 20 + 9;})
+      .attr("font-size", "11px")
+      .attr("fill", "#737373")
+      .text(function(d) { return d; })
+      ;	
 
 
     }
@@ -2207,105 +2070,45 @@ function createForceNetwork(nodes, edges) {
     setCentrality("bw");
 }
 
-function filterNetwork(ids, data){
-    if (ids.length==0){
-        resetNetwork();
-        resetTransactions();
-    } else {
-        var svg = d3v4.select('#network');
+function filterTransactions(id){
+    var svg = d3v4.select('#transactionsGraph')
 
-        var filtered = data.filter(function(d) { return ids.includes(d.hash); })
-    
-        var addresses = [];
-        filtered.forEach(function(d) {
-            d.inputs.forEach(function(i){
-                addresses.push.apply(addresses, i.addresses);
-            })
-            d.outputs.forEach(function(o){
-                addresses.push.apply(addresses, o.addresses);
-            })
-        });
-    
-    
-    var connections = []
-        svg.selectAll("line")
-        .style('opacity', function (l) {
-            if(addresses.includes(l.target.id) || addresses.includes(l.source.id)){
-                connections.push(l.target.id)
-                connections.push(l.source.id)
-            }
-            return addresses.includes(l.target.id) || addresses.includes(l.source.id) ? 1 : 0.3;
-        })
-    
-        svg.selectAll("circle")
-        .style("opacity", function(o) {
-            return connections.includes(o.id) ? 1 : 0.3;
-          })
-        .classed("selected", false);
-    }
+    var txs = []
+    var insOuts = []
 
+    svg.selectAll("circle").each(function (d){
+        if(id.includes(d.name)){
+            txs.push(d.tx_hash)
+        }
+    })
 
+    svg.selectAll("line")
+    .style('opacity', function (l) {
+        if(txs.includes(l.source.id)){
+            insOuts.push(l.target.id)
+        }
+        return txs.includes(l.source.id) ? 1 : 0.3;
+        
+    })
+
+    svg.selectAll("circle")
+    .style("opacity", function(o) {
+        return txs.includes(o.id) || insOuts.includes(o.id) ? 1 : 0.3;
+      });
 
 }
-function filterTransactions(ids){
-    if (ids.length==0){
-        resetNetwork();
-        resetTransactions();
-    } else {
-        var svg = d3v4.select('#transactionsGraph');
 
-        var txs = []
-        var insOuts = []
-    
-        svg.select('.gDraw').selectAll("circle").each(function (d){
-            if(ids.includes(d.name)){
-                txs.push(d.tx_hash)
-            }
-        })
-    
-        svg.select('.gDraw').selectAll("line")
-        .style('opacity', function (l) {
-            if(txs.includes(l.source.id)){
-                insOuts.push(l.target.id)
-            }
-            return txs.includes(l.source.id) ? 1 : 0.3;
-            
-        })
-    
-        svg.select('.gDraw').selectAll("circle")
-        .style("opacity", function(o) {
-            return txs.includes(o.id) || insOuts.includes(o.id) ? 1 : 0.3;
-          })
-        .classed("selected", false);
-    }
-
-
-}
-function resetNetwork() {
-    var svg = d3v4.select('#network');
+function resetTransactions(){
+    var svg = d3v4.select('#transactionsGraph');
 
     svg.selectAll("line")
     .style('opacity', 1);
 
     svg.selectAll("circle")
-    .style("opacity", 1)
-    .classed("selected", false);
-
-}
-function resetTransactions() {
-    var svg = d3v4.select('#transactionsGraph');
-
-    svg.select('.gDraw').selectAll("line")
-    .style('opacity', 1);
-
-    svg.select('.gDraw').selectAll("circle")
-    .style("opacity", 1)
-    .classed("selected", false);
-
-
+    .style("opacity", 1);
 }
 
-function changeBarChartMonth(month) {
+function changeBarChartMonth(month){
     d3.select('#barChart').selectAll(".bar")
     .style("opacity", function(d) {
         return (d.id == month) ? 1.0 : 0.3;
