@@ -820,7 +820,6 @@ function createTransactionsGraph(svg, data, day) {
 
 function createBarChart(myDay){
 
-var formatTime =  d3.timeFormat("%d %b");
 var lastUpdate = [0,0];
 
 var h = parseInt(d3.select('#barChart').style('height'), 10);
@@ -850,8 +849,8 @@ var height2 = 300 - margin2.top - margin2.bottom; */
 var x = d3.scaleBand()
       .rangeRound([0, width])
       .padding(0.1);
-var y = d3.scaleLinear()
-      .range([0, height]);
+var y = d3.scaleLog()
+      .range([1, height]);
 
 
 var svg = d3.select('#barChart');
@@ -872,12 +871,22 @@ var context = svg.append("g")
 d3.csv("daily_data.csv", function(error, data) {
 if (error) throw error;
 
+const parseTime = d3.timeParse("%Y-%m-%d");
+
+const parseToMonth = d3.timeParse("%d %b");
+
+const formatToMonth = d3.timeFormat("%m");
+
+const formatTime = d3.timeFormat("%d %b");
+
 // format the data
 data.forEach(function(d) {
+    aux = parseTime(d.date);
+    d.date = formatTime(aux);
     d.value = +d.value;
     });
 
-console.log(new Date(data[260].date).getDate());
+/* console.log(new Date(data[260].date).getDate()); */
 
 var maxHeight=d3.max(data,function(d){return d.value});
 var minHeight=d3.min(data,function(d){return d.value});
@@ -891,7 +900,7 @@ xScale2.domain(d3.range(1,data.length+".5",1));
 
 // Scale the range of the data in the domains
 x.domain(d3.range(0,data.length,1));
-y.domain([maxHeight, 0]);
+y.domain([maxHeight, 1]);
 yScale2.domain([maxHeight,0]);
 
 // append the rectangles for the bar chart
@@ -914,29 +923,24 @@ var bars1 =gMain.selectAll(".bar")
         .style("opacity", function() {
             return (this === selected) ? 1.0 : 0.3;
         })
-    createLineChartWithBrush((d.day%12));
+    createLineChartWithBrush(formatToMonth(parseToMonth(d.date)));
     
 });
+
+var superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹",
+    formatPower = function(d) { return (d + "").split("").map(function(c) { return superscript[c]; }).join(""); };
 
 // add the x Axis
 var xAxis = d3.axisBottom(x);
 
-var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")")
+var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")");
 
 xAxisGroup.selectAll("text")
+.data(data)
 .text(function(d,i){
-    return (new Date(d[i].date));
+    console.log(d);
+    return d.date;
 });
-
-/* svg.append("g")
-.attr("class", "x axis")
-.attr("transform", "translate(0," + height + ")")
-.call(xAxis)
-.selectAll("text")  
-.style("text-anchor", "end")
-.attr("dx", "-.8em")
-.attr("dy", ".15em")
-.attr("transform", "rotate(-45)"); */
 
 var xAxis2 = d3.axisBottom(xScale2);
 	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
@@ -945,7 +949,7 @@ var xAxis2 = d3.axisBottom(xScale2);
 /* gMain.append("g")
   .call(d3.axisLeft(y)); */
 
-  var yAxis = d3.axisLeft(y);
+  var yAxis = d3.axisLeft(y).ticks(5, function(d) {console.log(d); return 10 + formatPower(Math.round(Math.log(d) / Math.LN10)); });
   var yAxisGroup = gMain.append("g").call(yAxis);
 
 // text label for the x axis
@@ -1095,6 +1099,7 @@ var primo = false;
     });
 
     x.domain(newInput);
+    console.log(newInput);
     //realocate the bar chart
     bars1.attr("x",function(d,i){//data set is still data
         return x(i)/*xScale(xScale.domain().indexOf(i))*/;
@@ -1110,12 +1115,19 @@ var primo = false;
         else
             return height - y(d.value);
     });
-    
+
+    console.log(data);
+
     xAxisGroup.call(xAxis);
     xAxisGroup.selectAll("text")
-    .text(function(d,i){
-        return (new Date(d[i].date).getDate());
-    });
+    .text(function(d){
+        console.log(data[d]);
+        return ((data[d].date));    
+    })
+    .style("text-anchor", "end")
+    .attr("dx", "-.8em")
+    .attr("dy", ".15em")
+    .attr("transform", "rotate(-45)");
 
 }
 
