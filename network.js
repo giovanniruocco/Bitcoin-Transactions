@@ -921,7 +921,22 @@ var bars1 =gMain.selectAll(".bar")
 // add the x Axis
 var xAxis = d3.axisBottom(x);
 
-var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")");
+var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")")
+
+xAxisGroup.selectAll("text")
+.text(function(d,i){
+    return (new Date(d[i].date));
+});
+
+/* svg.append("g")
+.attr("class", "x axis")
+.attr("transform", "translate(0," + height + ")")
+.call(xAxis)
+.selectAll("text")  
+.style("text-anchor", "end")
+.attr("dx", "-.8em")
+.attr("dy", ".15em")
+.attr("transform", "rotate(-45)"); */
 
 var xAxis2 = d3.axisBottom(xScale2);
 	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
@@ -1097,6 +1112,10 @@ var primo = false;
     });
     
     xAxisGroup.call(xAxis);
+    xAxisGroup.selectAll("text")
+    .text(function(d,i){
+        return (new Date(d[i].date).getDate());
+    });
 
 }
 
