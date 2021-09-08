@@ -19,7 +19,7 @@ var RadarChart = {
 	   levels: 6,
 	   maxValue: 0.6,
 	   radians: 2 * Math.PI,
-	   opacityArea: 0.5,
+	   opacityArea: 0.2,
 	   ToRight: 5,
 	   TranslateX: 0,
 	   TranslateY: 0,

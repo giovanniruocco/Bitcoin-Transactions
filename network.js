@@ -1996,18 +1996,37 @@ if (output_array.length ==1 ){
     console.log("Il 1° è: " + bestOutputArray[0][0] + "\nHa speso: " + bestOutputArray[0][1] + ";è stato input " + bestOutputArray[0][2] + " volte\n" + "ha ricev: " + bestOutputArray[0][3] + ";è stato output " + bestOutputArray[0][4] + " volte")
     console.log("Il 2° è: " + bestOutputArray[1][0] + "\nHa speso: " + bestOutputArray[1][1] + ";è stato input " + bestOutputArray[1][2] + " volte\n" + "ha ricev: " + bestOutputArray[1][3] + ";è stato output " + bestOutputArray[1][4] + " volte")
     console.log("Il 3° è: " + bestOutputArray[2][0] + "\nHa speso: " + bestOutputArray[2][1] + ";è stato input " + bestOutputArray[2][2] + " volte\n" + "ha ricev: " + bestOutputArray[2][3] + ";è stato output " + bestOutputArray[2][4] + " volte")
-       
+    
     bestInputArray[3][0] = "Average";
-    bestInputArray[3][1] = (bestInputArray[0][1] + bestInputArray[1][1] + bestInputArray[2][1]) / 3
-    bestInputArray[3][2] = (bestInputArray[0][2] + bestInputArray[1][2] + bestInputArray[2][2]) / 3
-    bestInputArray[3][3] = (bestInputArray[0][3] + bestInputArray[1][3] + bestInputArray[2][3]) / 3
-    bestInputArray[3][4] = (bestInputArray[0][4] + bestInputArray[1][4] + bestInputArray[2][4]) / 3
+    if (bestInputArray[1][0] < 0){
+        bestInputArray[3][1] = bestInputArray[3][2] = bestInputArray[3][3] =  bestInputArray[3][4] = 0
+    }else if(bestInputArray[2][0] < 0){
+        bestInputArray[3][1] = (bestInputArray[0][1] + bestInputArray[1][1]) / 2
+        bestInputArray[3][2] = (bestInputArray[0][2] + bestInputArray[1][2]) / 2
+        bestInputArray[3][3] = (bestInputArray[0][3] + bestInputArray[1][3]) / 2
+        bestInputArray[3][4] = (bestInputArray[0][4] + bestInputArray[1][4]) / 2
+    }else{
+        bestInputArray[3][1] = (bestInputArray[0][1] + bestInputArray[1][1] + bestInputArray[2][1]) / 3
+        bestInputArray[3][2] = (bestInputArray[0][2] + bestInputArray[1][2] + bestInputArray[2][2]) / 3
+        bestInputArray[3][3] = (bestInputArray[0][3] + bestInputArray[1][3] + bestInputArray[2][3]) / 3
+        bestInputArray[3][4] = (bestInputArray[0][4] + bestInputArray[1][4] + bestInputArray[2][4]) / 3
+    }
 
     bestOutputArray[3][0] = "Average";
-    bestOutputArray[3][1] = (bestOutputArray[0][1] + bestOutputArray[1][1] + bestOutputArray[2][1]) / 3
-    bestOutputArray[3][2] = (bestOutputArray[0][2] + bestOutputArray[1][2] + bestOutputArray[2][2]) / 3
-    bestOutputArray[3][3] = (bestOutputArray[0][3] + bestOutputArray[1][3] + bestOutputArray[2][3]) / 3
-    bestOutputArray[3][4] = (bestOutputArray[0][4] + bestOutputArray[1][4] + bestOutputArray[2][4]) / 3
+    if (bestOutputArray[1][0] < 0){
+        bestOutputArray[3][1] = bestOutputArray[3][2] = bestOutputArray[3][3] =  bestOutputArray[3][4] = 0
+    }else if(bestOutputArray[2][0] < 0){
+        bestOutputArray[3][1] = (bestOutputArray[0][1] + bestOutputArray[1][1]) / 2
+        bestOutputArray[3][2] = (bestOutputArray[0][2] + bestOutputArray[1][2]) / 2
+        bestOutputArray[3][3] = (bestOutputArray[0][3] + bestOutputArray[1][3]) / 2
+        bestOutputArray[3][4] = (bestOutputArray[0][4] + bestOutputArray[1][4]) / 2
+    }else{
+        bestOutputArray[3][1] = (bestOutputArray[0][1] + bestOutputArray[1][1] + bestOutputArray[2][1]) / 3
+        bestOutputArray[3][2] = (bestOutputArray[0][2] + bestOutputArray[1][2] + bestOutputArray[2][2]) / 3
+        bestOutputArray[3][3] = (bestOutputArray[0][3] + bestOutputArray[1][3] + bestOutputArray[2][3]) / 3
+        bestOutputArray[3][4] = (bestOutputArray[0][4] + bestOutputArray[1][4] + bestOutputArray[2][4]) / 3
+    }
+
 
 
     
@@ -2084,31 +2103,31 @@ function graph(data){
   //Data
   d = [
         [
-        {axis:"Total Inputs Value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[0][1]},
-        {axis:"# Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[0][3]},
-        {axis:"# Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
-        {axis:"# Transactions",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
+        {axis:"Total Inputs Value",value:((bestInputArray[0][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[0][1]},
+        {axis:"# Inputs",value:((bestInputArray[0][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[0][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[0][3]},
+        {axis:"# Outputs",value:((bestInputArray[0][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
+        {axis:"# Transactions",value:((bestInputArray[0][2]) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
         ],[
-        {axis:"Total Inputs Value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[1][1]},
-        {axis:"# Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[1][3]},
-        {axis:"# Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
-        {axis:"# Transactions",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
+        {axis:"Total Inputs Value",value:((bestInputArray[1][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[1][1]},
+        {axis:"# Inputs",value:((bestInputArray[1][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[1][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[1][3]},
+        {axis:"# Outputs",value:((bestInputArray[1][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
+        {axis:"# Transactions",value:((bestInputArray[1][2]) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
         ]
         ,[
-        {axis:"Total Inputs Value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[2][1]},
-        {axis:"# Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[2][3]},
-        {axis:"# Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
-        {axis:"# Transactions",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
+        {axis:"Total Inputs Value",value:((bestInputArray[2][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[2][1]},
+        {axis:"# Inputs",value:((bestInputArray[2][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[2][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[2][3]},
+        {axis:"# Outputs",value:((bestInputArray[2][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
+        {axis:"# Transactions",value:((bestInputArray[2][2]) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
         ],
         ,[
-        {axis:"Total Inputs Value",value:((bestInputArray[3][1]+0.001) / (maxInpVal+0.001)),realvalue:bestInputArray[3][1]},
-        {axis:"# Inputs",value:((bestInputArray[3][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestInputArray[3][2]},
-        {axis:"Total Outputs Value",value:((bestInputArray[3][3]+0.001) / (maxOutVal+0.001)),realvalue:bestInputArray[3][3]},
-        {axis:"# Outputs",value:((bestInputArray[3][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestInputArray[3][4]},
-        {axis:"# Transactions",value:((bestInputArray[3][2]+0.001) + bestInputArray[3][4]) /(maxOp+0.001),realvalue:(bestInputArray[3][2]+bestInputArray[3][4])}
+        {axis:"Total Inputs Value",value:((bestInputArray[3][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[3][1]},
+        {axis:"# Inputs",value:((bestInputArray[3][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[3][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[3][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[3][3]},
+        {axis:"# Outputs",value:((bestInputArray[3][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[3][4]},
+        {axis:"# Transactions",value:((bestInputArray[3][2]) + bestInputArray[3][4]) /(maxOp+0.001),realvalue:(bestInputArray[3][2]+bestInputArray[3][4])}
         ]
       ];
     }
@@ -2130,30 +2149,30 @@ function graph(data){
        //Data
        d = [
             [
-            {axis:"Total Inputs Value",value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[0][1]},
-            {axis:"# Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[0][3]},
-            {axis:"# Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
-            {axis:"# Transactions",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
+            {axis:"Total Inputs Value",value:((bestOutputArray[0][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[0][1]},
+            {axis:"# Inputs",value:((bestOutputArray[0][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[0][3]},
+            {axis:"# Outputs",value:((bestOutputArray[0][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
+            {axis:"# Transactions",value:((bestOutputArray[0][2]) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
             ],[
-            {axis:"Total Inputs Value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[1][1]},
-            {axis:"# Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[1][3]},
-            {axis:"# Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
-            {axis:"# Transactions",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
+            {axis:"Total Inputs Value",value:((bestOutputArray[1][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[1][1]},
+            {axis:"# Inputs",value:((bestOutputArray[1][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[1][3]},
+            {axis:"# Outputs",value:((bestOutputArray[1][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
+            {axis:"# Transactions",value:((bestOutputArray[1][2]) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
             ]
             ,[
-            {axis:"Total Inputs Value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[2][1]},
-            {axis:"# Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[2][3]},
-            {axis:"# Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
-            {axis:"# Transactions",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
+            {axis:"Total Inputs Value",value:((bestOutputArray[2][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[2][1]},
+            {axis:"# Inputs",value:((bestOutputArray[2][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[2][3]},
+            {axis:"# Outputs",value:((bestOutputArray[2][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
+            {axis:"# Transactions",value:((bestOutputArray[2][2]) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
             ],[
-            {axis:"Total Inputs Value",value:((bestOutputArray[3][1]+0.001) / (maxInpVal+0.001)),realvalue:bestOutputArray[3][1]},
-            {axis:"# Inputs",value:((bestOutputArray[3][2]+0.001) / (maxNumbInp+0.001)),realvalue:bestOutputArray[3][2]},
-            {axis:"Total Outputs Value",value:((bestOutputArray[3][3]+0.001) / (maxOutVal+0.001)),realvalue:bestOutputArray[3][3]},
-            {axis:"# Outputs",value:((bestOutputArray[3][4]+0.001) / (maxNumbOut+0.001)),realvalue:bestOutputArray[3][4]},
-            {axis:"# Transactions",value:((bestOutputArray[3][2]+0.001) + bestOutputArray[3][4]) /(maxOp+0.001),realvalue:(bestOutputArray[3][2]+bestOutputArray[3][4])}
+            {axis:"Total Inputs Value",value:((bestOutputArray[3][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[3][1]},
+            {axis:"# Inputs",value:((bestOutputArray[3][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[3][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[3][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[3][3]},
+            {axis:"# Outputs",value:((bestOutputArray[3][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[3][4]},
+            {axis:"# Transactions",value:((bestOutputArray[3][2]) + bestOutputArray[3][4]) /(maxOp+0.001),realvalue:(bestOutputArray[3][2]+bestOutputArray[3][4])}
             ]
           ];
         }
