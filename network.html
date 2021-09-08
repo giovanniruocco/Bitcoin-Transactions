@@ -5,6 +5,14 @@
      <link rel='stylesheet' href='network.css'>
 
   </head>
+
+  <div id="myNav" class="overlay">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+    <div class="overlay-content">
+        <span id="text">Qui aggiungiamo qualche immagine e qualche testo</span>
+    </div>
+  </div>
+
   <div class="row" style="margin: 0px;">
   <div class="col-4">
     <svg id="slider" class="w-100" style="height: 44px;">        
@@ -21,6 +29,7 @@
         <option value="in" selected>input</option>
         <option value="out">output</option>
     </select>
+    <span style="font-size:30px;cursor:pointer" onclick="openNav()">☰ open</span>
   </div>
 
 </div>
@@ -81,6 +90,13 @@
 
 <script>
 
+function openNav() {
+    document.getElementById("myNav").style.width = "100%";
+}
+
+function closeNav() {
+    document.getElementById("myNav").style.width = "0%";
+}
 // Defining event listener function
 function displayWindowSize(){
     // Get width and height of the window excluding scrollbars
