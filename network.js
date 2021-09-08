@@ -852,7 +852,6 @@ var x = d3.scaleBand()
 var y = d3.scaleLog()
       .range([1, height]);
 
-
 var svg = d3.select('#barChart');
 
 // remove any previous graphs
@@ -935,15 +934,14 @@ var xAxis = d3.axisBottom(x);
 
 var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+height+")");
 
+/* console.log(new Date(data[260].date).getDate()); */
+
 xAxisGroup.selectAll("text")
 .data(data)
 .text(function(d,i){
     console.log(d);
-    return d.date;
+    return "";
 });
-
-var xAxis2 = d3.axisBottom(xScale2);
-	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
 
 // add the y Axis
 /* gMain.append("g")
@@ -984,6 +982,15 @@ gMain.append("text")
   bars2.attr("fill",function(d){
       return "steelblue";
   });
+
+let tickLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+var xAxis2 = d3.axisBottom(xScale2)
+.ticks(12)
+.tickValues([1,32,61,92,123,153,183,214,245,276,306,336])
+.tickFormat((d,i) => tickLabels[i]);
+
+	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
 
   var currentExtent = [0,0]
   
