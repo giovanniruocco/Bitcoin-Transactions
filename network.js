@@ -7,7 +7,9 @@ function createNetwork(data, day) {
     var selectedDate = new Date(day)
     var selectedDay = selectedDate.getDate()
     var selectedMonth = selectedDate.getMonth()
-    console.log("Questo è il mese: " + selectedMonth)
+    //console.log("Questo è il mese: " + selectedMonth)
+    var average_inp_count=0;
+    var numerotransazioni=0;
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
@@ -17,7 +19,13 @@ function createNetwork(data, day) {
             if(set.nodes.filter(x => x.id === data[j].outputs[k].addresses[0]).length == 0)
                 set.nodes.push({'id': data[j].outputs[k].addresses[0], 'group': 5});   
         }
+
+        average_inp_count += data[j].input_count;
+        numerotransazioni ++;
+
         for (let i = 0; i < data[j].inputs.length; i++) {
+            
+           
             if(set.nodes.filter(x => x.id === data[j].inputs[i].addresses[0]).length == 0)
                 set.nodes.push({'id': data[j].inputs[i].addresses[0], 'group': 5});
             for (let k = 0; k < data[j].outputs.length; k++) {
@@ -27,8 +35,10 @@ function createNetwork(data, day) {
     }
 
     }
+    average_inp_count = average_inp_count/numerotransazioni
+    console.log("LA MEDIA DEGLI INPUT COUNT PER IL GIORNO: " + selectedDay + "/" + (selectedMonth+1) + " è: " + average_inp_count)
 
-    console.log("nodi-network:" + set.nodes.length)
+    //console.log("nodi-network:" + set.nodes.length)
 
 var svg = d3v4.select('#network');
 var svgWidth = parseInt(svg.style('width'), 10);
@@ -393,12 +403,12 @@ function createSlider(start, end) {
             month=actualmonth;
             conteggio++
         }*/
-        console.log("Ecco start: " + start)
+        //console.log("Ecco start: " + start)
         //new Date(start.setMonth(start.getMonth()+5));
         //new Date(end.setMonth(end.getMonth()+5));
     createNN("trans2010new", start)
   
-    console.log("Ecco new date: " + start)
+    //console.log("Ecco new date: " + start)
     createRadarChart(start)
 
     var formatDateIntoDay = d3.timeFormat("%d");
@@ -536,7 +546,7 @@ function createTransactionsGraph(data, day) {
         }
     }
     
-    console.log("nodi-txGraph:" + set.nodes.length)
+    //console.log("nodi-txGraph:" + set.nodes.length)
 
     // if both d3v3 and d3v4 are loaded, we'll assume
     // that d3v4 is called d3v4, otherwise we'll assume
@@ -962,7 +972,7 @@ data.forEach(function(d) {
     d.value = +d.value;
     });
 
-console.log(new Date(data[260].date).getDate());
+//console.log(new Date(data[260].date).getDate());
 
 var maxHeight=d3.max(data,function(d){return d.value});
 var minHeight=d3.min(data,function(d){return d.value});
@@ -1131,24 +1141,24 @@ var primo = false;
         lastUpdate = s;
     }
 
-    console.log(s);
-    console.log(lastUpdate);
+    //console.log(s);
+    //console.log(lastUpdate);
     if ((s[1]-s[0]) > limit) {
         if (lastUpdate[0] == s[0]) {
             lastUpdate = s;
             temp[0] = s[1]-limit;
             temp[1] = s[1];
             primo = true;
-            console.log("primo");
+            //console.log("primo");
         } else if (lastUpdate[1] == s[1]) {
             lastUpdate = s;
             temp[0] = s[0]
             temp[1] = s[0]+limit;
-            console.log("secondo");
+            //console.log("secondo");
         }
         if (lastUpdate[0]==0 && lastUpdate[1]==0)
             lastUpdate=s;
-        console.log(lastUpdate);
+        //console.log(lastUpdate);
     }
     
     xScale2.domain().forEach(function(d){
@@ -1207,25 +1217,25 @@ function brushend(){
 
     temp2 = brushArea;
     temp = temp2;
-    console.log(brushArea);
+    //console.log(brushArea);
 
     if (brushArea[1]-brushArea[0] > 30) {
         if (primo) {
             brushArea[0] = brushArea[1] - 30;
             primo = false;
-            console.log("primo");
+            //console.log("primo");
         } else if (temp2[1] == brushArea[1]) {
             brushArea[1] = brushArea[0] + 30;
-            console.log("secondo");
+            //console.log("secondo");
         }
     }
 
-    console.log(brushArea);
+    //console.log(brushArea);
     
     xScale2.domain().forEach(function(d){
         var pos = xScale2(d) + xScale2.bandwidth()/2;
         if (pos >= brushArea[0] && pos <= brushArea[1]){
-            console.log("log"+brushArea)
+            //console.log("log"+brushArea)
           newInput.push(d);
         }
     });
@@ -1572,7 +1582,7 @@ function createRadarChart(day){
         ""
           ]
       ];
-      console.log("Mo stampo qualcosa: Il 1° è: " + bestInputArray[0][0] + "\nHa speso: " + bestInputArray[0][1] + ";è stato input " + bestInputArray[0][2] + " volte\n" + "ha ricev: " + bestInputArray[0][3] + ";è stato output " + bestInputArray[0][4] + " volte")
+      //console.log("Mo stampo qualcosa: Il 1° è: " + bestInputArray[0][0] + "\nHa speso: " + bestInputArray[0][1] + ";è stato input " + bestInputArray[0][2] + " volte\n" + "ha ricev: " + bestInputArray[0][3] + ";è stato output " + bestInputArray[0][4] + " volte")
      
     countinput = 0, countoutput=0;
     count2=0;
@@ -1603,8 +1613,8 @@ function createRadarChart(day){
     var selectedDate = new Date(day)
     var oggi = selectedDate.getTime() //+ 3600000
     var domani = oggi + 86400000
-    console.log("Oggi:   " + oggi)
-    console.log("Domani: " + domani)
+    //console.log("Oggi:   " + oggi)
+    //console.log("Domani: " + domani)
 
 
 febbraio = 1264982400000;
@@ -1743,12 +1753,12 @@ for (let q = 0; q < input_array.length; q++) {
    
     
   
-  console.log ("Ho: " + input_array.length + " input_arrayput!!!!!*****!!!!!*****!!!")
+  //console.log ("Ho: " + input_array.length + " input_arrayput!!!!!*****!!!!!*****!!!")
   for (let q = input_array.length-1; q >=0; q--) {
-    console.log("Il numero " + (q+1) + " è: " + input_array[q][0] + " e ha questo input: " + input_array[q][1])
+    //console.log("Il numero " + (q+1) + " è: " + input_array[q][0] + " e ha questo input: " + input_array[q][1])
 }
 best_in[0] = input_array[input_array.length-1]
-console.log("Numero di input qui dentro: " + input_array.length)
+//console.log("Numero di input qui dentro: " + input_array.length)
 if (input_array.length ==1 ){
     best_in[1]=0
     best_in[2]=0
@@ -1757,7 +1767,7 @@ else if(input_array.length ==2){
     best_in[1]=input_array[input_array.length-2]
     m=0;
     while (best_in[1][0]===best_in[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
         best_in[1]=input_array[input_array.length-(3+m)]
         m++
     }
@@ -1767,7 +1777,7 @@ else{
 best_in[1]=input_array[input_array.length-2]
 m=0;
 while (best_in[1][0]===best_in[0][0]){//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-    console.log("Ce ne sono 2 uguali, vado avanti.")
+    //console.log("Ce ne sono 2 uguali, vado avanti.")
     best_in[1]=input_array[input_array.length-(3+m)]
     m++
 }
@@ -1775,16 +1785,16 @@ best_in[2]=input_array[input_array.length-3]
 m=0;
 while (best_in[2][0]===best_in[1][0] || best_in[2][0]===best_in[0][0])//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
 {
-    console.log("Ce ne sono 2 uguali, vado avanti.")
+    //console.log("Ce ne sono 2 uguali, vado avanti.")
     best_in[2]=input_array[input_array.length-(4+m)]
     m++
 }
 
 }
 
-console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
-console.log("Il secondo è: " + best_in[1][0] + ", che ha questo input: " + best_in[1][1] )
-console.log("Il terzo è: " + best_in[2][0] + ", che ha questo input: " + best_in[2][1] )
+//console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
+//console.log("Il secondo è: " + best_in[1][0] + ", che ha questo input: " + best_in[1][1] )
+//console.log("Il terzo è: " + best_in[2][0] + ", che ha questo input: " + best_in[2][1] )
 
 
     
@@ -1884,13 +1894,13 @@ for (let j=0; j<3; j++){
         */
         
       
-      console.log ("Ho: " + output_array.length + " output!!!!!*****!!!!!*****!!!")
+      //console.log ("Ho: " + output_array.length + " output!!!!!*****!!!!!*****!!!")
       for (let q = output_array.length-1; q >=0; q--) {
-        console.log("Il numero " + (q+1) + " è: " + output_array[q][0] + " e ha questo output: " + output_array[q][1])
+        //console.log("Il numero " + (q+1) + " è: " + output_array[q][0] + " e ha questo output: " + output_array[q][1])
     }
     
     best_out[0] = output_array[output_array.length-1]
-    console.log("Numero di output qui dentro: " + output_array.length)
+    //console.log("Numero di output qui dentro: " + output_array.length)
 if (output_array.length ==1 ){
     best_out[1]=0
     best_out[2]=0
@@ -1898,7 +1908,7 @@ if (output_array.length ==1 ){
     best_out[1]= output_array[output_array.length-2]
     m=0;
     while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
         best_out[1]=output_array[output_array.length-(3+m)]
         m++
     }
@@ -1908,23 +1918,23 @@ if (output_array.length ==1 ){
     best_out[1]= output_array[output_array.length-2]
     m=0;
     while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
         best_out[1]=output_array[output_array.length-(3+m)]
         m++
     }
     best_out[2]= output_array[output_array.length-3]
     m=0;
     while (best_out[2][0]===best_out[1][0] || best_out[2][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
-        console.log("Ce ne sono 2 uguali, vado avanti.")
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
         best_out[2]=output_array[output_array.length-(4+m)]
         m++
     }
     }
    
 
-    console.log("Il primo è: " + best_out[0][0] + ", che ha questo output: " + best_out[0][1] )
-    console.log("Il secondo è: " + best_out[1][0] + ", che ha questo output: " + best_out[1][1] )
-    console.log("Il terzo è: " + best_out[2][0] + ", che ha questo output: " + best_out[2][1] )
+    //console.log("Il primo è: " + best_out[0][0] + ", che ha questo output: " + best_out[0][1] )
+    //console.log("Il secondo è: " + best_out[1][0] + ", che ha questo output: " + best_out[1][1] )
+    //console.log("Il terzo è: " + best_out[2][0] + ", che ha questo output: " + best_out[2][1] )
 
 
 
@@ -2083,22 +2093,22 @@ function graph(data){
          }
     var LegendOptions = ['\nFirst: ' + bestInputArray[0][0] ,'\nSecond: ' + bestInputArray[1][0], '\nThird: ' + bestInputArray[2][0] ];
 
-    console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
+    //console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
     maxInpVal = Math.max(bestInputArray[0][1], bestInputArray[1][1], bestInputArray[2][1])+0.00001
-    console.log("Massimo tra i total input value: " + maxInpVal)
-    console.log("Il primo input è: " + bestInputArray[0][1])
-    console.log("Il secondo input è: " + bestInputArray[1][1])
-    console.log("Il terzo input è: " + bestInputArray[2][1])
+    //console.log("Massimo tra i total input value: " + maxInpVal)
+    //console.log("Il primo input è: " + bestInputArray[0][1])
+    //console.log("Il secondo input è: " + bestInputArray[1][1])
+    //console.log("Il terzo input è: " + bestInputArray[2][1])
     maxNumbInp = Math.max(bestInputArray[0][2], bestInputArray[1][2], bestInputArray[2][2])+0.00001
-    console.log("Massimo tra i total input count: " + maxNumbInp)
+    //console.log("Massimo tra i total input count: " + maxNumbInp)
     maxOutVal = Math.max(bestInputArray[0][3], bestInputArray[1][3], bestInputArray[2][3])+0.00001
-    console.log("Massimo tra i total output value: " + maxOutVal)
+    //console.log("Massimo tra i total output value: " + maxOutVal)
     maxNumbOut = Math.max(bestInputArray[0][4], bestInputArray[1][4], bestInputArray[2][4])+0.00001
-    console.log("Massimo tra i total output count: " + maxNumbOut)
+    //console.log("Massimo tra i total output count: " + maxNumbOut)
     maxOp = Math.max((bestInputArray[0][2] + bestInputArray[0][4]), (bestInputArray[1][2] + bestInputArray[1][4]), (bestInputArray[2][2] + bestInputArray[2][4]))+0.00001
-    console.log("Massimo tra i numeri di operazioni: " + maxOp)
+    //console.log("Massimo tra i numeri di operazioni: " + maxOp)
 
-    console.log("I Due fuori usciti sono questi: " + bestInputArray[1][1])
+    //console.log("I Due fuori usciti sono questi: " + bestInputArray[1][1])
 
   //Data
   d = [
@@ -2133,18 +2143,18 @@ function graph(data){
     }
 
     else{    
-        console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
+        //console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
         var LegendOptions = ['First: ' + bestOutputArray[0][0] ,' Second: ' + bestOutputArray[1][0], 'Third: ' + bestOutputArray[2][0] ];
         maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
-        console.log("Massimo tra i total input value: " + maxInpVal)
+        //console.log("Massimo tra i total input value: " + maxInpVal)
         maxNumbInp = Math.max(bestOutputArray[0][2], bestOutputArray[1][2], bestOutputArray[2][2])+0.00001
-        console.log("Massimo tra i total input count: " + maxNumbInp)
+        //console.log("Massimo tra i total input count: " + maxNumbInp)
         maxOutVal = Math.max(bestOutputArray[0][3], bestOutputArray[1][3], bestOutputArray[2][3])+0.00001
-        console.log("Massimo tra i total output value: " + maxOutVal)
+        //console.log("Massimo tra i total output value: " + maxOutVal)
         maxNumbOut = Math.max(bestOutputArray[0][4], bestOutputArray[1][4], bestOutputArray[2][4])+0.00001
-        console.log("Massimo tra i total output count: " + maxNumbOut)
+        //console.log("Massimo tra i total output count: " + maxNumbOut)
         maxOp = Math.max((bestOutputArray[0][2] + bestOutputArray[0][4]), (bestOutputArray[1][2] + bestOutputArray[1][4]), (bestOutputArray[2][2] + bestOutputArray[2][4]))+0.00001
-        console.log("Massimo tra i numeri di operazioni: " + maxOp)
+        //console.log("Massimo tra i numeri di operazioni: " + maxOp)
     
        //Data
        d = [
