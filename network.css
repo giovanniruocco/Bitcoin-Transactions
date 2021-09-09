@@ -112,7 +112,7 @@
       pointer-events: none;
   }
 
-  .overlay {
+/*   .overlay {
     height: 100%;
     width: 100%;
     position: fixed;
@@ -171,4 +171,4 @@
     top: 15px;
     right: 35px;
   }
-}
+} */

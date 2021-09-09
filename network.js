@@ -876,6 +876,12 @@ const parseToMonth = d3.timeParse("%d %b");
 
 const formatToMonth = d3.timeFormat("%m");
 
+const formatToMonth2 = d3.timeFormat("%b");
+
+const parseToDay = d3.timeParse("%d %b");
+
+const formatToDay = d3.timeFormat("%d");
+
 const formatTime = d3.timeFormat("%d %b");
 
 // format the data
@@ -939,7 +945,6 @@ var xAxisGroup = gMain.append("g").call(xAxis).attr("transform", "translate(0,"+
 xAxisGroup.selectAll("text")
 .data(data)
 .text(function(d,i){
-    console.log(d);
     return "";
 });
 
@@ -987,7 +992,7 @@ let tickLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','N
 
 var xAxis2 = d3.axisBottom(xScale2)
 .ticks(12)
-.tickValues([1,32,61,92,123,153,183,214,245,276,306,336])
+.tickValues([1,32,60,91,121,152,182,213,244,275,306,336])
 .tickFormat((d,i) => tickLabels[i]);
 
 	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
@@ -1035,7 +1040,7 @@ var primo = false;
             var oldDay = scaleBandInvert(xScale2)(p[0]);  // single invert
             if (startDay == oldDay) {
                 start = xScale2(endDay)
-                end = xScale2(startDay)   
+                end = xScale2(startDay)
             } else {
                 start = xScale2(endDay)
                 end = xScale2(startDay)   
@@ -1065,7 +1070,6 @@ var primo = false;
         diff = limit
     }
     
-
     var newInput = [];
 
     if ((s[1]-s[0]) < limit) {
@@ -1106,7 +1110,6 @@ var primo = false;
     });
 
     x.domain(newInput);
-    console.log(newInput);
     //realocate the bar chart
     bars1.attr("x",function(d,i){//data set is still data
         return x(i)/*xScale(xScale.domain().indexOf(i))*/;
@@ -1128,7 +1131,6 @@ var primo = false;
     xAxisGroup.call(xAxis);
     xAxisGroup.selectAll("text")
     .text(function(d){
-        console.log(data[d]);
         return ((data[d].date));    
     })
     .style("text-anchor", "end")
@@ -1173,6 +1175,78 @@ function brushend(){
         }
     }
 
+    var days;
+
+    brushArea[0] = Math.round(brushArea[0]);
+    brushArea[1] = Math.round(brushArea[1]);
+
+switch (formatToMonth2(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))].date))) {
+    case "Jan":
+            days = 31;
+    break;
+        
+    case "Feb":
+            days = 28;
+    break;
+
+    case "Mar":
+        days = 31;
+    break;
+
+    case "Apr":
+            days = 30;
+    break;
+
+    case "May":
+            days = 31;
+    break;
+
+    case "Jun":
+            days = 30;
+    break;
+
+    case "Jul":
+            days = 31;
+    break;
+
+    case "Aug":
+            days = 31;
+    break;
+
+    case "Sep":
+            days = 30;
+    break;
+
+    case "Oct":
+            days = 31;
+    break;
+
+    case "Nov":
+            days = 30;
+    break;
+
+    case "Dec":
+        days = 31;
+    break;
+
+    default:
+        break;
+}
+
+console.log(days);
+
+var daysOfPrec = (days - formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[0]))].date)));
+var daysOfSeq = formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[1]))].date));
+
+if (formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))].date)) == formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[1]))].date))) {
+    return;
+}else {
+    if (daysOfPrec < daysOfSeq) {
+        brushArea[0] = brushArea[0] + daysOfPrec + 1;
+    } else {
+        brushArea[1] = brushArea[1] - daysOfSeq +1;
+    }
+}
     console.log(brushArea);
     
     xScale2.domain().forEach(function(d){
@@ -1192,6 +1266,36 @@ function brushend(){
     var right = xScale2(d3.max(newInput))+xScale2.bandwidth();
 
     d3.select(this).transition().call(d3.event.target.move,[left,right]);//The inner padding determines the ratio of the range that is reserved for blank space between bands.
+
+    x.domain(newInput);
+    //realocate the bar chart
+    bars1.attr("x",function(d,i){//data set is still data
+        return x(i)/*xScale(xScale.domain().indexOf(i))*/;
+    })
+    .attr("y",function(d){
+        return y(d.value);
+    })//for bottom to top
+    .attr("width", x.bandwidth())//if you want to change the width of bar. Set the width to xScale.bandwidth(); If you want a fixed width, use xScale2.bandwidth(). Note because we use padding() in the scale, we should use xScale.bandwidth()
+    .attr("height", function(d,i){
+        if(x.domain().indexOf(i) === -1){
+            return 0;
+        }
+        else
+            return height - y(d.value);
+    });
+
+    console.log(data);
+
+    xAxisGroup.call(xAxis);
+    xAxisGroup.selectAll("text")
+    .text(function(d){
+        return ((data[d].date));    
+    })
+    .style("text-anchor", "end")
+    .attr("dx", "-.8em")
+    .attr("dy", ".15em")
+    .attr("transform", "rotate(-45)");
+
 }
 
 });
