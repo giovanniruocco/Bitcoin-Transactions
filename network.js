@@ -7,7 +7,9 @@ function createNetwork(data, day) {
     var selectedDate = new Date(day)
     var selectedDay = selectedDate.getDate()
     var selectedMonth = selectedDate.getMonth()
-    console.log("Questo è il mese: " + selectedMonth)
+    //console.log("Questo è il mese: " + selectedMonth)
+    var average_inp_count=0;
+    var numerotransazioni=0;
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
@@ -17,7 +19,13 @@ function createNetwork(data, day) {
             if(set.nodes.filter(x => x.id === data[j].outputs[k].addresses[0]).length == 0)
                 set.nodes.push({'id': data[j].outputs[k].addresses[0], 'group': 5});   
         }
+
+        average_inp_count += data[j].input_count;
+        numerotransazioni ++;
+
         for (let i = 0; i < data[j].inputs.length; i++) {
+            
+           
             if(set.nodes.filter(x => x.id === data[j].inputs[i].addresses[0]).length == 0)
                 set.nodes.push({'id': data[j].inputs[i].addresses[0], 'group': 5});
             for (let k = 0; k < data[j].outputs.length; k++) {
@@ -27,8 +35,10 @@ function createNetwork(data, day) {
     }
 
     }
+    average_inp_count = average_inp_count/numerotransazioni
+    console.log("LA MEDIA DEGLI INPUT COUNT PER IL GIORNO: " + selectedDay + "/" + (selectedMonth+1) + " è: " + average_inp_count)
 
-    console.log("nodi-network:" + set.nodes.length)
+    //console.log("nodi-network:" + set.nodes.length)
 
 var svg = d3v4.select('#network');
 var svgWidth = parseInt(svg.style('width'), 10);
@@ -396,12 +406,12 @@ function createSlider(start, end) {
             month=actualmonth;
             conteggio++
         }*/
-        console.log("Ecco start: " + start)
+        //console.log("Ecco start: " + start)
         //new Date(start.setMonth(start.getMonth()+5));
         //new Date(end.setMonth(end.getMonth()+5));
     createNN("trans2010new", start)
   
-    console.log("Ecco new date: " + start)
+    //console.log("Ecco new date: " + start)
     createRadarChart(start)
 
     var formatDateIntoDay = d3.timeFormat("%d");
@@ -540,7 +550,7 @@ function createTransactionsGraph(svg, data, day) {
         }
     }
     
-    console.log("nodi-txGraph:" + set.nodes.length)
+    //console.log("nodi-txGraph:" + set.nodes.length)
 
     // if both d3v3 and d3v4 are loaded, we'll assume
     // that d3v4 is called d3v4, otherwise we'll assume
@@ -842,9 +852,7 @@ svgBar.selectAll("*").remove();
 var h = parseInt(d3.select('#barChart').style('height'), 10);
 var margin = {top: h*5/100, right: 0, bottom: h*8/100, left: w*11/100};
 var margin2 = {top: 230, right: 20, bottom: 30, left: 50};
-
 var width = parseInt(d3.select('#barChart').style('width'), 10) - margin.left;
-
 var height = parseInt(d3.select('#barChart').style('height'), 10) - margin.bottom - margin.top;
 var height2 = 300 - margin2.top - margin2.bottom; */
 
@@ -1114,7 +1122,7 @@ var primo = false;
             temp[0] = s[1]-limit;
             temp[1] = s[1];
             primo = true;
-            console.log("primo");
+            //console.log("primo");
         } else if (lastUpdate[1] == s[1]) {
             lastUpdate = s;
             temp[0] = s[0]
@@ -1190,16 +1198,16 @@ function brushend(){
 
     temp2 = brushArea;
     temp = temp2;
-    console.log(brushArea);
+    //console.log(brushArea);
 
     if (brushArea[1]-brushArea[0] > 30) {
         if (primo) {
             brushArea[0] = brushArea[1] - 30;
             primo = false;
-            console.log("primo");
+            //console.log("primo");
         } else if (temp2[1] == brushArea[1]) {
             brushArea[1] = brushArea[0] + 30;
-            console.log("secondo");
+            //console.log("secondo");
         }
     }
 
@@ -1279,7 +1287,7 @@ if (formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))].da
     xScale2.domain().forEach(function(d){
         var pos = xScale2(d) + xScale2.bandwidth()/2;
         if (pos >= brushArea[0] && pos <= brushArea[1]){
-            console.log("log"+brushArea)
+            //console.log("log"+brushArea)
           newInput.push(d);
         }
     });
@@ -1592,9 +1600,11 @@ let best_out = ["","",""];
 let bestInputArray = [
     ["", "", "", "", ""],
     ["", "", "", "", ""],
+    ["", "", "", "", ""],
     ["", "", "", "", ""]
 ];
 let bestOutputArray =[
+    ["", "", "", "", ""],
     ["", "", "", "", ""],
     ["", "", "", "", ""],
     ["", "", "", "", ""]
@@ -1630,6 +1640,7 @@ myDati="";
 var testArray = [];
 input_array = [];
 output_array= [];
+var brushArray = [];
 
 function createRadarChart(day){
 
@@ -1639,9 +1650,11 @@ function createRadarChart(day){
     bestInputArray = [
         ["", "", "", "", ""],
         ["", "", "", "", ""],
+        ["", "", "", "", ""],
         ["", "", "", "", ""]
       ]; 
     bestOutputArray = [
+        ["", "", "", "", ""],
         ["", "", "", "", ""],
         ["", "", "", "", ""],
         ["", "", "", "", ""]
@@ -1656,7 +1669,7 @@ function createRadarChart(day){
         ""
           ]
       ];
-      console.log("Mo stampo qualcosa: Il 1° è: " + bestInputArray[0][0] + "\nHa speso: " + bestInputArray[0][1] + ";è stato input " + bestInputArray[0][2] + " volte\n" + "ha ricev: " + bestInputArray[0][3] + ";è stato output " + bestInputArray[0][4] + " volte")
+      //console.log("Mo stampo qualcosa: Il 1° è: " + bestInputArray[0][0] + "\nHa speso: " + bestInputArray[0][1] + ";è stato input " + bestInputArray[0][2] + " volte\n" + "ha ricev: " + bestInputArray[0][3] + ";è stato output " + bestInputArray[0][4] + " volte")
      
     countinput = 0, countoutput=0;
     count2=0;
@@ -1687,8 +1700,8 @@ function createRadarChart(day){
     var selectedDate = new Date(day)
     var oggi = selectedDate.getTime() //+ 3600000
     var domani = oggi + 86400000
-    console.log("Oggi:   " + oggi)
-    console.log("Domani: " + domani)
+    //console.log("Oggi:   " + oggi)
+    //console.log("Domani: " + domani)
 
 
 febbraio = 1264982400000;
@@ -1703,30 +1716,64 @@ ottobre = 1285891200000;
 novembre = 1288569600000;
 dicembre = 1291161600000;
 i=0, x=0, numtrans=0;
+
+
+
+//brushArray = ["d407989570b3c0e09209836a72ac87e8f2e5a71c3f73bbb330ebb896e6081937","22a66d452f67315db6918965b4681b734bc62b8fa1dd42f9156a876b9b186a40"]
+
+// hash del 1 maggio: 
+//d407989570b3c0e09209836a72ac87e8f2e5a71c3f73bbb330ebb896e6081937      (1 input)
+//70c4ffa9a8dbec2feb1cb687155f4e0e9c1007eea6d92c1cb1073c007c709fd3      (1 input)
+//22a66d452f67315db6918965b4681b734bc62b8fa1dd42f9156a876b9b186a40      (2 input)
+
+
 d3.json('trans2010new.json', function(error, data) {
   if (!error) {
-      for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
-          if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani){
-            numtrans++
-            for (let w=0; w < data[j].input_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
-            {
-              input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
-              //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
-              countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
-              i++ //incremento la posizione nell'input_array a ogni ciclo
+      if (brushArray == ""){
+        for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
+            if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani){
+                //console.log("Ammor stampo l'hash che trovo: " + data[j].hash)
+                numtrans++
+                for (let w=0; w < data[j].input_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
+                    countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
+                    i++ //incremento la posizione nell'input_array a ogni ciclo
+                }
+                for (let w=0; w < data[j].output_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
+                    countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
+                    x++ //incremento la posizione nell'input_array a ogni ciclo
+                }
             }
-            for (let w=0; w < data[j].output_count; w++) //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
-            {
-              output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
-              //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
-              countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
-              x++ //incremento la posizione nell'input_array a ogni ciclo
+        }
+    }
+    else{
+        for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
+            if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani && brushArray.includes(data[j].hash)){
+                //console.log("Ammor stampo l'hash che trovo: " + data[j].hash)
+                numtrans++
+                for (let w=0; w < data[j].input_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    input_array[i] = [data[j].inputs[w].addresses[0], data[j].inputs[w].value, data[j].input_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(input_array[i])  // stampo tutti gli input di ogni transazione 
+                    countinput++ //mi restituirà a fine ciclo il numero tutti gli input presenti in quel periodo temporale
+                    i++ //incremento la posizione nell'input_array a ogni ciclo
+                }
+                for (let w=0; w < data[j].output_count; w++){ //controllo tutti gli input di ogni transazione con un ciclo da 0 a input_count
+                    output_array[x] = [data[j].outputs[w].addresses[0], data[j].outputs[w].value, data[j].output_count, data[j].block_timestamp, data[j].hash]
+                    //console.log(output_array[x])  // stampo tutti gli output di ogni transazione 
+                    countoutput++ //mi restituirà a fine ciclo il numero tutti gli output presenti in quel periodo temporale
+                    x++ //incremento la posizione nell'input_array a ogni ciclo
+                }
             }
-
-
-
-      }
-      }
+        }
+    }
+      
+    
+    
+    
+    
       console.log("Nel periodo scelto sono presenti: " + numtrans + " transazioni")
       console.log("Nel periodo scelto sono presenti: " + countinput + " input")
       console.log("Nel periodo scelto sono presenti: " + countoutput + " output")
@@ -1793,28 +1840,48 @@ for (let q = 0; q < input_array.length; q++) {
    
     
   
-  console.log ("Ho: " + input_array.length + " input_arrayput!!!!!*****!!!!!*****!!!")
+  //console.log ("Ho: " + input_array.length + " input_arrayput!!!!!*****!!!!!*****!!!")
   for (let q = input_array.length-1; q >=0; q--) {
-    console.log("Il numero " + (q+1) + " è: " + input_array[q][0] + " e ha questo input: " + input_array[q][1])
+    //console.log("Il numero " + (q+1) + " è: " + input_array[q][0] + " e ha questo input: " + input_array[q][1])
 }
 best_in[0] = input_array[input_array.length-1]
-console.log("Numero di input qui dentro: " + input_array.length)
+//console.log("Numero di input qui dentro: " + input_array.length)
 if (input_array.length ==1 ){
     best_in[1]=0
     best_in[2]=0
 }
 else if(input_array.length ==2){
     best_in[1]=input_array[input_array.length-2]
+    m=0;
+    while (best_in[1][0]===best_in[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_in[1]=input_array[input_array.length-(3+m)]
+        m++
+    }
     best_in[2]=0
 }
 else{
 best_in[1]=input_array[input_array.length-2]
+m=0;
+while (best_in[1][0]===best_in[0][0]){//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+    //console.log("Ce ne sono 2 uguali, vado avanti.")
+    best_in[1]=input_array[input_array.length-(3+m)]
+    m++
+}
 best_in[2]=input_array[input_array.length-3]
+m=0;
+while (best_in[2][0]===best_in[1][0] || best_in[2][0]===best_in[0][0])//controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+{
+    //console.log("Ce ne sono 2 uguali, vado avanti.")
+    best_in[2]=input_array[input_array.length-(4+m)]
+    m++
 }
 
-console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
-console.log("Il secondo è: " + best_in[1][0] + ", che ha questo input: " + best_in[1][1] )
-console.log("Il terzo è: " + best_in[2][0] + ", che ha questo input: " + best_in[2][1] )
+}
+
+//console.log("Il primo è: " + best_in[0][0] + ", che ha questo input: " + best_in[0][1] )
+//console.log("Il secondo è: " + best_in[1][0] + ", che ha questo input: " + best_in[1][1] )
+//console.log("Il terzo è: " + best_in[2][0] + ", che ha questo input: " + best_in[2][1] )
 
 
     
@@ -1851,6 +1918,10 @@ for (let j=0; j<3; j++){
     bestInputArray[j][4] = contatoreinput2[j]   //TOTAL OUTPU COUNT
 
   }
+
+  
+       
+
       /* 
       console.log("Il 1° è: " + best_in[0][0] + "\nHa speso: " + best_in[0][1] + ";è stato input " + contatoreinput1[0] + " volte\n" + "ha ricev: " + conto_input2[0] + ";è stato output " + contatoreinput2[0] + " volte")
       console.log("Il 2° è: " + best_in[1][0] + "\nHa speso: " + best_in[1][1] + ";è stato input " + contatoreinput1[1] + " volte\n" + "ha ricev: " + conto_input2[1] + ";è stato output " + contatoreinput2[1] + " volte")
@@ -1863,8 +1934,7 @@ for (let j=0; j<3; j++){
      
 
 
-      
-      
+     
 
 
 
@@ -1911,29 +1981,47 @@ for (let j=0; j<3; j++){
         */
         
       
-      console.log ("Ho: " + output_array.length + " output!!!!!*****!!!!!*****!!!")
+      //console.log ("Ho: " + output_array.length + " output!!!!!*****!!!!!*****!!!")
       for (let q = output_array.length-1; q >=0; q--) {
-        console.log("Il numero " + (q+1) + " è: " + output_array[q][0] + " e ha questo output: " + output_array[q][1])
+        //console.log("Il numero " + (q+1) + " è: " + output_array[q][0] + " e ha questo output: " + output_array[q][1])
     }
     
     best_out[0] = output_array[output_array.length-1]
-    console.log("Numero di output qui dentro: " + output_array.length)
+    //console.log("Numero di output qui dentro: " + output_array.length)
 if (output_array.length ==1 ){
     best_out[1]=0
     best_out[2]=0
 }else if(output_array.length == 2){
     best_out[1]= output_array[output_array.length-2]
+    m=0;
+    while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_out[1]=output_array[output_array.length-(3+m)]
+        m++
+    }
     best_out[2]=0 
 }
     else{
     best_out[1]= output_array[output_array.length-2]
+    m=0;
+    while (best_out[1][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_out[1]=output_array[output_array.length-(3+m)]
+        m++
+    }
     best_out[2]= output_array[output_array.length-3]
+    m=0;
+    while (best_out[2][0]===best_out[1][0] || best_out[2][0]===best_out[0][0]){ //controllo per vede se tra i primi 3 ci sono doppioni in termini di hash
+        //console.log("Ce ne sono 2 uguali, vado avanti.")
+        best_out[2]=output_array[output_array.length-(4+m)]
+        m++
+    }
     }
    
 
-    console.log("Il primo è: " + best_out[0][0] + ", che ha questo output: " + best_out[0][1] )
-    console.log("Il secondo è: " + best_out[1][0] + ", che ha questo output: " + best_out[1][1] )
-    console.log("Il terzo è: " + best_out[2][0] + ", che ha questo output: " + best_out[2][1] )
+    //console.log("Il primo è: " + best_out[0][0] + ", che ha questo output: " + best_out[0][1] )
+    //console.log("Il secondo è: " + best_out[1][0] + ", che ha questo output: " + best_out[1][1] )
+    //console.log("Il terzo è: " + best_out[2][0] + ", che ha questo output: " + best_out[2][1] )
 
 
 
@@ -1994,6 +2082,8 @@ if (output_array.length ==1 ){
         }
     }
 
+    
+
     /*
     console.log("Il 1° è: " + best_out[0][0] + "\nHa ricev: " + best_out[0][1] + ";è stato output " + contatoreoutput1[0] + " volte\n" + "ha speso: " + conto_output2[0] + ";è stato input " + contatoreoutput2[0] + " volte")
     console.log("Il 2° è: " + best_out[1][0] + "\nHa ricev: " + best_out[1][1] + ";è stato output " + contatoreoutput1[1] + " volte\n" + "ha speso: " + conto_output2[1] + ";è stato input " + contatoreoutput2[1] + " volte")
@@ -2003,8 +2093,41 @@ if (output_array.length ==1 ){
     console.log("Il 1° è: " + bestOutputArray[0][0] + "\nHa speso: " + bestOutputArray[0][1] + ";è stato input " + bestOutputArray[0][2] + " volte\n" + "ha ricev: " + bestOutputArray[0][3] + ";è stato output " + bestOutputArray[0][4] + " volte")
     console.log("Il 2° è: " + bestOutputArray[1][0] + "\nHa speso: " + bestOutputArray[1][1] + ";è stato input " + bestOutputArray[1][2] + " volte\n" + "ha ricev: " + bestOutputArray[1][3] + ";è stato output " + bestOutputArray[1][4] + " volte")
     console.log("Il 3° è: " + bestOutputArray[2][0] + "\nHa speso: " + bestOutputArray[2][1] + ";è stato input " + bestOutputArray[2][2] + " volte\n" + "ha ricev: " + bestOutputArray[2][3] + ";è stato output " + bestOutputArray[2][4] + " volte")
-       
-       
+    
+    bestInputArray[3][0] = "Average";
+    if (bestInputArray[1][0] < 0){
+        bestInputArray[3][1] = bestInputArray[3][2] = bestInputArray[3][3] =  bestInputArray[3][4] = 0
+    }else if(bestInputArray[2][0] < 0){
+        bestInputArray[3][1] = (bestInputArray[0][1] + bestInputArray[1][1]) / 2
+        bestInputArray[3][2] = (bestInputArray[0][2] + bestInputArray[1][2]) / 2
+        bestInputArray[3][3] = (bestInputArray[0][3] + bestInputArray[1][3]) / 2
+        bestInputArray[3][4] = (bestInputArray[0][4] + bestInputArray[1][4]) / 2
+    }else{
+        bestInputArray[3][1] = (bestInputArray[0][1] + bestInputArray[1][1] + bestInputArray[2][1]) / 3
+        bestInputArray[3][2] = (bestInputArray[0][2] + bestInputArray[1][2] + bestInputArray[2][2]) / 3
+        bestInputArray[3][3] = (bestInputArray[0][3] + bestInputArray[1][3] + bestInputArray[2][3]) / 3
+        bestInputArray[3][4] = (bestInputArray[0][4] + bestInputArray[1][4] + bestInputArray[2][4]) / 3
+    }
+
+    bestOutputArray[3][0] = "Average";
+    if (bestOutputArray[1][0] < 0){
+        bestOutputArray[3][1] = bestOutputArray[3][2] = bestOutputArray[3][3] =  bestOutputArray[3][4] = 0
+    }else if(bestOutputArray[2][0] < 0){
+        bestOutputArray[3][1] = (bestOutputArray[0][1] + bestOutputArray[1][1]) / 2
+        bestOutputArray[3][2] = (bestOutputArray[0][2] + bestOutputArray[1][2]) / 2
+        bestOutputArray[3][3] = (bestOutputArray[0][3] + bestOutputArray[1][3]) / 2
+        bestOutputArray[3][4] = (bestOutputArray[0][4] + bestOutputArray[1][4]) / 2
+    }else{
+        bestOutputArray[3][1] = (bestOutputArray[0][1] + bestOutputArray[1][1] + bestOutputArray[2][1]) / 3
+        bestOutputArray[3][2] = (bestOutputArray[0][2] + bestOutputArray[1][2] + bestOutputArray[2][2]) / 3
+        bestOutputArray[3][3] = (bestOutputArray[0][3] + bestOutputArray[1][3] + bestOutputArray[2][3]) / 3
+        bestOutputArray[3][4] = (bestOutputArray[0][4] + bestOutputArray[1][4] + bestOutputArray[2][4]) / 3
+    }
+
+
+
+    
+
 
     var json = data;
     if (inputradar==true)
@@ -2048,84 +2171,97 @@ function setUserType(type, data) {
    
   if (inputradar){
 
-    console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
+    //console.log("**********STO ANALIZZANDO GLI INPUT**********\n")
     maxInpVal = Math.max(bestInputArray[0][1], bestInputArray[1][1], bestInputArray[2][1])+0.00001
-    console.log("Massimo tra i total input value: " + maxInpVal)
-    console.log("Il primo input è: " + bestInputArray[0][1])
-    console.log("Il secondo input è: " + bestInputArray[1][1])
-    console.log("Il terzo input è: " + bestInputArray[2][1])
+    //console.log("Massimo tra i total input value: " + maxInpVal)
+    //console.log("Il primo input è: " + bestInputArray[0][1])
+    //console.log("Il secondo input è: " + bestInputArray[1][1])
+    //console.log("Il terzo input è: " + bestInputArray[2][1])
     maxNumbInp = Math.max(bestInputArray[0][2], bestInputArray[1][2], bestInputArray[2][2])+0.00001
-    console.log("Massimo tra i total input count: " + maxNumbInp)
+    //console.log("Massimo tra i total input count: " + maxNumbInp)
     maxOutVal = Math.max(bestInputArray[0][3], bestInputArray[1][3], bestInputArray[2][3])+0.00001
-    console.log("Massimo tra i total output value: " + maxOutVal)
+    //console.log("Massimo tra i total output value: " + maxOutVal)
     maxNumbOut = Math.max(bestInputArray[0][4], bestInputArray[1][4], bestInputArray[2][4])+0.00001
-    console.log("Massimo tra i total output count: " + maxNumbOut)
+    //console.log("Massimo tra i total output count: " + maxNumbOut)
     maxOp = Math.max((bestInputArray[0][2] + bestInputArray[0][4]), (bestInputArray[1][2] + bestInputArray[1][4]), (bestInputArray[2][2] + bestInputArray[2][4]))+0.00001
-    console.log("Massimo tra i numeri di operazioni: " + maxOp)
+    //console.log("Massimo tra i numeri di operazioni: " + maxOp)
 
-    console.log("I Due fuori usciti sono questi: " + bestInputArray[1][1])
+    //console.log("I Due fuori usciti sono questi: " + bestInputArray[1][1])
 
   //Data
   d = [
         [
-        {axis:"Total Inputs value",value:((bestInputArray[0][1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Inputs",value:((bestInputArray[0][2]+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Outputs Value",value:((bestInputArray[0][3]+0.001) / (maxOutVal+0.001))},
-        {axis:"Number of Outputs",value:((bestInputArray[0][4]+0.001) / (maxNumbOut+0.001))},
-        {axis:"Number of operations",value:((bestInputArray[0][2]+0.001) + bestInputArray[0][4]) /(maxOp+0.001)}
+        {axis:"Total Inputs Value",value:((bestInputArray[0][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[0][1]},
+        {axis:"# Inputs",value:((bestInputArray[0][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[0][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[0][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[0][3]},
+        {axis:"# Outputs",value:((bestInputArray[0][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[0][4]},
+        {axis:"# Transactions",value:((bestInputArray[0][2]) + bestInputArray[0][4]) /(maxOp+0.001),realvalue:(bestInputArray[0][2]+bestInputArray[0][4])}
         ],[
-        {axis:"Total Inputs value",value:((bestInputArray[1][1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Inputs",value:((bestInputArray[1][2]+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Outputs Value",value:((bestInputArray[1][3]+0.001) / (maxOutVal+0.001))},
-        {axis:"Number of Outputs",value:((bestInputArray[1][4]+0.001) / (maxNumbOut+0.001))},
-        {axis:"Number of operations",value:((bestInputArray[1][2]+0.001) + bestInputArray[1][4]) /(maxOp+0.001)}
+        {axis:"Total Inputs Value",value:((bestInputArray[1][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[1][1]},
+        {axis:"# Inputs",value:((bestInputArray[1][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[1][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[1][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[1][3]},
+        {axis:"# Outputs",value:((bestInputArray[1][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[1][4]},
+        {axis:"# Transactions",value:((bestInputArray[1][2]) + bestInputArray[1][4]) /(maxOp+0.001),realvalue:(bestInputArray[1][2]+bestInputArray[1][4])}
         ]
         ,[
-        {axis:"Total Inputs value",value:((bestInputArray[2][1]+0.001) / (maxInpVal+0.001))},
-        {axis:"Number of Inputs",value:((bestInputArray[2][2]+0.001) / (maxNumbInp+0.001))},
-        {axis:"Total Outputs Value",value:((bestInputArray[2][3]+0.001) / (maxOutVal+0.001))},
-        {axis:"Number of Outputs",value:((bestInputArray[2][4]+0.001) / (maxNumbOut+0.001))},
-        {axis:"Number of operations",value:((bestInputArray[2][2]+0.001) + bestInputArray[2][4]) /(maxOp+0.001)}
-          ]
+        {axis:"Total Inputs Value",value:((bestInputArray[2][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[2][1]},
+        {axis:"# Inputs",value:((bestInputArray[2][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[2][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[2][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[2][3]},
+        {axis:"# Outputs",value:((bestInputArray[2][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[2][4]},
+        {axis:"# Transactions",value:((bestInputArray[2][2]) + bestInputArray[2][4]) /(maxOp+0.001),realvalue:(bestInputArray[2][2]+bestInputArray[2][4])}
+        ],
+        ,[
+        {axis:"Total Inputs Value",value:((bestInputArray[3][1]) / (maxInpVal+0.001)),realvalue:bestInputArray[3][1]},
+        {axis:"# Inputs",value:((bestInputArray[3][2]) / (maxNumbInp+0.001)),realvalue:bestInputArray[3][2]},
+        {axis:"Total Outputs Value",value:((bestInputArray[3][3]) / (maxOutVal+0.001)),realvalue:bestInputArray[3][3]},
+        {axis:"# Outputs",value:((bestInputArray[3][4]) / (maxNumbOut+0.001)),realvalue:bestInputArray[3][4]},
+        {axis:"# Transactions",value:((bestInputArray[3][2]) + bestInputArray[3][4]) /(maxOp+0.001),realvalue:(bestInputArray[3][2]+bestInputArray[3][4])}
+        ]
       ];
     }
 
     else{    
-        console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
-        
+        //console.log("**********STO ANALIZZANDO GLI OUTPUT**********")
+        var LegendOptions = ['First: ' + bestOutputArray[0][0] ,' Second: ' + bestOutputArray[1][0], 'Third: ' + bestOutputArray[2][0] ];
         maxInpVal = Math.max(bestOutputArray[0][1], bestOutputArray[1][1], bestOutputArray[2][1])+0.00001
-        console.log("Massimo tra i total input value: " + maxInpVal)
+        //console.log("Massimo tra i total input value: " + maxInpVal)
         maxNumbInp = Math.max(bestOutputArray[0][2], bestOutputArray[1][2], bestOutputArray[2][2])+0.00001
-        console.log("Massimo tra i total input count: " + maxNumbInp)
+        //console.log("Massimo tra i total input count: " + maxNumbInp)
         maxOutVal = Math.max(bestOutputArray[0][3], bestOutputArray[1][3], bestOutputArray[2][3])+0.00001
-        console.log("Massimo tra i total output value: " + maxOutVal)
+        //console.log("Massimo tra i total output value: " + maxOutVal)
         maxNumbOut = Math.max(bestOutputArray[0][4], bestOutputArray[1][4], bestOutputArray[2][4])+0.00001
-        console.log("Massimo tra i total output count: " + maxNumbOut)
+        //console.log("Massimo tra i total output count: " + maxNumbOut)
         maxOp = Math.max((bestOutputArray[0][2] + bestOutputArray[0][4]), (bestOutputArray[1][2] + bestOutputArray[1][4]), (bestOutputArray[2][2] + bestOutputArray[2][4]))+0.00001
-        console.log("Massimo tra i numeri di operazioni: " + maxOp)
+        //console.log("Massimo tra i numeri di operazioni: " + maxOp)
     
        //Data
        d = [
             [
-            {axis:"Total Inputs value" + i ,value:((bestOutputArray[0][1]+0.001) / (maxInpVal+0.001))},
-            {axis:"Number of Inputs",value:((bestOutputArray[0][2]+0.001) / (maxNumbInp+0.001))},
-            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]+0.001) / (maxOutVal+0.001))},
-            {axis:"Number of Outputs",value:((bestOutputArray[0][4]+0.001) / (maxNumbOut+0.001))},
-            {axis:"Number of operations",value:((bestOutputArray[0][2]+0.001) + bestOutputArray[0][4]) /(maxOp+0.001)}
+            {axis:"Total Inputs Value",value:((bestOutputArray[0][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[0][1]},
+            {axis:"# Inputs",value:((bestOutputArray[0][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[0][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[0][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[0][3]},
+            {axis:"# Outputs",value:((bestOutputArray[0][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[0][4]},
+            {axis:"# Transactions",value:((bestOutputArray[0][2]) + bestOutputArray[0][4]) /(maxOp+0.001),realvalue:(bestOutputArray[0][2] + bestOutputArray[0][4])}
             ],[
-            {axis:"Total Inputs value",value:((bestOutputArray[1][1]+0.001) / (maxInpVal+0.001))},
-            {axis:"Number of Inputs",value:((bestOutputArray[1][2]+0.001) / (maxNumbInp+0.001))},
-            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]+0.001) / (maxOutVal+0.001))},
-            {axis:"Number of Outputs",value:((bestOutputArray[1][4]+0.001) / (maxNumbOut+0.001))},
-            {axis:"Number of operations",value:((bestOutputArray[1][2]+0.001) + bestOutputArray[1][4]) /(maxOp+0.001)}
+            {axis:"Total Inputs Value",value:((bestOutputArray[1][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[1][1]},
+            {axis:"# Inputs",value:((bestOutputArray[1][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[1][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[1][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[1][3]},
+            {axis:"# Outputs",value:((bestOutputArray[1][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[1][4]},
+            {axis:"# Transactions",value:((bestOutputArray[1][2]) + bestOutputArray[1][4]) /(maxOp+0.001),realvalue:(bestOutputArray[1][2] + bestOutputArray[1][4])}
             ]
             ,[
-            {axis:"Total Inputs value",value:((bestOutputArray[2][1]+0.001) / (maxInpVal+0.001))},
-            {axis:"Number of Inputs",value:((bestOutputArray[2][2]+0.001) / (maxNumbInp+0.001))},
-            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]+0.001) / (maxOutVal+0.001))},
-            {axis:"Number of Outputs",value:((bestOutputArray[2][4]+0.001) / (maxNumbOut+0.001))},
-            {axis:"Number of operations",value:((bestOutputArray[2][2]+0.001) + bestOutputArray[2][4]) /(maxOp+0.001)}
-              ]
+            {axis:"Total Inputs Value",value:((bestOutputArray[2][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[2][1]},
+            {axis:"# Inputs",value:((bestOutputArray[2][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[2][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[2][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[2][3]},
+            {axis:"# Outputs",value:((bestOutputArray[2][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[2][4]},
+            {axis:"# Transactions",value:((bestOutputArray[2][2]) + bestOutputArray[2][4]) /(maxOp+0.001),realvalue:(bestOutputArray[2][2] + bestOutputArray[2][4])}
+            ],[
+            {axis:"Total Inputs Value",value:((bestOutputArray[3][1]) / (maxInpVal+0.001)),realvalue:bestOutputArray[3][1]},
+            {axis:"# Inputs",value:((bestOutputArray[3][2]) / (maxNumbInp+0.001)),realvalue:bestOutputArray[3][2]},
+            {axis:"Total Outputs Value",value:((bestOutputArray[3][3]) / (maxOutVal+0.001)),realvalue:bestOutputArray[3][3]},
+            {axis:"# Outputs",value:((bestOutputArray[3][4]) / (maxNumbOut+0.001)),realvalue:bestOutputArray[3][4]},
+            {axis:"# Transactions",value:((bestOutputArray[3][2]) + bestOutputArray[3][4]) /(maxOp+0.001),realvalue:(bestOutputArray[3][2]+bestOutputArray[3][4])}
+            ]
           ];
         }
 
@@ -2372,7 +2508,13 @@ d3.csv("pca_finale2.csv", function(error, data) {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis)
-      .selectAll("text")  
+      .selectAll("text")
+      .text(function(d){
+          if (d == 0) {
+              return d;
+          }
+        return (d/1000000000000 + "k Billions");
+      })
       .style("text-anchor", "end")
       .attr("dx", "-.8em")
       .attr("dy", ".15em")
@@ -2380,7 +2522,14 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
   svg.append("g")
       .attr("class", "y axis")
-      .call(yAxis);
+      .call(yAxis)
+      .selectAll("text")
+      .text(function(d){
+          if (d == 0) {
+              return d;
+          }
+        return (d/1000000000 + "k Billions");
+      });
 
   svg.selectAll(".dot")
       .data(data)
@@ -2412,4 +2561,3 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
 
 }
-

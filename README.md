@@ -18,6 +18,6 @@ Here are our LinkedIn profiles:
 
 ## Links
 
-Site published at this [link](https://giovanniruocco.github.io/Bitcoin-Transactions/)
+Site published at this [link](https://giovanniruocco.github.io/Bitcoin-Transactions/network.html)
 
 Complete dataset available [here](https://www.kaggle.com/bigquery/bitcoin-blockchain) 
