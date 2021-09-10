@@ -37,6 +37,34 @@ function createNetwork(data, day) {
     }
     average_inp_count = average_inp_count/numerotransazioni
     console.log("LA MEDIA DEGLI INPUT COUNT PER IL GIORNO: " + selectedDay + "/" + (selectedMonth+1) + " è: " + average_inp_count)
+    
+    filter_avg(data, average_inp_count)
+
+
+    function filter_avg(data, average_inp_count){
+        var listacheck =[];
+        console.log("Ciaoooo, questo è l'average: " + average_inp_count)
+        
+        for (let j = 0; j < data.length; j++) {
+            var currentDay = new Date (data[j].block_timestamp).getDate()
+            var currentMonth = new Date (data[j].block_timestamp).getMonth()
+            if(currentMonth == selectedMonth && currentDay == selectedDay){
+                if(data[j].input_count >= average_inp_count){
+                    listacheck.push(data[j].hash);
+                }
+        
+            }
+        }
+
+        console.log("Le transazioni che rispettano la media sono: ")
+        console.log(listacheck)
+    }
+
+
+
+
+
+
 
     //console.log("nodi-network:" + set.nodes.length)
 
