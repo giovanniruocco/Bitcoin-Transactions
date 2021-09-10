@@ -831,6 +831,9 @@ var width = w - margin.left - margin.right;
 var height = h - margin.top - margin.bottom;
 var height2 = h - margin2.top - margin2.bottom;
 
+var svgBar = d3.select("#barChart")
+svgBar.selectAll("*").remove();
+
 // set the dimensions and margins of the graph
 // var margin = {top: 20, right: 20, bottom: 30, left: 40},
 // width = 960 - margin.left - margin.right,
@@ -884,6 +887,31 @@ const formatToDay = d3.timeFormat("%d");
 
 const formatTime = d3.timeFormat("%d %b");
 
+/* let dayOfYear = 0;
+
+console.log(String(myDay));
+
+    if (myDay) {
+
+
+        for (var i = 0; i < data.length; i++) 
+        {
+            if(String(data[i].date) === String(myDay))
+                {
+                    console.log(data[i].date);
+                    console.log(myDay)
+                    
+                dayOfYear = data[i].day;
+
+                break;
+                }else {
+                    dayOfYear=30;
+                }
+        }
+    } 
+
+    console.log(dayOfYear); */
+
 // format the data
 data.forEach(function(d) {
     aux = parseTime(d.date);
@@ -891,7 +919,6 @@ data.forEach(function(d) {
     d.value = +d.value;
     });
 
-/* console.log(new Date(data[260].date).getDate()); */
 
 var maxHeight=d3.max(data,function(d){return d.value});
 var minHeight=d3.min(data,function(d){return d.value});
@@ -928,7 +955,7 @@ var bars1 =gMain.selectAll(".bar")
         .style("opacity", function() {
             return (this === selected) ? 1.0 : 0.3;
         })
-    createLineChartWithBrush(formatToMonth(parseToMonth(d.date)));
+    createLineChartWithBrush(formatToMonth(parseToMonth(d.date))-1);
     
 });
 
@@ -952,7 +979,7 @@ xAxisGroup.selectAll("text")
 /* gMain.append("g")
   .call(d3.axisLeft(y)); */
 
-  var yAxis = d3.axisLeft(y).ticks(5, function(d) {console.log(d); return 10 + formatPower(Math.round(Math.log(d) / Math.LN10)); });
+  var yAxis = d3.axisLeft(y).ticks(5, function(d) { return 10 + formatPower(Math.round(Math.log(d) / Math.LN10)); });
   var yAxisGroup = gMain.append("g").call(yAxis);
 
 // text label for the x axis
@@ -992,22 +1019,27 @@ let tickLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','N
 
 var xAxis2 = d3.axisBottom(xScale2)
 .ticks(12)
-.tickValues([1,32,60,91,121,152,182,213,244,275,306,336])
+.tickValues([1,32,60,91,122,153,182,214,245,275,306,336])
 .tickFormat((d,i) => tickLabels[i]);
 
 	var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
 
   var currentExtent = [0,0]
+
+  console.log(scaleBandInvert(xScale2)(75))
+  console.log(xScale2(60));
   
   var brush = d3.brushX()
   .extent([[0,0],[width,height2]])//(x0,y0)  (x1,y1)
   .on("brush start", updateCurrentExtent)
   .on("brush",brushed)//when mouse up, move the selection to the exact tick //start(mouse down), brush(mouse move), end(mouse up)
   .on("end",brushend);
+
   context.append("g")
-  .attr("class","brush")
+  .attr("class","x brush")
   .call(brush)
-  .call(brush.move,[myDay+15,myDay+45]);
+  .call(brush.move,[xScale2(myDay),xScale2(myDay+30)])
+ /*  .call(brush.event) */;
 
   function updateCurrentExtent() {
     currentExtent = d3.brushSelection(this);
@@ -1076,8 +1108,6 @@ var primo = false;
         lastUpdate = s;
     }
 
-    console.log(s);
-    console.log(lastUpdate);
     if ((s[1]-s[0]) > limit) {
         if (lastUpdate[0] == s[0]) {
             lastUpdate = s;
@@ -1089,11 +1119,11 @@ var primo = false;
             lastUpdate = s;
             temp[0] = s[0]
             temp[1] = s[0]+limit;
-            console.log("secondo");
+            /* console.log("secondo"); */
         }
         if (lastUpdate[0]==0 && lastUpdate[1]==0)
             lastUpdate=s;
-        console.log(lastUpdate);
+        /* console.log(lastUpdate); */
     }
     
     xScale2.domain().forEach(function(d){
@@ -1125,8 +1155,6 @@ var primo = false;
         else
             return height - y(d.value);
     });
-
-    console.log(data);
 
     xAxisGroup.call(xAxis);
     xAxisGroup.selectAll("text")
@@ -1233,7 +1261,6 @@ switch (formatToMonth2(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0])
         break;
 }
 
-console.log(days);
 
 var daysOfPrec = (days - formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[0]))].date)));
 var daysOfSeq = formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[1]))].date));
@@ -1530,7 +1557,12 @@ function createLineChartWithBrush(month){
                                                 .translate(-s[0], 0));
 
         var newMonth = x2.invert(start).getMonth();
-        changeBarChartMonth(newMonth)
+        
+        /* changeBarChartMonth(newMonth) */
+
+        /* createBarChart("01-"+ "0"+(newMonth+1) + "-2010"); */
+        createBarChart(1);
+
         //createSlider(newMonth)
         createSlider(x2.invert(start), x2.invert(end))
     }
