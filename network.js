@@ -37,6 +37,34 @@ function createNetwork(data, day) {
     }
     average_inp_count = average_inp_count/numerotransazioni
     console.log("LA MEDIA DEGLI INPUT COUNT PER IL GIORNO: " + selectedDay + "/" + (selectedMonth+1) + " è: " + average_inp_count)
+    
+    filter_avg(data, average_inp_count)
+
+
+    function filter_avg(data, average_inp_count){
+        var listacheck =[];
+        console.log("Ciaoooo, questo è l'average: " + average_inp_count)
+        
+        for (let j = 0; j < data.length; j++) {
+            var currentDay = new Date (data[j].block_timestamp).getDate()
+            var currentMonth = new Date (data[j].block_timestamp).getMonth()
+            if(currentMonth == selectedMonth && currentDay == selectedDay){
+                if(data[j].input_count >= average_inp_count){
+                    listacheck.push(data[j].hash);
+                }
+        
+            }
+        }
+
+        console.log("Le transazioni che rispettano la media sono: ")
+        console.log(listacheck)
+    }
+
+
+
+
+
+
 
     //console.log("nodi-network:" + set.nodes.length)
 
@@ -991,8 +1019,8 @@ function createBarChart(myDay){
     
     const formatTime = d3.timeFormat("%d %b");
     
-     let dayOfYear = 0;
-    console.log(String(myDay));
+    let dayOfYear = 0;
+
         if (myDay) {
             for (var i = 0; i < data.length; i++) 
             {
@@ -1008,7 +1036,6 @@ function createBarChart(myDay){
                     }
             }
         } 
-        console.log(dayOfYear);
     
     // format the data
     data.forEach(function(d) {
@@ -1130,8 +1157,9 @@ function createBarChart(myDay){
     
       var currentExtent = [0,0]
     
-      console.log(scaleBandInvert(xScale2)(75))
-      console.log(xScale2(60));
+      console.log(scaleBandInvert(xScale2)(xScale2(dayOfYear)))
+      console.log(xScale2(dayOfYear));
+      console.log(xScale2(parseInt(dayOfYear)+30));
       
       var brush = d3.brushX()
       .extent([[0,0],[width,height2]])//(x0,y0)  (x1,y1)
@@ -1142,7 +1170,7 @@ function createBarChart(myDay){
       context.append("g")
       .attr("class","x brush")
       .call(brush)
-      .call(brush.move,[xScale2(myDay),xScale2(myDay+30)])
+      .call(brush.move,[xScale2(parseInt(dayOfYear)),xScale2(parseInt(dayOfYear)+30)])
      /*  .call(brush.event) */;
     
       function updateCurrentExtent() {
@@ -1153,8 +1181,8 @@ function createBarChart(myDay){
     var primo = false;
     
       function brushed(){
-        if (!d3.event.sourceEvent) return; // Only transition after input.
-          if (!d3.event.selection) return; // Ignore empty selections.
+/*         if (!d3.event.sourceEvent) return; // Only transition after input.
+          if (!d3.event.selection) return; // Ignore empty selections. */
         if(d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-
         //scaleBand of bar chart is not continuous. Thus we cannot use method in line chart.
         //The idea here is to count all the bar chart in the brush area. And reset the domain
@@ -1163,7 +1191,7 @@ function createBarChart(myDay){
         var s = d3.event.selection;	 
         var start;
         var end;
-    
+
         if (s) {
     
             start = d3.min([s[0], s[1]])
@@ -1193,9 +1221,11 @@ function createBarChart(myDay){
     
         } else { // if no selection took place and the brush was just clicked
             var mouse = d3.mouse(this)[0];
-            selectedDay = scaleBandInvert(xScale2)(mouse);
-            start = xScale2(selectedDay)
-            end = xScale2(selectedDay)
+            var selectedMonth = scaleBandInvert(xScale2)(mouse);
+            console.log(mouse);
+            console.log(selectedMonth);
+/*             start = x2(new Date(2010, selectedMonth, 1))
+            end = x2(new Date(2010, selectedMonth+1, 0)) */
         }
         
         s = [end,start]
@@ -1617,6 +1647,8 @@ function createLineChartWithBrush(month){
         var endMonth;
         var oldMonth = x2.invert(p[0]).getMonth();
 
+        console.log(s);
+
         if (s) {
             start = d3.min([s[0], s[1]])
             end = d3.max([s[0], s[1]])
@@ -1662,7 +1694,14 @@ function createLineChartWithBrush(month){
 
         var newMonth = x2.invert(start).getMonth();
         /* changeBarChartMonth(newMonth) */
-        createBarChart(30)
+        /* createBarChart(30) */
+        var aux= null;
+        if (newMonth+1 <= 9) {
+            aux = '0'+(newMonth+1);
+        } else aux = newMonth+1;
+
+        createBarChart("01-"+aux+"-2010");
+        changePCA(newMonth+1);
         //createSlider(newMonth)
         createSlider(x2.invert(start), x2.invert(end))
     }
@@ -2661,10 +2700,12 @@ d3.csv("pca_finale2.csv", function(error, data) {
     d.x = +d.x;
   });
 
+
   const colorValue = d => d.month;
 
   x.domain([d3.min(data,function(d){return d.x}), d3.max(data,function(d){return d.x})]).nice();
-  y.domain([d3.min(data,function(d){return d.y}), d3.max(data,function(d){return d.y})]).nice();
+  y.domain([d3.min(data,function(d){return d.y}), d3.max(data,function(d){return d.y})])
+
 
 /*   svg.append("g")
       .attr("class", "x axis")
@@ -2680,7 +2721,7 @@ d3.csv("pca_finale2.csv", function(error, data) {
           if (d == 0) {
               return d;
           }
-        return (d/1000000000000 + "k Billions");
+        return (d/1000000000000);
       })
       .style("text-anchor", "end")
       .attr("dx", "-.8em")
@@ -2695,19 +2736,21 @@ d3.csv("pca_finale2.csv", function(error, data) {
           if (d == 0) {
               return d;
           }
-        return (d/1000000000 + "k Billions");
+        return (d/1000000000);
       });
 
   svg.selectAll(".dot")
       .data(data)
     .enter().append("circle")
-      .attr("class", "dot")
+      .attr("class", function (d) { return "dot" } )
       .attr("r", 3.5)
       .attr("cx", function(d) { return x(d.x); })
       .attr("cy", function(d) { return y(d.y); })
       .attr('fill', d => color(colorValue(d)))
       .attr('fill-opacity', 0.6)
-      .on("mouseover", function(d) {		
+      .on("mouseover", function(d) {
+          
+
         div.transition()		
             .duration(500)		
             .style("opacity", .9);		
@@ -2715,16 +2758,81 @@ d3.csv("pca_finale2.csv", function(error, data) {
             .style("visibility", "visible")
             .style("left", d3.select(this).attr("cx") + "px")		
             .style("top", d3.select(this).attr("cy") + "px");	
+    
+        hoverMonth = d.month;
+
+          svg.selectAll(".dot")
+          .style("fill", function(d) {
+              return (d.month == hoverMonth) ? (d => color(colorValue(d))) : "lightgrey";
+          })
+
         })					
-    .on("mouseout", function(d) {		
-        div.transition()		
-            .duration(1000)
-            .style("opacity", 0);
-        div.style("visibility", "hidden");	
-    });
+        .on("mouseleave", function(d) {		
+            svg.selectAll(".dot")
+            .style("fill", function(d) {
+                return color(colorValue(d));
+            })
+        });
 
 });
-
-
-
 }
+
+function changePCA(month){
+
+var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+var svgPca = d3.select('#pca');
+
+var svg = svgPca.select("g");
+
+
+    d3.csv("pca_finale2.csv", function(error, data) {
+        if (error) throw error;
+
+        data.forEach(function(d) {
+            d.y = +d.y;
+            d.x = +d.x;
+        });
+
+        const colorValue = d => d.month;
+
+        /*   svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis); */
+
+        svg.selectAll(".dot")
+            .data(data)
+            .attr('fill', d => color(colorValue(d)))
+            .style("fill", function(d) {
+                return (d.month == month) ? (color(colorValue(d))) : "lightgrey";
+            })
+            .attr('fill-opacity', 0.6)
+            .on("mouseover", function(d) {
+/*                 div.transition()		
+                    .duration(500)		
+                    .style("opacity", .9);		
+                div	.html(d.hash)	
+                    .style("visibility", "visible")
+                    .style("left", d3.select(this).attr("cx") + "px")		
+                    .style("top", d3.select(this).attr("cy") + "px");	 */
+            
+                hoverMonth = d.month;
+
+                svg.selectAll(".dot")
+                .style("fill", function(d) {
+                    return (d.month == hoverMonth) ? (d => color(colorValue(d))) : "lightgrey";
+                })
+
+                })					
+                .on("mouseleave", function(d) {		
+                    svg.selectAll(".dot")
+                    .style("fill", function(d) {
+                        return color(colorValue(d));
+                    })
+                });
+
+    });
+}
+
+
