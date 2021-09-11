@@ -37,6 +37,34 @@ function createNetwork(data, day) {
     }
     average_inp_count = average_inp_count/numerotransazioni
     console.log("LA MEDIA DEGLI INPUT COUNT PER IL GIORNO: " + selectedDay + "/" + (selectedMonth+1) + " è: " + average_inp_count)
+    
+    filter_avg(data, average_inp_count)
+
+
+    function filter_avg(data, average_inp_count){
+        var listacheck =[];
+        console.log("Ciaoooo, questo è l'average: " + average_inp_count)
+        
+        for (let j = 0; j < data.length; j++) {
+            var currentDay = new Date (data[j].block_timestamp).getDate()
+            var currentMonth = new Date (data[j].block_timestamp).getMonth()
+            if(currentMonth == selectedMonth && currentDay == selectedDay){
+                if(data[j].input_count >= average_inp_count){
+                    listacheck.push(data[j].hash);
+                }
+        
+            }
+        }
+
+        console.log("Le transazioni che rispettano la media sono: ")
+        console.log(listacheck)
+    }
+
+
+
+
+
+
 
     //console.log("nodi-network:" + set.nodes.length)
 
@@ -409,7 +437,7 @@ function createSlider(start, end) {
     createNN("trans2010new", start)
   
     //console.log("Ecco new date: " + start)
-    createRadarChart(start)
+    createRadarChart(start, [])
 
     var formatDateIntoDay = d3.timeFormat("%d");
     var formatDate = d3.timeFormat("%d %b");
@@ -439,7 +467,7 @@ function createSlider(start, end) {
             .on("start drag", function() { update(x.invert(d3.event.x)); })
             .on("end", function(){ 
                 createNN("trans2010new", x.invert(d3.event.x));
-                createRadarChart(x.invert(d3.event.x)); }));
+                createRadarChart(x.invert(d3.event.x), []); }));
 
     slider.insert("g", ".track-overlay")
         .attr("class", "ticks")
@@ -624,6 +652,8 @@ function createTransactionsGraph(data, day) {
         .on('click', function(d) {
             var txNode = d.tx_hash ? d.tx_hash : d.id;
             filterNetwork([txNode], data)
+            createRadarChart(selectedDate, [txNode])
+
             node.style("opacity", function(o) {
                 return neighboring(txNode, o) ? 1 : 0.3;
               });
@@ -808,6 +838,7 @@ function createTransactionsGraph(data, day) {
             selectedList.push(d.tx_hash ? d.tx_hash : d.id)
         }) 
         filterNetwork(selectedList, data)
+        createRadarChart(selectedDate, selectedList)
         if(selectedList.length != 0){
             node.style("opacity", function(o) {
                 var isNeigh = false;
@@ -1736,9 +1767,9 @@ myDati="";
 var testArray = [];
 input_array = [];
 output_array= [];
-var brushArray = [];
+// var brushArray = [];
 
-function createRadarChart(day){
+function createRadarChart(day, brushArray){
 
     primo_cont_input, secondo_cont_input, terzo_cont_input;
     best_in = ["","",""];
