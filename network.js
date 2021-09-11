@@ -101,7 +101,8 @@ var node = gDraw.append("g")
             return color(d.group); 
     })
     .on('click', function(d) {
-        filterTransactions(d.id)
+        var transactionArray = filterTransactions(d.id)
+        createRadarChart(selectedDate, transactionArray)
         node.style("opacity", function(o) {
             return neighboring(d.id, o) ? 1 : 0.3;
           });
@@ -254,6 +255,7 @@ rect.on('click', () => {
     });
     node.classed("selected", false);
     resetTransactions();
+    createRadarChart(selectedDate, [])
 });
 
 function brushed() {
@@ -289,7 +291,8 @@ function brushended() {
     .each(function(d) { 
         selectedList.push(d.id)
     }) 
-    filterTransactions(selectedList)
+    var transactionArray = filterTransactions(selectedList)
+    createRadarChart(selectedDate, transactionArray)
     if(selectedList.length != 0){
         node.style("opacity", function(o) {
             var isNeigh = false;
@@ -774,6 +777,7 @@ function createTransactionsGraph(data, day) {
         });
         node.classed("selected", false);
         resetNetwork();
+        createRadarChart(selectedDate, [])
     });
 
     function brushed() {
@@ -1817,7 +1821,7 @@ i=0, x=0, numtrans=0;
 
 d3.json('trans2010new.json', function(error, data) {
   if (!error) {
-      if (brushArray == ""){
+      if (brushArray.length == 0){
         for (let j = 0; j < data.length; j++) { //controllo tutte le transazioni
             if(data[j].block_timestamp >= oggi && data[j].block_timestamp <= domani){
                 //console.log("Ammor stampo l'hash che trovo: " + data[j].hash)
@@ -2493,6 +2497,7 @@ function filterTransactions(ids){
     if (ids.length==0){
         resetNetwork();
         resetTransactions();
+        return []
     } else {
         var svg = d3v4.select('#transactionsGraph');
 
@@ -2519,6 +2524,8 @@ function filterTransactions(ids){
             return txs.includes(o.id) || insOuts.includes(o.id) ? 1 : 0.3;
           })
         .classed("selected", false);
+
+        return txs
     }
 
 
