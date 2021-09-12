@@ -6,9 +6,16 @@
 
   </head>
   <div class="row" style="margin: 0px;">
-  <div class="col-4">
+  <div class="col-3">
     <svg id="slider" class="w-100" style="height: 44px;">        
     </svg>
+  </div>
+  <div class="col-1" style="padding-left: 0px;">
+    <span style="font-size: 12px;">tsx degree &#8805 avg</span>
+    <label class="switch">
+        <input id="myCheck" type="checkbox" onclick="createNN()">
+        <span class="slider round"></span>
+      </label>
   </div>
   <div class="col-4">
     <select name="aa" onchange="setCentrality(this.value)">
