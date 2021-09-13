@@ -8,8 +8,6 @@ function createNetwork(data, day) {
     var selectedDay = selectedDate.getDate()
     var selectedMonth = selectedDate.getMonth()
     //console.log("Questo è il mese: " + selectedMonth)
-    var average_inp_count=0;
-    var numerotransazioni=0;
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
@@ -19,9 +17,6 @@ function createNetwork(data, day) {
             if(set.nodes.filter(x => x.id === data[j].outputs[k].addresses[0]).length == 0)
                 set.nodes.push({'id': data[j].outputs[k].addresses[0], 'group': 5});   
         }
-
-        average_inp_count += data[j].input_count;
-        numerotransazioni ++;
 
         for (let i = 0; i < data[j].inputs.length; i++) {
             
@@ -35,34 +30,6 @@ function createNetwork(data, day) {
     }
 
     }
-    average_inp_count = average_inp_count/numerotransazioni
-    console.log("LA MEDIA DEGLI INPUT COUNT PER IL GIORNO: " + selectedDay + "/" + (selectedMonth+1) + " è: " + average_inp_count)
-    
-    filter_avg(data, average_inp_count)
-
-
-    function filter_avg(data, average_inp_count){
-        var listacheck =[];
-        console.log("Ciaoooo, questo è l'average: " + average_inp_count)
-        
-        for (let j = 0; j < data.length; j++) {
-            var currentDay = new Date (data[j].block_timestamp).getDate()
-            var currentMonth = new Date (data[j].block_timestamp).getMonth()
-            if(currentMonth == selectedMonth && currentDay == selectedDay){
-                if(data[j].input_count >= average_inp_count){
-                    listacheck.push(data[j].hash);
-                }
-        
-            }
-        }
-
-        console.log("Le transazioni che rispettano la media sono: ")
-        console.log(listacheck)
-    }
-
-
-
-
 
 
 
@@ -437,10 +404,10 @@ function createSlider(start, end) {
         //console.log("Ecco start: " + start)
         //new Date(start.setMonth(start.getMonth()+5));
         //new Date(end.setMonth(end.getMonth()+5));
-    createNN("trans2010new", start)
+    createNN(start)
   
     //console.log("Ecco new date: " + start)
-    createRadarChart(start, [])
+    //createRadarChart(start, [])
 
     var formatDateIntoDay = d3.timeFormat("%d");
     var formatDate = d3.timeFormat("%d %b");
@@ -469,8 +436,10 @@ function createSlider(start, end) {
             .on("start.interrupt", function() { slider.interrupt(); })
             .on("start drag", function() { update(x.invert(d3.event.x)); })
             .on("end", function(){ 
-                createNN("trans2010new", x.invert(d3.event.x));
-                createRadarChart(x.invert(d3.event.x), []); }));
+                ddday = x.invert(d3.event.x)
+                createNN(x.invert(d3.event.x));
+                //createRadarChart(x.invert(d3.event.x), []); 
+            }));
 
     slider.insert("g", ".track-overlay")
         .attr("class", "ticks")
@@ -529,13 +498,20 @@ function setCentrality(type) {
       //.attr("r", 5)
 }
 
-function createNN(month, day){
+function createNN(){    
 
-d3.json(month + '.json', function(error, data) {
+d3.json('trans2010new.json', function(error, data) {
     if (!error) {
+        if(document.getElementById("myCheck").checked){
+            filterTransactionsByInOutAvg(data, this.ddday)
+        }
+        else{
+            createNetwork(data, this.ddday);
+            createTransactionsGraph(data, this.ddday)
+            createRadarChart(this.ddday, [])
+        }
         //console.log('graph', graph);
-        createNetwork(data, day);
-        createTransactionsGraph(data, day)
+
 
     } else {
         console.error(error);
@@ -965,8 +941,8 @@ function createBarChart(myDay){
     var height = h - margin.top - margin.bottom;
     var height2 = h - margin2.top - margin2.bottom;
     
-    var svgBar = d3.select("#barChart")
-    svgBar.selectAll("*").remove();
+    var svg = d3.select("#barChart")
+    svg.selectAll("*").remove();
     
     // set the dimensions and margins of the graph
     // var margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -986,11 +962,6 @@ function createBarChart(myDay){
           .padding(0.1);
     var y = d3.scaleLog()
           .range([0.1, height]);
-    
-    var svg = d3.select('#barChart');
-    
-    // remove any previous graphs
-    svg.selectAll('.g-main').remove();
     
     var gMain = svg.append('g')
     .classed('g-main', true)
@@ -1052,7 +1023,7 @@ function createBarChart(myDay){
     .range([1, height2]);
     
           //add x axis
-    var xScale2 = d3.scaleBand().rangeRound([0,width]).padding(0.1);//scaleBand is used for  bar chart
+    var xScale2 = d3.scaleBand().range([0,width]).padding(0.1);//scaleBand is used for  bar chart
     xScale2.domain(d3.range(1,data.length+".5",1));
     
     // Scale the range of the data in the domains
@@ -1723,6 +1694,7 @@ function createLineChartWithBrush(month){
         changePCA(newMonth+1);
         //createSlider(newMonth)
         createSlider(x2.invert(start), x2.invert(end))
+        ddday=x2.invert(start)
     }
 
     function zoomed() {
@@ -2956,6 +2928,50 @@ var svg = svgPca.select("g");
                 });
 
     });
+}
+
+function filterTransactionsByInOutAvg(data, day){
+
+    var selectedDate = new Date(day)
+    var selectedDay = selectedDate.getDate()
+    var selectedMonth = selectedDate.getMonth()
+    //console.log("Questo è il mese: " + selectedMonth)
+    var inOutCount = 0;
+    var tsxCount = 0;
+    var dayData = [];
+    for (let j = 0; j < data.length; j++) {
+        var currentDay = new Date (data[j].block_timestamp).getDate()
+        var currentMonth = new Date (data[j].block_timestamp).getMonth()
+        
+        if(currentMonth == selectedMonth && currentDay == selectedDay){
+            dayData.push(data[j])
+            inOutCount = inOutCount + data[j].input_count + data[j].output_count;
+            tsxCount ++;
+        }
+
+    }
+    var inOutAvg = inOutCount/tsxCount
+    
+    var dataByAvg = [];
+    console.log("Ciaoooo, questo è l'average: " + inOutAvg)
+    
+    for (let j = 0; j < dayData.length; j++) {
+
+        if(dayData[j].input_count + dayData[j].output_count >= inOutAvg){
+            dataByAvg.push(dayData[j]);
+        }
+    
+    }
+
+    createTransactionsGraph(dataByAvg, day)
+    createNetwork(dataByAvg, day)
+    createRadarChart(day, dataByAvg)
+}
+
+function prova1() {
+    
+    var value = document.getElementById("myCheck").checked 
+    console.log('her1213131e', value)
 }
 
 
