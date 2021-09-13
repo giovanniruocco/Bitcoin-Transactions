@@ -1614,7 +1614,7 @@ function createLineChartWithBrush(month){
     .attr("width", width)
     .attr("height", height)
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .on("mouseover", function() { focus2.style("display", null); })
+    .on("mouseover", function() {focus2.style("display", null); })
     .on("mouseout", function() { focus2.style("display", "none"); })
     .on("mousemove", mousemove);
     //.call(zoom);
@@ -1629,7 +1629,26 @@ function createLineChartWithBrush(month){
         var d = data[i];
         //daaa = x0 - d0.year > d.year - x0 ? d : d0;
         focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-    focus2.select("text").text(function() { return d.close; });
+        focus2.selectAll("foreignObject").remove();
+        focus2.append("foreignObject").attr("width",200).attr("height",200).attr("y",-80)
+        focus2.selectAll("foreignObject").append("xhtml:div").append("xhtml:span")
+        .html( function() { 
+            retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
+                this.textContent = (val[0]) // This is normally done in d3's text() method
+            })
+        });
+        focus2.selectAll("foreignObject").append("xhtml:div").append("xhtml:span")
+        .html( function() { 
+            retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
+                this.textContent = (val[1]) // This is normally done in d3's text() method
+            })
+        });
+        focus2.selectAll("foreignObject").append("xhtml:div").append("xhtml:span")
+        .html( function() { 
+            retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
+                this.textContent = (val[2]) // This is normally done in d3's text() method
+            })
+        });
     focus2.select(".x-hover-line").attr("y2", height - y(d.close));
     focus2.select(".y-hover-line").attr("x2", width + width);
     }
@@ -1724,6 +1743,110 @@ function createLineChartWithBrush(month){
     }
 
 }
+
+const retrieveInfo = async (price, date) => {
+
+    const parseTime = d3.timeParse("%Y-%m-%d");
+    
+    const formatToDate = d3.timeFormat("%d-%m-%Y");
+
+    var transIncrement;
+
+    var oldTrans;
+
+    var oldPrice;
+
+    var priceIncrement;
+
+    d3.csv("daily_data.csv", function(error, data) {
+
+        var myDate = formatToDate(parseTime(date));
+
+        if (myDate) {
+            for (var i = 0; i < data.length; i++) 
+            {
+                if( data[i].date == myDate)
+                    {
+                        if (data[i].day <= 3) {
+                            break;
+                        }
+    
+                        oldTrans = data[i-3].value;                       
+
+                        transIncrement = (((data[i].value - oldTrans)/(data[i].value))*100).toFixed(2);
+
+                        if (transIncrement>=0) {
+                            transIncrement = "+" + transIncrement;
+                        }
+                        
+                    }else {
+                        
+                    }
+            }
+        } 
+
+        if (error) throw error;
+
+    });
+
+    d3.csv("prices.csv", function(error, data) {
+
+        var arr=[];
+
+        data.forEach(element => {
+            arr.push(element.date);
+        });
+
+        let closest = Infinity;
+
+arr.forEach(function(d) {
+   const date2 = new Date(d);
+
+   if ( date2 >= (new Date(date)) && (date2 < (new Date(closest)) || date2 < closest)) {
+      closest = d;
+   }
+});
+
+        if (closest) {
+            for (var i = 0; i < data.length; i++) 
+            {
+                if( data[i].date == closest)
+                    {
+                        oldPrice = data[i-1].close;
+
+                        if (data[i].close != 0) {
+                            priceIncrement = (((data[i].close - oldPrice)/(data[i].close))*100).toFixed(2);
+                        } else if (oldPrice == 0) {
+                            priceIncrement = 0
+                        } else {
+                            priceIncrement = 1000
+                        }
+
+                        if (priceIncrement>=0) {
+                            priceIncrement = "+" + priceIncrement;
+                        }
+                        
+                    }else {
+                        
+                    }
+            }
+        } 
+
+        if (error) throw error;
+
+    });
+
+    const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+   
+    await sleep(2000)
+
+    
+    var result = ['Price : ' + price + '$', 'Price Incr. : ' + priceIncrement + '% ', 'Trans Incr : ' + transIncrement + '% '];
+
+      return result
+
+}
+
 let inputradar=true
 let primo_cont_input, secondo_cont_input, terzo_cont_input;
 let best_in = ["","",""];
