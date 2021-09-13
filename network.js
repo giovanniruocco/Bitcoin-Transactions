@@ -933,7 +933,7 @@ function createTransactionsGraph(data, day) {
     
 }
 
-function createBarChart(myDay){
+function createBarChart(myDay, isFromLineChart){
 
     var lastUpdate = [0,0];
     
@@ -1145,17 +1145,120 @@ function createBarChart(myDay){
       var brush = d3.brushX()
       .extent([[0,0],[width,height2]])//(x0,y0)  (x1,y1)
       .on("start", updateCurrentExtent)
-      .on("brush",brushed)//when mouse up, move the selection to the exact tick //start(mouse down), brush(mouse move), end(mouse up)
-      .on("end",brushend);
+      .on("end", brushProva);
+
+      var bool = false
     
       context.append("g")
       .attr("class","x brush")
       .call(brush)
-      .call(brush.move,[xScale2(parseInt(dayOfYear)),xScale2(parseInt(dayOfYear)+30)])
-     /*  .call(brush.event) */;
+      .call(brush.move,[xScale2(parseInt(dayOfYear)),xScale2(parseInt(dayOfYear)+30)]);
     
       function updateCurrentExtent() {
         currentExtent = d3.brushSelection(this);
+    }
+
+    function brushProva(){
+        if (!d3.event.sourceEvent) {
+            if(bool){
+                return; // Only transition after input.                
+            }
+            bool = true
+        }
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+        var s = d3.event.selection;	 
+        var p = currentExtent;
+        var start;
+        var end;
+        var startMonth;
+        var endMonth;
+        var oldMonth = parseInt(data[scaleBandInvert(xScale2)(p[0])-1].month)
+        console.log(oldMonth )
+
+        if (s) {
+            start = d3.min([s[0], s[1]])
+            end = d3.max([s[0], s[1]])
+            startMonth = parseInt(data[scaleBandInvert(xScale2)(start)-1].month)
+            endMonth = parseInt(data[scaleBandInvert(xScale2)(end)-1].month)
+
+            if (startMonth != endMonth && ((p[0] == s[0]) || (p[1] == s[1]) || (p[1] == s[0]) || (p[0] == s[1]))) {
+                if (startMonth == oldMonth) {
+                    start = xScale2(getDayOfYearFromDate(new Date(2010, endMonth, 1))-1)
+                } else {
+                    end = xScale2(getDayOfYearFromDate(new Date(2010, startMonth+1, 0)))
+                }
+            } else if (startMonth != endMonth) {
+                if (p[0]<s[0]) { //right
+                    start = xScale2(getDayOfYearFromDate(new Date(2010, endMonth, 1))-1)
+                    end = s[1] + start - s[0]
+                } else { //left
+                    end = xScale2(getDayOfYearFromDate(new Date(2010, startMonth+1, 0)))
+                    start = s[0] - (s[1] - end)
+                }
+            }
+
+        } else { // if no selection took place and the brush was just clicked
+            var mouse = d3.mouse(this)[0];
+            var selectedMonth =  parseInt(data[scaleBandInvert(xScale2)(mouse)-1].month)
+            start = xScale2(getDayOfYearFromDate(new Date(2010, selectedMonth, 1))-1)
+            end = xScale2(getDayOfYearFromDate(new Date(2010, selectedMonth+1, 0)))
+        }
+        s = [start,end]
+
+        newInput = []
+
+        xScale2.domain().forEach(function(d){
+            var pos = xScale2(d) + xScale2.bandwidth()/2;
+            if (pos >= s[0] && pos <= s[1]){
+                //console.log("log"+brushArea)
+              newInput.push(d);
+            }
+        });
+
+        console.log("new input", newInput)
+    
+        //relocate the position of brush area
+        var left=xScale2(d3.min(newInput));
+        var right = xScale2(d3.max(newInput))+xScale2.bandwidth();
+    
+        d3.select(this).transition().call(d3.event.target.move,[left,right]);//The inner padding determines the ratio of the range that is reserved for blank space between bands.
+    
+
+        x.domain(newInput);
+        //realocate the bar chart
+        bars1.attr("x",function(d,i){//data set is still data
+            return x(i)/*xScale(xScale.domain().indexOf(i))*/;
+        })
+        .attr("y",function(d){
+            return y(d.value);
+        })//for bottom to top
+        .attr("width", x.bandwidth())//if you want to change the width of bar. Set the width to xScale.bandwidth(); If you want a fixed width, use xScale2.bandwidth(). Note because we use padding() in the scale, we should use xScale.bandwidth()
+        .attr("height", function(d,i){
+            if(x.domain().indexOf(i) === -1){
+                return 0;
+            }
+            else
+                return height - y(d.value);
+        });
+        
+        xAxisGroup.call(xAxis);
+        xAxisGroup.selectAll("text")
+        .text(function(d){
+            return ((data[d].date));    
+        })
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-45)");
+        
+        var sBrush = new Date(data[x.domain()[0]].date)
+        var eBrush = new Date(data[x.domain()[x.domain().length-1]].date)
+        changeBarChartDay(sBrush)
+        if(!isFromLineChart){
+            createLineChartWithBrush(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()), true) 
+        }
+
+        isFromLineChart = false
     }
     
     var temp = [0,0];
@@ -1476,7 +1579,7 @@ function createBarChart(myDay){
     
     }
 
-function createLineChartWithBrush(myStart, myEnd, isFromLineChart){
+function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
 
     queue()
     .defer(d3.csv, "prices.csv", type)
@@ -1693,7 +1796,7 @@ function createLineChartWithBrush(myStart, myEnd, isFromLineChart){
                 } else {
                     end = x2(new Date(2010, startMonth+1, 0))
                 }
-            } else if (startMonth != endMonth) {
+            } else if (startMonth != endMonth) { //todo implementare controllo se trascino da un mese con piu giorni a uno con meno
                 if (p[0]<s[0]) { //right
                     start = x2(new Date(2010, endMonth, 1))
                     end = s[1] + start - s[0]
@@ -1727,18 +1830,17 @@ function createLineChartWithBrush(myStart, myEnd, isFromLineChart){
         var newMonth = x2.invert(start).getMonth();
         /* changeBarChartMonth(newMonth) */
         /* createBarChart(30) */
-        if(!isFromLineChart){
+        if(!isFromBarChart){
             var aux= null;
         if (newMonth+1 <= 9) {
             aux = '0'+(newMonth+1);
         } else aux = newMonth+1;
 
         
-        createBarChart("01-"+aux+"-2010");
-        //createSlider(x2.invert(start), x2.invert(end), x2.invert(start)) todo e toglierlo sotto ma prima devo crearlo dal brush del bar
+        createBarChart("01-"+aux+"-2010", true);
 
         }
-        isFromLineChart = false
+        isFromBarChart = false
         changePCA(newMonth+1);
         createSlider(x2.invert(start), x2.invert(end), x2.invert(start))
         ddday=x2.invert(start)
@@ -2737,10 +2839,7 @@ function resetTransactions() {
 
 function changeBarChartDay(day) {
 
-    var start = new Date(day.getFullYear(), 0, 0);
-    var diff = (day - start) + ((start.getTimezoneOffset() - day.getTimezoneOffset()) * 60 * 1000);
-    var oneDay = 1000 * 60 * 60 * 24;
-    var nDay = Math.floor(diff / oneDay);
+    var nDay = getDayOfYearFromDate(day)
 
     d3.select('#barChart').select(".g-main").selectAll(".bar")
     .style("opacity", function(d) {
@@ -3021,3 +3120,11 @@ function filterTransactionsByInOutAvg(data, day){
     createRadarChart(day, dataByAvg)
 }
 
+function getDayOfYearFromDate(day){
+    var start = new Date(day.getFullYear(), 0, 0);
+    var diff = (day - start) + ((start.getTimezoneOffset() - day.getTimezoneOffset()) * 60 * 1000);
+    var oneDay = 1000 * 60 * 60 * 24;
+    var nDay = Math.floor(diff / oneDay);
+    return nDay;
+
+}
