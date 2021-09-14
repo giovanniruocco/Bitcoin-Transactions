@@ -2916,7 +2916,7 @@ function createPCA(){
 var h = parseInt(d3.select('#pca').style('height'), 10);
 var w = parseInt(d3.select('#pca').style('width'), 10);
 
-var margin = {top: h*5/100, right: w*5/100, bottom: h*15/100, left: w*15/100};
+var margin = {top: h*5/100, right: w*5/100, bottom: h*15/100, left: w*12/100};
 var width = w - margin.left - margin.right;
 var height = h - margin.top - margin.bottom;
 
@@ -2962,6 +2962,11 @@ d3.csv("pca_finale2.csv", function(error, data) {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis); */
+
+      svg.append("text")
+      .attr("transform", "translate(" + (width/2) + " ," + margin.top + ")")
+      .style("text-anchor", "middle")
+      .text("PCA");
 
       svg.append("g")
       .attr("class", "x axis")
