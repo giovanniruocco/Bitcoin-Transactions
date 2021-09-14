@@ -176,3 +176,17 @@
   .slider.round:before {
     border-radius: 50%;
   }
+
+  .day   { background: white; color: black; }
+  .night { background: #333; color: white; }
+  
+  @media (prefers-color-scheme: dark) {
+    .day.dark-scheme   { background:  #333; color: white; border: 1px solid #333;}
+    .night.dark-scheme { background: black; color:  #ddd; }
+  }
+  
+  @media (prefers-color-scheme: light) {
+    .day.light-scheme   { background: white; color:  #555; }
+    .night.light-scheme { background:  white; color: black; }
+  }
+  

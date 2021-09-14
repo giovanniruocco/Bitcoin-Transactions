@@ -1598,23 +1598,24 @@ function createLineChartWithBrush(month){
 
         var d0 = data[i - 1];
         var d = data[i];
+
         //daaa = x0 - d0.year > d.year - x0 ? d : d0;
         focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
         focus2.selectAll("foreignObject").remove();
-        focus2.append("foreignObject").attr("width",200).attr("height",200).attr("y",-80)
-        focus2.selectAll("foreignObject").append("xhtml:div").append("xhtml:span")
+        focus2.append("foreignObject").attr("width",160).attr("height",90).attr("y",-100)
+        focus2.selectAll("foreignObject").append("xhtml:div").attr("class","day dark-scheme").style("margin","-1px").style("padding", "2px").append("xhtml:span")
         .html( function() { 
             retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
                 this.textContent = (val[0]) // This is normally done in d3's text() method
             })
         });
-        focus2.selectAll("foreignObject").append("xhtml:div").append("xhtml:span")
+        focus2.selectAll("foreignObject").append("xhtml:div").attr("class","day dark-scheme").style("margin","-1px").style("padding", "2px").append("xhtml:span")
         .html( function() { 
             retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
                 this.textContent = (val[1]) // This is normally done in d3's text() method
             })
         });
-        focus2.selectAll("foreignObject").append("xhtml:div").append("xhtml:span")
+        focus2.selectAll("foreignObject").append("xhtml:div").attr("class","day dark-scheme").style("margin","-1px").style("padding", "2px").append("xhtml:span")
         .html( function() { 
             retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
                 this.textContent = (val[2]) // This is normally done in d3's text() method
@@ -2783,8 +2784,8 @@ var svg = svgPca
 
 // Define the div for the tooltip
 var div = d3.select("#pca_div").append("div")	
-    .attr("class", "tooltip")
-    .style("visibility", "hidden");				
+    .attr("class", "tooltip")/* 
+    .style("visibility", "hidden");				 */
     // .style("opacity", 0);
 
 d3.csv("pca_finale2.csv", function(error, data) {
@@ -2843,16 +2844,20 @@ d3.csv("pca_finale2.csv", function(error, data) {
       .attr("cy", function(d) { return y(d.y); })
       .attr('fill', d => color(colorValue(d)))
       .attr('fill-opacity', 0.6)
-      .on("mouseover", function(d) {
-          
+      .on("mouseover", function(d) {  
 
-        div.transition()		
-            .duration(500)		
-            .style("opacity", .9);		
-        div	.html(d.hash)	
-            .style("visibility", "visible")
-            .style("left", d3.select(this).attr("cx") + "px")		
-            .style("top", d3.select(this).attr("cy") + "px");	
+        d3.select("#pca_div").selectAll("div").remove();
+
+        div.selectAll("foreignObject").remove();
+        div.append("foreignObject").attr("width",200).attr("height",200).attr("y",-80)
+        .attr("class","day dark-scheme")
+        .style("left", (d3.select(this).attr("cx")-200) + "px")		
+        .style("top", (d3.select(this).attr("cy")-50) + "px")
+        .style("position", "absolute")
+        .style("overflow-wrap", "break-word")
+        .style("max-width", "280px")
+        div.selectAll("foreignObject").append("xhtml:p").style("margin", "5px")
+        .html( d.hash );
     
         hoverMonth = d.month;
 
@@ -2863,6 +2868,11 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
         })					
         .on("mouseleave", function(d) {		
+
+            d3.select("#pca_div").selectAll("div").remove();
+
+            div.selectAll("foreignObject").remove();
+
             svg.selectAll(".dot")
             .style("fill", function(d) {
                 return color(colorValue(d));
@@ -2891,6 +2901,8 @@ var svg = svgPca.select("g");
 
         const colorValue = d => d.month;
 
+        var div = d3.select("#pca_div");
+
         /*   svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
@@ -2904,13 +2916,19 @@ var svg = svgPca.select("g");
             })
             .attr('fill-opacity', 0.6)
             .on("mouseover", function(d) {
-/*                 div.transition()		
-                    .duration(500)		
-                    .style("opacity", .9);		
-                div	.html(d.hash)	
-                    .style("visibility", "visible")
-                    .style("left", d3.select(this).attr("cx") + "px")		
-                    .style("top", d3.select(this).attr("cy") + "px");	 */
+
+                d3.select("#pca_div").selectAll("div").remove();
+
+                div.selectAll("foreignObject").remove();
+                div.append("foreignObject").attr("width",200).attr("height",200).attr("y",-80)
+                .attr("class","day dark-scheme")
+                .style("left", (d3.select(this).attr("cx")-200) + "px")		
+                .style("top", (d3.select(this).attr("cy")-50) + "px")
+                .style("position", "absolute")
+                .style("overflow-wrap", "break-word")
+                .style("max-width", "280px")
+                div.selectAll("foreignObject").append("xhtml:p").style("margin", "5px")
+                .html( d.hash );
             
                 hoverMonth = d.month;
 
@@ -2921,6 +2939,11 @@ var svg = svgPca.select("g");
 
                 })					
                 .on("mouseleave", function(d) {		
+
+                    d3.select("#pca_div").selectAll("div").remove();
+
+                    div.selectAll("foreignObject").remove();
+
                     svg.selectAll(".dot")
                     .style("fill", function(d) {
                         return color(colorValue(d));
