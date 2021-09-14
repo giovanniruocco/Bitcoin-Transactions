@@ -933,7 +933,7 @@ function createTransactionsGraph(data, day) {
     
 }
 
-function createBarChart(myDay, isFromLineChart){
+function createBarChart(myStart, myEnd, isFromLineChart){
 
     var lastUpdate = [0,0];
     
@@ -995,24 +995,6 @@ function createBarChart(myDay, isFromLineChart){
     
     const formatTime = d3.timeFormat("%d %b");
     
-    let dayOfYear = 0;
-
-        if (myDay) {
-            for (var i = 0; i < data.length; i++) 
-            {
-                if(String(data[i].date) === String(myDay))
-                    {
-                        console.log(data[i].date);
-                        console.log(myDay)
-                        
-                    dayOfYear = data[i].day;
-                    break;
-                    }else {
-                        dayOfYear=30;
-                    }
-            }
-        } 
-    
     // format the data
     data.forEach(function(d) {
         aux = parseTime(d.date);
@@ -1029,7 +1011,7 @@ function createBarChart(myDay, isFromLineChart){
     
           //add x axis
     var xScale2 = d3.scaleBand().range([0,width]).padding(0.1);//scaleBand is used for  bar chart
-    xScale2.domain(d3.range(0,data.length+".1",1));
+    xScale2.domain(d3.range(1,data.length+".1",1));
     
     // Scale the range of the data in the domains
     x.domain(d3.range(0,data.length,1));
@@ -1137,10 +1119,6 @@ function createBarChart(myDay, isFromLineChart){
         var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
     
       var currentExtent = [0,0]
-    
-      console.log(scaleBandInvert(xScale2)(xScale2(dayOfYear)))
-      console.log(xScale2(dayOfYear));
-      console.log(xScale2(parseInt(dayOfYear)+30));
       
       var brush = d3.brushX()
       .extent([[0,0],[width,height2]])//(x0,y0)  (x1,y1)
@@ -1148,11 +1126,13 @@ function createBarChart(myDay, isFromLineChart){
       .on("end", brushProva);
 
       var bool = false
+
+      console.log(xScale2.domain(), "domain x2222")
     
       context.append("g")
       .attr("class","x brush")
       .call(brush)
-      .call(brush.move,[xScale2(parseInt(dayOfYear)),xScale2(parseInt(dayOfYear)+30)]);
+      .call(brush.move,[xScale2(getDayOfYearFromDate(myStart) == 1 ? getDayOfYearFromDate(myStart) : getDayOfYearFromDate(myStart)-1),xScale2(getDayOfYearFromDate(myEnd))]);
     
       function updateCurrentExtent() {
         currentExtent = d3.brushSelection(this);
@@ -1669,10 +1649,10 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
     .attr("class", "line")
     .attr("d", line);
 
-    focus.append("g")
+    var xAxisGroup = focus.append("g")
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
+    .call(xAxis.tickFormat(d3.timeFormat("%d %b")))
 
     // text label for the x axis
     focus.append("text")
@@ -1831,19 +1811,19 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
         /* changeBarChartMonth(newMonth) */
         /* createBarChart(30) */
         if(!isFromBarChart){
-            var aux= null;
-        if (newMonth+1 <= 9) {
-            aux = '0'+(newMonth+1);
-        } else aux = newMonth+1;
-
-        
-        createBarChart("01-"+aux+"-2010", true);
+            createBarChart(x2.invert(start), x2.invert(end), true);
 
         }
         isFromBarChart = false
         changePCA(newMonth+1);
         createSlider(x2.invert(start), x2.invert(end), x2.invert(start))
         ddday=x2.invert(start)
+
+        xAxisGroup.selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-45)");
     }
 
     function zoomed() {
