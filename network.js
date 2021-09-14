@@ -39,6 +39,19 @@ var svg = d3v4.select('#network');
 var svgWidth = parseInt(svg.style('width'), 10);
 var svgHeight = parseInt(svg.style('height'), 10);
 
+svg.append('defs')
+.append('marker')
+.attr("id", "Triangle")
+.attr("refX", 11.5)
+.attr("refY", 3)
+.attr("markerUnits", 'userSpaceOnUse')
+.attr("markerWidth", 6)
+.attr("markerHeight", 9)
+.attr("orient", 'auto')
+.append('path')
+.style("fill", "#9e9393")
+.attr("d", 'M 0 0 6 3 0 6 1.5 3');
+
 // remove any previous graphs
 svg.selectAll('.g-main').remove();
 
@@ -81,6 +94,7 @@ var link = gDraw.append("g")
     .data(set.links)
     .enter().append("line")
     .style("stroke-width", "1px")
+    .attr("marker-end", "url(#Triangle)")
     .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
 var node = gDraw.append("g")
@@ -390,24 +404,12 @@ return set;
 }
 //let conteggio=0;  //questo per cambiare il mese
 
-function createSlider(start, end) {
+function createSlider(start, end, selected) {
     var svgSlider = d3.select("#slider")
     svgSlider.selectAll("*").remove();
-    /*var actualdate = new Date();                          //sempre per cambiare il mese
-    var actualmonth = actualdate.getMonth();
-    if (conteggio <3)
-        {
-            (console.log("Ho cambiato il conteggio"))       //sempre per cambiare il mese
-            month=actualmonth;
-            conteggio++
-        }*/
-        //console.log("Ecco start: " + start)
-        //new Date(start.setMonth(start.getMonth()+5));
-        //new Date(end.setMonth(end.getMonth()+5));
-    createNN(start)
-  
-    //console.log("Ecco new date: " + start)
-    //createRadarChart(start, [])
+    ddday = selected
+
+    createNN()
 
     var formatDateIntoDay = d3.timeFormat("%d");
     var formatDate = d3.timeFormat("%d %b");
@@ -437,7 +439,8 @@ function createSlider(start, end) {
             .on("start drag", function() { update(x.invert(d3.event.x)); })
             .on("end", function(){ 
                 ddday = x.invert(d3.event.x)
-                createNN(x.invert(d3.event.x));
+                createNN();
+                changeBarChartDay(ddday)
                 //createRadarChart(x.invert(d3.event.x), []); 
             }));
 
@@ -455,12 +458,14 @@ function createSlider(start, end) {
 
     var handle = slider.insert("circle", ".track-overlay")
         .attr("class", "handle")
-        .attr("r", 5);
+        .attr("r", 5)
+        .attr("cx", x(selected));
 
     var label = slider.append("text")  
         .attr("class", "label")
         .attr("text-anchor", "middle")
-        .text(formatDate(start))
+        .attr("x", x(selected))
+        .text(formatDate(selected))
         .attr("transform", "translate(0," + (-10) + ")")
 
     function update(h) {
@@ -928,7 +933,7 @@ function createTransactionsGraph(data, day) {
     
 }
 
-function createBarChart(myDay){
+function createBarChart(myStart, myEnd, isFromLineChart){
 
     var lastUpdate = [0,0];
     
@@ -958,7 +963,7 @@ function createBarChart(myDay){
     
     // set the ranges
     var x = d3.scaleBand()
-          .rangeRound([0, width])
+          .range([0, width])
           .padding(0.1);
     var y = d3.scaleLog()
           .range([0.1, height]);
@@ -990,24 +995,6 @@ function createBarChart(myDay){
     
     const formatTime = d3.timeFormat("%d %b");
     
-    let dayOfYear = 0;
-
-        if (myDay) {
-            for (var i = 0; i < data.length; i++) 
-            {
-                if(String(data[i].date) === String(myDay))
-                    {
-                        console.log(data[i].date);
-                        console.log(myDay)
-                        
-                    dayOfYear = data[i].day;
-                    break;
-                    }else {
-                        dayOfYear=30;
-                    }
-            }
-        } 
-    
     // format the data
     data.forEach(function(d) {
         aux = parseTime(d.date);
@@ -1024,7 +1011,7 @@ function createBarChart(myDay){
     
           //add x axis
     var xScale2 = d3.scaleBand().range([0,width]).padding(0.1);//scaleBand is used for  bar chart
-    xScale2.domain(d3.range(1,data.length+".5",1));
+    xScale2.domain(d3.range(1,data.length+".1",1));
     
     // Scale the range of the data in the domains
     x.domain(d3.range(0,data.length,1));
@@ -1051,8 +1038,13 @@ function createBarChart(myDay){
             .style("opacity", function() {
                 return (this === selected) ? 1.0 : 0.3;
             })
-        createLineChartWithBrush(formatToMonth(parseToMonth(d.date))-1);
-        
+
+            var sBrush = new Date(data[x.domain()[0]].date)
+            var eBrush = new Date(data[x.domain()[x.domain().length-1]].date)
+            var selDate = new Date(data[d.day-1].date)
+            
+            createSlider(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()), new Date(2010, selDate.getMonth(), selDate.getDate()))
+        //createLineChartWithBrush(formatToMonth(parseToMonth(d.date))-1); TODO puntamento sul linechart
     });
     
     var superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹",
@@ -1127,25 +1119,126 @@ function createBarChart(myDay){
         var xAxisGroup2 = context.append("g").call(xAxis2).attr("transform", "translate(0,"+height2+")");
     
       var currentExtent = [0,0]
-    
-      console.log(scaleBandInvert(xScale2)(xScale2(dayOfYear)))
-      console.log(xScale2(dayOfYear));
-      console.log(xScale2(parseInt(dayOfYear)+30));
       
       var brush = d3.brushX()
       .extent([[0,0],[width,height2]])//(x0,y0)  (x1,y1)
-      .on("brush start", updateCurrentExtent)
-      .on("brush",brushed)//when mouse up, move the selection to the exact tick //start(mouse down), brush(mouse move), end(mouse up)
-      .on("end",brushend);
+      .on("start", updateCurrentExtent)
+      .on("end", brushProva);
+
+      var bool = false
+
+      console.log(xScale2.domain(), "domain x2222")
     
       context.append("g")
       .attr("class","x brush")
       .call(brush)
-      .call(brush.move,[xScale2(parseInt(dayOfYear)),xScale2(parseInt(dayOfYear)+30)])
-     /*  .call(brush.event) */;
+      .call(brush.move,[xScale2(getDayOfYearFromDate(myStart) == 1 ? getDayOfYearFromDate(myStart) : getDayOfYearFromDate(myStart)-1),xScale2(getDayOfYearFromDate(myEnd))]);
     
       function updateCurrentExtent() {
         currentExtent = d3.brushSelection(this);
+    }
+
+    function brushProva(){
+        if (!d3.event.sourceEvent) {
+            if(bool){
+                return; // Only transition after input.                
+            }
+            bool = true
+        }
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+        var s = d3.event.selection;	 
+        var p = currentExtent;
+        var start;
+        var end;
+        var startMonth;
+        var endMonth;
+        var oldMonth = parseInt(data[scaleBandInvert(xScale2)(p[0])-1].month)
+        console.log(oldMonth )
+
+        if (s) {
+            start = d3.min([s[0], s[1]])
+            end = d3.max([s[0], s[1]])
+            startMonth = parseInt(data[scaleBandInvert(xScale2)(start)-1].month)
+            endMonth = parseInt(data[scaleBandInvert(xScale2)(end)-1].month)
+
+            if (startMonth != endMonth && ((p[0] == s[0]) || (p[1] == s[1]) || (p[1] == s[0]) || (p[0] == s[1]))) {
+                if (startMonth == oldMonth) {
+                    start = xScale2(getDayOfYearFromDate(new Date(2010, endMonth, 1))-1)
+                } else {
+                    end = xScale2(getDayOfYearFromDate(new Date(2010, startMonth+1, 0)))
+                }
+            } else if (startMonth != endMonth) {
+                if (p[0]<s[0]) { //right
+                    start = xScale2(getDayOfYearFromDate(new Date(2010, endMonth, 1))-1)
+                    end = s[1] + start - s[0]
+                } else { //left
+                    end = xScale2(getDayOfYearFromDate(new Date(2010, startMonth+1, 0)))
+                    start = s[0] - (s[1] - end)
+                }
+            }
+
+        } else { // if no selection took place and the brush was just clicked
+            var mouse = d3.mouse(this)[0];
+            var selectedMonth =  parseInt(data[scaleBandInvert(xScale2)(mouse)-1].month)
+            start = xScale2(getDayOfYearFromDate(new Date(2010, selectedMonth, 1))-1)
+            end = xScale2(getDayOfYearFromDate(new Date(2010, selectedMonth+1, 0)))
+        }
+        s = [start,end]
+
+        newInput = []
+
+        xScale2.domain().forEach(function(d){
+            var pos = xScale2(d) + xScale2.bandwidth()/2;
+            if (pos >= s[0] && pos <= s[1]){
+                //console.log("log"+brushArea)
+              newInput.push(d);
+            }
+        });
+
+        console.log("new input", newInput)
+    
+        //relocate the position of brush area
+        var left=xScale2(d3.min(newInput));
+        var right = xScale2(d3.max(newInput))+xScale2.bandwidth();
+    
+        d3.select(this).transition().call(d3.event.target.move,[left,right]);//The inner padding determines the ratio of the range that is reserved for blank space between bands.
+    
+
+        x.domain(newInput);
+        //realocate the bar chart
+        bars1.attr("x",function(d,i){//data set is still data
+            return x(i)/*xScale(xScale.domain().indexOf(i))*/;
+        })
+        .attr("y",function(d){
+            return y(d.value);
+        })//for bottom to top
+        .attr("width", x.bandwidth())//if you want to change the width of bar. Set the width to xScale.bandwidth(); If you want a fixed width, use xScale2.bandwidth(). Note because we use padding() in the scale, we should use xScale.bandwidth()
+        .attr("height", function(d,i){
+            if(x.domain().indexOf(i) === -1){
+                return 0;
+            }
+            else
+                return height - y(d.value);
+        });
+        
+        xAxisGroup.call(xAxis);
+        xAxisGroup.selectAll("text")
+        .text(function(d){
+            return ((data[d].date));    
+        })
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-45)");
+        
+        var sBrush = new Date(data[x.domain()[0]].date)
+        var eBrush = new Date(data[x.domain()[x.domain().length-1]].date)
+        changeBarChartDay(sBrush)
+        if(!isFromLineChart){
+            createLineChartWithBrush(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()), true) 
+        }
+
+        isFromLineChart = false
     }
     
     var temp = [0,0];
@@ -1270,12 +1363,38 @@ function createBarChart(myDay){
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
         .attr("transform", "rotate(-45)");
+
+        var sBrush = new Date(data[x.domain()[0]].date)
+        var eBrush = new Date(data[x.domain()[x.domain().length-1]].date)
+        
+        //createLineChartWithBrush(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()), true) // todo decommentare dopo aver settato una sola chiamata del brush
+    
     
     }
     
     function scaleBandInvert(scale) {
+        //const scale = scale;
+    // const domain = scale.domain;
+    // const paddingOuter = scale.paddingOuter();
+    // const paddingInner = scale.paddingInner();
+    // const step = scale.step();
+
+    // const range = scale.range();
+    // var domainIndex,
+    //   n = domain().length,
+    //   reverse = range[1] < range[0],
+    //   start = range[reverse - 0],
+    //   stop = range[1 - reverse];
+
+    //   return function(value){
+    // if (value < start + paddingOuter * step) domainIndex = 0;
+    // else if (value > stop - paddingOuter * step) domainIndex = n - 1;
+    // else domainIndex = Math.floor((value - start - paddingOuter * step) / step);
+
+    // return domain()[domainIndex];
+    // }
         var domain = scale.domain();
-        var paddingOuter = scale(domain[0]);
+        var paddingOuter = scale.paddingOuter();
         var eachBand = scale.step();
         return function (value) {
           var index = Math.floor(((value - paddingOuter) / eachBand));
@@ -1290,7 +1409,7 @@ function createBarChart(myDay){
         //scaleBand of bar chart is not continuous. Thus we cannot use method in line chart.
         //The idea here is to count all the bar chart in the brush area. And reset the domain
         var newInput = [];
-        var brushArea = d3.event.selection;
+        brushArea = d3.event.selection;
         if(brushArea === null) brushArea = x.range();
     
         temp2 = brushArea;
@@ -1313,7 +1432,7 @@ function createBarChart(myDay){
         brushArea[0] = Math.round(brushArea[0]);
         brushArea[1] = Math.round(brushArea[1]);
     
-    switch (formatToMonth2(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))].date))) {
+    switch (formatToMonth2(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))-1].date))) {
         case "Jan":
                 days = 31;
         break;
@@ -1367,10 +1486,10 @@ function createBarChart(myDay){
     }
     
     
-    var daysOfPrec = (days - formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[0]))].date)));
-    var daysOfSeq = formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[1]))].date));
+    var daysOfPrec = (days - formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[0]))-1].date)));
+    var daysOfSeq = formatToDay(parseToDay(data[(scaleBandInvert(xScale2)(brushArea[1]))-1].date));
     
-    if (formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))].date)) == formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[1]))].date))) {
+    if (formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[0]))-1].date)) == formatToMonth(parseToMonth(data[(scaleBandInvert(xScale2)(brushArea[1]))-1].date))) {
         return;
     }else {
         if (daysOfPrec < daysOfSeq) {
@@ -1427,6 +1546,12 @@ function createBarChart(myDay){
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
         .attr("transform", "rotate(-45)");
+
+        //createLineChartWithBrush(new Date (initData[scaleBandInvert(xScale2)(brushArea[0])].date), new Date(initData[scaleBandInvert(xScale2)(brushArea[1])-1].date))
+        // var sBrush = new Date(data[x.domain()[0]].date)
+        // var eBrush = new Date(data[x.domain()[x.domain().length-1]].date)
+        
+        // createLineChartWithBrush(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()))
     
     }
     
@@ -1434,7 +1559,7 @@ function createBarChart(myDay){
     
     }
 
-function createLineChartWithBrush(month){
+function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
 
     queue()
     .defer(d3.csv, "prices.csv", type)
@@ -1498,7 +1623,7 @@ function createLineChartWithBrush(month){
 
 
     var context = svg.append("g")
-        // <!-- .attr("class", "context") -->
+        .attr("class", "context")
         .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
         
     var currentExtent = [0,0]
@@ -1524,10 +1649,10 @@ function createLineChartWithBrush(month){
     .attr("class", "line")
     .attr("d", line);
 
-    focus.append("g")
+    var xAxisGroup = focus.append("g")
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
+    .call(xAxis.tickFormat(d3.timeFormat("%d %b")))
 
     // text label for the x axis
     focus.append("text")
@@ -1578,7 +1703,7 @@ function createLineChartWithBrush(month){
     context.append("g")
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, [new Date(2010,month,1),new Date(2010, parseInt(month)+1,0)].map(x));
+    .call(brush.move, [myStart,myEnd].map(x));
 
     svg.append("rect")
     .attr("class", "zoom")
@@ -1652,7 +1777,7 @@ function createLineChartWithBrush(month){
                 } else {
                     end = x2(new Date(2010, startMonth+1, 0))
                 }
-            } else if (startMonth != endMonth) {
+            } else if (startMonth != endMonth) { //todo implementare controllo se trascino da un mese con piu giorni a uno con meno
                 if (p[0]<s[0]) { //right
                     start = x2(new Date(2010, endMonth, 1))
                     end = s[1] + start - s[0]
@@ -1686,16 +1811,20 @@ function createLineChartWithBrush(month){
         var newMonth = x2.invert(start).getMonth();
         /* changeBarChartMonth(newMonth) */
         /* createBarChart(30) */
-        var aux= null;
-        if (newMonth+1 <= 9) {
-            aux = '0'+(newMonth+1);
-        } else aux = newMonth+1;
+        if(!isFromBarChart){
+            createBarChart(x2.invert(start), x2.invert(end), true);
 
-        createBarChart("01-"+aux+"-2010");
+        }
+        isFromBarChart = false
         changePCA(newMonth+1);
-        //createSlider(newMonth)
-        createSlider(x2.invert(start), x2.invert(end))
+        createSlider(x2.invert(start), x2.invert(end), x2.invert(start))
         ddday=x2.invert(start)
+
+        xAxisGroup.selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-45)");
     }
 
     function zoomed() {
@@ -2689,10 +2818,13 @@ function resetTransactions() {
 
 }
 
-function changeBarChartMonth(month) {
-    d3.select('#barChart').selectAll(".bar")
+function changeBarChartDay(day) {
+
+    var nDay = getDayOfYearFromDate(day)
+
+    d3.select('#barChart').select(".g-main").selectAll(".bar")
     .style("opacity", function(d) {
-        return (d.id == month) ? 1.0 : 0.3;
+        return (d.id == nDay) ? 1.0 : 0.3;
     })
 }
 
@@ -2985,10 +3117,11 @@ function filterTransactionsByInOutAvg(data, day){
     createRadarChart(day, dataByAvg)
 }
 
-function prova1() {
-    
-    var value = document.getElementById("myCheck").checked 
-    console.log('her1213131e', value)
+function getDayOfYearFromDate(day){
+    var start = new Date(day.getFullYear(), 0, 0);
+    var diff = (day - start) + ((start.getTimezoneOffset() - day.getTimezoneOffset()) * 60 * 1000);
+    var oneDay = 1000 * 60 * 60 * 24;
+    var nDay = Math.floor(diff / oneDay);
+    return nDay;
+
 }
-
-
