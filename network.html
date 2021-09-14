@@ -17,11 +17,14 @@
         <span class="slider round"></span>
       </label>
   </div>
-  <div class="col-4">
-    <select name="aa" onchange="setCentrality(this.value)">
-        <option value="bw" selected>betweenneess</option>
-        <option value="ev">eigenvector</option>
-    </select>
+  <div class="col-4" style="display: flex; justify-content: left; align-items: center;">
+    <div style="font-size: 12px;">Shows betweenneess centrality</div>
+    <div>
+    <label class="switch" style="margin-left: 10px;">
+        <input id="checkCentrality" type="checkbox" onclick="setCentrality()">
+        <span class="slider round"></span>
+      </label>
+    </div>
   </div>
   <div class="col-4">
     <select name="aa" onchange="setUserType(this.value)">

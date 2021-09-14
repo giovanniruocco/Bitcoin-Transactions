@@ -65,7 +65,24 @@ var rect = gMain.append('rect')
 .style('fill', 'white')
 .style('stroke', 'black')
 
-var gDraw = gMain.append('g');
+var gDraw = gMain.append('g').classed("gDraw", true);
+
+var scaleLegend = gMain.append("foreignObject").attr("width",100).attr("height",50).attr("y",10).attr("x", +svgWidth-110).style("fill", 'white').style("fill-opacity", 0.8)
+
+scaleLegend.append("xhtml:div").append("text")
+      .style("text-anchor", "middle")
+      .text("BW Centrality:");
+
+scaleLegend.append("xhtml:div").attr("class","scale")
+scaleLegend.append("xhtml:div").attr("class", "min-max").append("text")
+.style("float", "left")
+.style("font-size", "11px")
+.text("min");
+
+scaleLegend.select(".min-max").append("text")
+.style("float", "right")
+.style("font-size", "11px")
+.text("max");
 
 var zoom = d3v4.zoom()
 .on('zoom', zoomed)
@@ -399,6 +416,12 @@ function dragended(d) {
 
     createForceNetwork(set.nodes, set.links);
 
+    var leg = gMain.append('g')
+    leg.append("rect").attr('width', 50).attr('height', 20).style("fill", 'white').style("opacity", 0.8).attr("transform", 
+    "translate(" + 5 + "," + 5 + ")");
+    leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#ffff99").style("stroke", "#9e9393")
+    leg.append("text").attr("x", 28).attr("y", 15).text("user").style("font-size", "12px").attr("alignment-baseline","middle")
+
 return set;
 
 }
@@ -477,30 +500,33 @@ function createSlider(start, end, selected) {
     }
 }
 
-function setCentrality(type) {
-    if(type == 'bw'){
-        var centrality = jsnx.betweennessCentrality(G);
-    } else {
-        var centrality = jsnx.eigenvectorCentrality(G);
-    }
-
-    var extent = d3v4.extent(d3v4.values(centrality._stringValues));
-        
-    var colorScale = d3v4.scaleLinear().domain([0,1]).range(["#ffff99", "#ff6600"]);
-    var sizeScale = d3v4.scaleLinear().domain([0,1]).range([5,11]);
-    
-    sizeScale.domain(extent);
-    colorScale.domain(extent);
-
+function setCentrality() {
     var svg = d3v4.select('#network')
 
-    svg.selectAll("circle")
-      .attr("r", function (d) {
-          //console.log(G.degree(d.id))
-          return sizeScale(centrality._stringValues[d.id])})
+    if(document.getElementById("checkCentrality").checked){
+        var centrality = jsnx.betweennessCentrality(G);
+        var extent = d3v4.extent(d3v4.values(centrality._stringValues));
+        
+        var colorScale = d3v4.scaleLinear().domain([0,1]).range(["#ffff99", "#ff6600"]);
+        var sizeScale = d3v4.scaleLinear().domain([0,1]).range([5,11]);
+        
+        sizeScale.domain(extent);
+        colorScale.domain(extent);
+    
+        svg.select('.gDraw').selectAll("circle")
+        .style("fill", function (d) {return colorScale(centrality._stringValues[d.id])})
 
-      .style("fill", function (d) {return colorScale(centrality._stringValues[d.id])})
-      //.attr("r", 5)
+
+        svg.select(".g-main").selectAll("foreignObject").style("display", "block")
+
+        }
+    else{
+        svg.select('.gDraw').selectAll("circle")
+        .style("fill", "#ffff99")
+
+        svg.select(".g-main").selectAll("foreignObject").style("display", "none")
+    }
+
 }
 
 function createNN(){    
@@ -922,9 +948,9 @@ function createTransactionsGraph(data, day) {
     var leg = gMain.append('g')
     leg.append("rect").attr('width', 87).attr('height', 50).style("fill", 'white').style("opacity", 0.8).attr("transform", 
     "translate(" + 5 + "," + 5 + ")");
-    leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#1f77b4")
-    leg.append("circle").attr("cx", 15).attr("cy",30).attr("r", 5).style("fill", "#aec7e8")
-    leg.append("circle").attr("cx", 15).attr("cy",45).attr("r", 5).style("fill", "#ff7f0e")
+    leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#1f77b4").style("stroke", "#9e9393")
+    leg.append("circle").attr("cx", 15).attr("cy",30).attr("r", 5).style("fill", "#aec7e8").style("stroke", "#9e9393")
+    leg.append("circle").attr("cx", 15).attr("cy",45).attr("r", 5).style("fill", "#ff7f0e").style("stroke", "#9e9393")
 
     leg.append("text").attr("x", 28).attr("y", 15).text("transaction").style("font-size", "12px").attr("alignment-baseline","middle")
     leg.append("text").attr("x", 28).attr("y", 30).text("input").style("font-size", "12px").attr("alignment-baseline","middle")
@@ -2714,7 +2740,7 @@ function createForceNetwork(nodes, edges) {
     G = new jsnx.Graph();
     G.addNodesFrom(node_data);
     G.addEdgesFrom(edge_data);
-    setCentrality("bw");
+    setCentrality();
 }
 
 function filterNetwork(ids, data){
@@ -2747,7 +2773,7 @@ function filterNetwork(ids, data){
             return addresses.includes(l.target.id) || addresses.includes(l.source.id) ? 1 : 0.3;
         })
     
-        svg.selectAll("circle")
+        svg.select('.gDraw').selectAll("circle")
         .style("opacity", function(o) {
             return connections.includes(o.id) ? 1 : 0.3;
           })
@@ -2800,7 +2826,7 @@ function resetNetwork() {
     svg.selectAll("line")
     .style('opacity', 1);
 
-    svg.selectAll("circle")
+    svg.select('.gDraw').selectAll("circle")
     .style("opacity", 1)
     .classed("selected", false);
 

@@ -199,3 +199,9 @@ body{
     .night.light-scheme { background:  white; color: black; }
   }
   
+  .scale {
+    height: 12px;
+    background: linear-gradient(to right, #ffff99 0%, #ff6600 100%);
+    border: 1px solid black;
+    margin-top: 2px;
+  }
