@@ -935,8 +935,8 @@ function createBarChart(myDay){
     var h = parseInt(d3.select('#barChart').style('height'), 10);
     var w = parseInt(d3.select('#barChart').style('width'), 10);
     
-    var margin = {top: 0, right: 0, bottom: h*28/100, left: w*11/100};
-    var margin2 = {top: h*82/100, right: 0, bottom: h*8/100, left: w*11/100};
+    var margin = {top: h*5/100, right: w*5/100, bottom: h*28/100, left: w*11/100};
+    var margin2 = {top: h*82/100, right: w*5/100, bottom: h*8/100, left: w*11/100};
     var width = w - margin.left - margin.right;
     var height = h - margin.top - margin.bottom;
     var height2 = h - margin2.top - margin2.bottom;
@@ -966,7 +966,7 @@ function createBarChart(myDay){
     var gMain = svg.append('g')
     .classed('g-main', true)
     .attr("transform", 
-           "translate(" + margin.left + "," + 0 + ")");
+           "translate(" + margin.left + "," + margin.top + ")");
     
     var context = svg.append("g")
     .attr("transform","translate("+margin2.left+","+(margin2.top)+")")
@@ -1453,8 +1453,8 @@ function createLineChartWithBrush(month){
     var h = parseInt(d3.select('#lineChart').style('height'), 10);
     var w = parseInt(d3.select('#lineChart').style('width'), 10);
 
-    var margin = {top: 0, right: 0, bottom: h*28/100, left: w*11/100};
-    var margin2 = {top: h*82/100, right: 0, bottom: h*8/100, left: w*11/100};
+    var margin = {top: h*5/100, right: w*5/100, bottom: h*28/100, left: w*11/100};
+    var margin2 = {top: h*82/100, right: w*5/100, bottom: h*8/100, left: w*11/100};
     var width = w - margin.left - margin.right;
     var height = h - margin.top - margin.bottom;
     var height2 = h - margin2.top - margin2.bottom;
@@ -1602,7 +1602,7 @@ function createLineChartWithBrush(month){
         //daaa = x0 - d0.year > d.year - x0 ? d : d0;
         focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
         focus2.selectAll("foreignObject").remove();
-        focus2.append("foreignObject").attr("width",160).attr("height",90).attr("y",-100)
+        focus2.append("foreignObject").attr("width",160).attr("height",90).attr("y",-100).attr("x", -80)
         focus2.selectAll("foreignObject").append("xhtml:div").attr("class","day dark-scheme").style("margin","-1px").style("padding", "2px").append("xhtml:span")
         .html( function() { 
             retrieveInfo(d.close, (d.date.toISOString().split('T')[0])).then(val => {
@@ -2796,9 +2796,6 @@ d3.csv("pca_finale2.csv", function(error, data) {
     d.x = +d.x;
   });
 
-
-  const colorValue = d => d.month;
-
   x.domain([d3.min(data,function(d){return d.x}), d3.max(data,function(d){return d.x})]).nice();
   y.domain([d3.min(data,function(d){return d.y}), d3.max(data,function(d){return d.y})])
 
@@ -2842,7 +2839,7 @@ d3.csv("pca_finale2.csv", function(error, data) {
       .attr("r", 3.5)
       .attr("cx", function(d) { return x(d.x); })
       .attr("cy", function(d) { return y(d.y); })
-      .attr('fill', d => color(colorValue(d)))
+      .attr('fill',"#69b3a2")
       .attr('fill-opacity', 0.6)
       .on("mouseover", function(d) {  
 
@@ -2863,7 +2860,7 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
           svg.selectAll(".dot")
           .style("fill", function(d) {
-              return (d.month == hoverMonth) ? (d => color(colorValue(d))) : "lightgrey";
+              return (d.month == hoverMonth) ? ("#69b3a2") : "lightgrey";
           })
 
         })					
@@ -2875,7 +2872,7 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
             svg.selectAll(".dot")
             .style("fill", function(d) {
-                return color(colorValue(d));
+                return (d.month == month) ? "#69b3a2" : "lightgrey";
             })
         });
 
@@ -2899,8 +2896,6 @@ var svg = svgPca.select("g");
             d.x = +d.x;
         });
 
-        const colorValue = d => d.month;
-
         var div = d3.select("#pca_div");
 
         /*   svg.append("g")
@@ -2910,9 +2905,8 @@ var svg = svgPca.select("g");
 
         svg.selectAll(".dot")
             .data(data)
-            .attr('fill', d => color(colorValue(d)))
             .style("fill", function(d) {
-                return (d.month == month) ? (color(colorValue(d))) : "lightgrey";
+                return (d.month == month) ? "#69b3a2" : "lightgrey";
             })
             .attr('fill-opacity', 0.6)
             .on("mouseover", function(d) {
@@ -2934,7 +2928,7 @@ var svg = svgPca.select("g");
 
                 svg.selectAll(".dot")
                 .style("fill", function(d) {
-                    return (d.month == hoverMonth) ? (d => color(colorValue(d))) : "lightgrey";
+                    return (d.month == hoverMonth) ? "#69b3a2" : "lightgrey";
                 })
 
                 })					
@@ -2946,7 +2940,7 @@ var svg = svgPca.select("g");
 
                     svg.selectAll(".dot")
                     .style("fill", function(d) {
-                        return color(colorValue(d));
+                        return (d.month == month) ? "#69b3a2" : "lightgrey";
                     })
                 });
 

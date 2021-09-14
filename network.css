@@ -1,3 +1,8 @@
+body{
+  overflow-y: hidden;
+  background-color: floralwhite;
+}
+
 .node .selected {
   stroke: rgb(83, 185, 199);
 }
@@ -175,6 +180,10 @@
   
   .slider.round:before {
     border-radius: 50%;
+  }
+
+  foreignObject{
+    font-size: small;
   }
 
   .day   { background: white; color: black; }
