@@ -422,7 +422,7 @@ function dragended(d) {
     "translate(" + 5 + "," + 5 + ")");
     leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#ffff99").style("stroke", "#9e9393")
     leg.append("text").attr("x", 30).attr("y", 15).text("user").style("font-size", "12px").attr("alignment-baseline","middle")
-    leg.append("text").attr("x", 9).attr("y", 32).text("\u{1F816}").style("font-size", "20px").attr("alignment-baseline","middle").style("fill","#9e9393" )
+    leg.append("text").attr("x", 9).attr("y", 32).text("➞").style("font-size", "20px").attr("alignment-baseline","middle").style("fill","#9e9393" )
     leg.append("text").attr("x", 30).attr("y", 30).text("tsx from-to").style("font-size", "12px").attr("alignment-baseline","middle")
 
 return set;
@@ -1078,7 +1078,24 @@ function createBarChart(myStart, myEnd, isFromLineChart){
             
             createSlider(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()), new Date(2010, selDate.getMonth(), selDate.getDate()))
         //createLineChartWithBrush(formatToMonth(parseToMonth(d.date))-1); TODO puntamento sul linechart
-    });
+    })
+    .on("mouseover", function(d) {  
+
+        svg.selectAll("foreignObject").remove();
+        svg.append("foreignObject").attr("width",130).attr("height",30).attr("y",30)
+        .attr("class","day dark-scheme")
+        .style("x", (d3.select(this).attr("x")-50) + "px")		
+        .style("y", (d3.select(this).attr("y")-20) + "px")
+        .style("position", "absolute")
+        .style("overflow-wrap", "break-word")
+        svg.selectAll("foreignObject").append("xhtml:p").style("margin", "5px")
+        .html("Transactions : " +  d.value );
+        })
+        .on("mouseleave", function(d) {
+
+            svg.selectAll("foreignObject").remove();
+
+        });
     
     var superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹",
         formatPower = function(d) { return (d + "").split("").map(function(c) { return superscript[c]; }).join(""); };

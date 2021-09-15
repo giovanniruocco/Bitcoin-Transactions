@@ -38,13 +38,13 @@ body{
 }
 
 .focus circle {
-  fill: steelblue;
+  fill: cadetblue;
   /* stroke: steelblue;
   stroke-width: 5px; */
 }
   
 .hover-line {
-  stroke: steelblue;
+  stroke: cadetblue;
   stroke-width: 2px;
   stroke-dasharray: 3,3;
 }
@@ -57,7 +57,7 @@ body{
 
 .line {
   fill: none;
-  stroke: steelblue;
+  stroke: cadetblue;
   stroke-width: 2px;
 	clip-path: url(#clip);
 }
