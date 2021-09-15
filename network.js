@@ -1184,7 +1184,6 @@ function createBarChart(myStart, myEnd, isFromLineChart){
         var startMonth;
         var endMonth;
         var oldMonth = parseInt(data[scaleBandInvert(xScale2)(p[0])-1].month)
-        console.log(oldMonth )
 
         if (s) {
             start = d3.min([s[0], s[1]])
@@ -1233,8 +1232,6 @@ function createBarChart(myStart, myEnd, isFromLineChart){
               newInput.push(d);
             }
         });
-
-        console.log("new input", newInput)
     
         //relocate the position of brush area
         var left=xScale2(d3.min(newInput));
@@ -2930,7 +2927,7 @@ function createPCA(){
 var h = parseInt(d3.select('#pca').style('height'), 10);
 var w = parseInt(d3.select('#pca').style('width'), 10);
 
-var margin = {top: h*5/100, right: w*5/100, bottom: h*7/100, left: w*11/100};
+var margin = {top: h*5/100, right: w*5/100, bottom: w*11/100, left: w*11/100};
 var width = w - margin.left - margin.right;
 var height = h - margin.top - margin.bottom;
 
@@ -3002,6 +2999,21 @@ d3.csv("pca_finale2.csv", function(error, data) {
           }
         return (d/1000000000);
       });
+
+          // text label for the x axis
+    svg.append("text")
+    .attr("transform", "translate(" + (width/2) + " ," + (h-(margin.bottom/2)) + ")")
+    .style("text-anchor", "middle")
+      .text("PC1");
+    
+      // text label for the y axis
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("PC2"); 
 
   svg.selectAll(".dot")
       .data(data)

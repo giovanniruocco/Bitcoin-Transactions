@@ -153,12 +153,18 @@ var RadarChart = {
 			.style("fill", function(d, i){
 			return colorscale(i);})
 			.on('mouseover', function (d,i){
-				if (colorscale(i) === "#1f77b4" )
+				if (colorscale(i) === "#1f77b4" ){
 					z = "polygon.radar-chart-serie0";
-				else if (colorscale(i) === "#ff7f0e" )
+					transitionNodes(inputradar ? bestInputArray[0][0] : bestOutputArray[0][0])
+				}
+				else if (colorscale(i) === "#ff7f0e" ){
 					z = "polygon.radar-chart-serie1";
-				else if (colorscale(i) === "#2ca02c" )
+					transitionNodes(inputradar ? bestInputArray[1][0] : bestOutputArray[1][0])
+				}
+				else if (colorscale(i) === "#2ca02c" ){
 					z = "polygon.radar-chart-serie2";
+					transitionNodes(inputradar ? bestInputArray[2][0] : bestOutputArray[2][0])
+				}
 				else if (colorscale(i) === "#d62728" )
 					z = "polygon.radar-chart-serie3";
 				g.selectAll("polygon")
@@ -168,10 +174,21 @@ var RadarChart = {
 				 .transition(200)
 				 .style("fill-opacity", .7);
 			  })
-			.on('mouseout', function(){
+			.on('mouseout', function(d, i){
+				if (colorscale(i) === "#1f77b4" ){
+					transitionNodesEnd(inputradar ? bestInputArray[0][0] : bestOutputArray[0][0])
+				}
+				else if (colorscale(i) === "#ff7f0e" ){
+					transitionNodesEnd(inputradar ? bestInputArray[1][0] : bestOutputArray[1][0])
+				}
+				else if (colorscale(i) === "#2ca02c" ){
+					transitionNodesEnd(inputradar ? bestInputArray[2][0] : bestOutputArray[2][0])
+				}
+
 				g.selectAll("polygon")
 				 .transition(200)
 				 .style("fill-opacity", cfg.opacityArea);
+
 })
 			;
 		  //Create text next to squares
@@ -214,7 +231,16 @@ var RadarChart = {
 						})
 					   .style("fill", function(j, i){return cfg.color(series)})
 					   .style("fill-opacity", cfg.opacityArea)
-					   .on('mouseover', function (d){
+					   .on('mouseover', function (d, i){
+									if (colorscale(i) === "#1f77b4" ){
+										transitionNodes(inputradar ? bestInputArray[0][0] : bestOutputArray[0][0])
+									}
+									else if (colorscale(i) === "#ff7f0e" ){
+										transitionNodes(inputradar ? bestInputArray[1][0] : bestOutputArray[1][0])
+									}
+									else if (colorscale(i) === "#2ca02c" ){
+										transitionNodes(inputradar ? bestInputArray[2][0] : bestOutputArray[2][0])
+									}
 										  z = "polygon."+d3.select(this).attr("class");
 										  g.selectAll("polygon")
 										   .transition(200)
@@ -223,7 +249,16 @@ var RadarChart = {
 										   .transition(200)
 										   .style("fill-opacity", .7);
 										})
-					   .on('mouseout', function(){
+					   .on('mouseout', function(d,i){
+										if (colorscale(i) === "#1f77b4" ){
+											transitionNodesEnd(inputradar ? bestInputArray[0][0] : bestOutputArray[0][0])
+										}
+										else if (colorscale(i) === "#ff7f0e" ){
+											transitionNodesEnd(inputradar ? bestInputArray[1][0] : bestOutputArray[1][0])
+										}
+										else if (colorscale(i) === "#2ca02c" ){
+											transitionNodesEnd(inputradar ? bestInputArray[2][0] : bestOutputArray[2][0])
+										}
 										  g.selectAll("polygon")
 										   .transition(200)
 										   .style("fill-opacity", cfg.opacityArea);
@@ -322,4 +357,52 @@ var RadarChart = {
 	
   };
   
-  
+function transitionNodes(addr){
+
+	var svgNetwork = d3v4.select('#network');
+
+	svgNetwork.select('.gDraw').selectAll("circle").each(function(d) { 
+		if (d.id == addr){
+			d3v4.select(this).transition()
+            .duration(750)
+            .attr("r", 15);
+
+		}
+		})
+
+	var svgTsx = d3v4.select('#transactionsGraph');
+
+	svgTsx.select('.gDraw').selectAll("circle").each(function(d) { 
+		if (d.name ? d.name == addr : false){
+			d3v4.select(this).transition()
+            .duration(750)
+            .attr("r", 15);
+
+		}
+		})
+}
+
+function transitionNodesEnd(addr){
+
+	var svgNetwork = d3v4.select('#network');
+
+	svgNetwork.select('.gDraw').selectAll("circle").each(function(d) { 
+		if (d.id == addr){
+			d3v4.select(this).transition()
+            .duration(750)
+            .attr("r", 5);
+
+		}
+		})
+
+	var svgTsx = d3v4.select('#transactionsGraph');
+
+	svgTsx.select('.gDraw').selectAll("circle").each(function(d) { 
+		if (d.name ? d.name == addr : false){
+			d3v4.select(this).transition()
+            .duration(750)
+            .attr("r", 5);
+
+		}
+		})
+}
