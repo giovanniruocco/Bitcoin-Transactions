@@ -38,7 +38,7 @@ body{
 }
 
 .focus circle {
-  fill: #72cccc;
+  fill: steelblue;
   /* stroke: steelblue;
   stroke-width: 5px; */
 }

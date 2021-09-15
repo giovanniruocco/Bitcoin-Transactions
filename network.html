@@ -6,7 +6,7 @@
 
   </head>
   <div class="row" style="margin: 0px;">
-  <div class="col-3">
+  <div class="col-3" style="display: flex; align-items: center;">
     <svg id="slider" class="w-100" style="height: 44px;">        
     </svg>
   </div>
@@ -26,10 +26,10 @@
       </label>
     </div>
   </div>
-  <div class="col-4">
+  <div class="col-4" style="display: flex; align-items: center;">
     <select name="aa" onchange="setUserType(this.value)">
-        <option value="in" selected>Best Seller</option>
-        <option value="out">Best Buyer</option>
+        <option value="in" selected>Best Sellers</option>
+        <option value="out">Best Buyers</option>
     </select>
   </div>
 
@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <div class="row" style="margin-top: 44px; margin-left: 0px; margin-right: 0px; margin-bottom: 0px; height: calc(50% - 44px);">
+    <div class="row" style="margin-top: 23px; margin-left: 0px; margin-right: 0px; margin-bottom: 21px; height: calc(50% - 44px);">
         <div class="col-4" id="bar_chart">
             <svg style="background-color: white; border: 1px solid black;" class="h-100 w-100" id="barChart">
             </svg>
@@ -88,6 +88,7 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="d3v4-brush-lite.js"></script>
+<!-- <script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" data-auto-a11y="true"></script> -->
 
 <script>
 

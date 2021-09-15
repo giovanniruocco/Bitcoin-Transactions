@@ -39,6 +39,7 @@ var svg = d3v4.select('#network');
 var svgWidth = parseInt(svg.style('width'), 10);
 var svgHeight = parseInt(svg.style('height'), 10);
 
+
 svg.append('defs')
 .append('marker')
 .attr("id", "Triangle")
@@ -417,10 +418,12 @@ function dragended(d) {
     createForceNetwork(set.nodes, set.links);
 
     var leg = gMain.append('g')
-    leg.append("rect").attr('width', 50).attr('height', 20).style("fill", 'white').style("opacity", 0.8).attr("transform", 
+    leg.append("rect").attr('width', 87).attr('height', 35).style("fill", 'white').style("opacity", 0.8).attr("transform", 
     "translate(" + 5 + "," + 5 + ")");
     leg.append("circle").attr("cx", 15).attr("cy",15).attr("r", 5).style("fill", "#ffff99").style("stroke", "#9e9393")
-    leg.append("text").attr("x", 28).attr("y", 15).text("user").style("font-size", "12px").attr("alignment-baseline","middle")
+    leg.append("text").attr("x", 30).attr("y", 15).text("user").style("font-size", "12px").attr("alignment-baseline","middle")
+    leg.append("text").attr("x", 9).attr("y", 32).text("\u{1F816}").style("font-size", "20px").attr("alignment-baseline","middle").style("fill","#9e9393" )
+    leg.append("text").attr("x", 30).attr("y", 30).text("tsx from-to").style("font-size", "12px").attr("alignment-baseline","middle")
 
 return set;
 
@@ -558,11 +561,13 @@ function createTransactionsGraph(data, day) {
     var selectedDate = new Date(day)
     var selectedDay = selectedDate.getDate()
     var selectedMonth = selectedDate.getMonth()
+    var tsxArray = []
     for (let j = 0; j < data.length; j++) {
         var currentDay = new Date (data[j].block_timestamp).getDate()
         var currentMonth = new Date (data[j].block_timestamp).getMonth()
 
         if(currentMonth == selectedMonth && currentDay == selectedDay){
+            tsxArray.push(data[j].hash)
 
             set.nodes.push({"id": data[j].hash , "group": 1, "input_count": data[j].input_count, "output_count": data[j].output_count, "input_value": data[j].input_value, "output_value": data[j].output_value, "fee": data[j].fee});
 
@@ -583,6 +588,8 @@ function createTransactionsGraph(data, day) {
             }
         }
     }
+
+    changePCA(tsxArray)
     
     //console.log("nodi-txGraph:" + set.nodes.length)
 
@@ -966,8 +973,8 @@ function createBarChart(myStart, myEnd, isFromLineChart){
     var h = parseInt(d3.select('#barChart').style('height'), 10);
     var w = parseInt(d3.select('#barChart').style('width'), 10);
     
-    var margin = {top: h*5/100, right: w*5/100, bottom: h*28/100, left: w*11/100};
-    var margin2 = {top: h*82/100, right: w*5/100, bottom: h*8/100, left: w*11/100};
+    var margin = {top: h*5/100, right: w*5/100, bottom: h*30/100, left: w*11/100};
+    var margin2 = {top: h*84/100, right: w*5/100, bottom: h*7/100, left: w*11/100};
     var width = w - margin.left - margin.right;
     var height = h - margin.top - margin.bottom;
     var height2 = h - margin2.top - margin2.bottom;
@@ -1104,9 +1111,9 @@ function createBarChart(myStart, myEnd, isFromLineChart){
     
     // text label for the x axis
     gMain.append("text")
-      .attr("transform", "translate(" + (width/2) + " ," + margin2.top + ")")
-      .style("text-anchor", "middle")
-      .text("Days");
+    .attr("transform", "translate(" + (width/2) + " ," + (margin2.top-margin2.bottom +h*2/100) + ")")
+    .style("text-anchor", "middle")
+      .text("Day");
     
       // text label for the y axis
     gMain.append("text")
@@ -1152,8 +1159,6 @@ function createBarChart(myStart, myEnd, isFromLineChart){
       .on("end", brushProva);
 
       var bool = false
-
-      console.log(xScale2.domain(), "domain x2222")
     
       context.append("g")
       .attr("class","x brush")
@@ -1196,10 +1201,18 @@ function createBarChart(myStart, myEnd, isFromLineChart){
             } else if (startMonth != endMonth) {
                 if (p[0]<s[0]) { //right
                     start = xScale2(getDayOfYearFromDate(new Date(2010, endMonth, 1))-1)
-                    end = s[1] + start - s[0]
+                    if (new Date(2010, oldMonth+1, 0).getDate() > new Date(2010, endMonth+1, 0).getDate()){
+                        end = xScale2(getDayOfYearFromDate(new Date(2010, endMonth+1, 0)))
+                    } else {
+                        end = s[1] + start - s[0]
+                    }
                 } else { //left
                     end = xScale2(getDayOfYearFromDate(new Date(2010, startMonth+1, 0)))
-                    start = s[0] - (s[1] - end)
+                    if(new Date(2010, oldMonth+1, 0).getDate() > new Date(2010, startMonth+1, 0).getDate()){
+                        start = xScale2(getDayOfYearFromDate(new Date(2010, startMonth, 1))-1)
+                    } else {
+                        start = s[0] - (s[1] - end)
+                    }
                 }
             }
 
@@ -1389,12 +1402,6 @@ function createBarChart(myStart, myEnd, isFromLineChart){
         .attr("dx", "-.8em")
         .attr("dy", ".15em")
         .attr("transform", "rotate(-45)");
-
-        var sBrush = new Date(data[x.domain()[0]].date)
-        var eBrush = new Date(data[x.domain()[x.domain().length-1]].date)
-        
-        //createLineChartWithBrush(new Date(2010, sBrush.getMonth(), sBrush.getDate()), new Date(2010, eBrush.getMonth(), eBrush.getDate()), true) // todo decommentare dopo aver settato una sola chiamata del brush
-    
     
     }
     
@@ -1604,8 +1611,8 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
     var h = parseInt(d3.select('#lineChart').style('height'), 10);
     var w = parseInt(d3.select('#lineChart').style('width'), 10);
 
-    var margin = {top: h*5/100, right: w*5/100, bottom: h*28/100, left: w*11/100};
-    var margin2 = {top: h*82/100, right: w*5/100, bottom: h*8/100, left: w*11/100};
+    var margin = {top: h*5/100, right: w*5/100, bottom: h*30/100, left: w*11/100};
+    var margin2 = {top: h*84/100, right: w*5/100, bottom: h*7/100, left: w*11/100};
     var width = w - margin.left - margin.right;
     var height = h - margin.top - margin.bottom;
     var height2 = h - margin2.top - margin2.bottom;
@@ -1682,7 +1689,7 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
 
     // text label for the x axis
     focus.append("text")
-        .attr("transform", "translate(" + (width/2) + " ," + (margin2.top) + ")")
+        .attr("transform", "translate(" + (width/2) + " ," + (margin2.top-margin2.bottom +h*2/100) + ")")
         .style("text-anchor", "middle")
         .text("Date");
 
@@ -1789,8 +1796,6 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
         var endMonth;
         var oldMonth = x2.invert(p[0]).getMonth();
 
-        console.log(s);
-
         if (s) {
             start = d3.min([s[0], s[1]])
             end = d3.max([s[0], s[1]])
@@ -1806,10 +1811,19 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
             } else if (startMonth != endMonth) { //todo implementare controllo se trascino da un mese con piu giorni a uno con meno
                 if (p[0]<s[0]) { //right
                     start = x2(new Date(2010, endMonth, 1))
-                    end = s[1] + start - s[0]
+                    if(new Date(2010, oldMonth+1, 0).getDate() > new Date(2010, endMonth+1, 0).getDate()){
+                        end = x2(new Date(2010, endMonth+1, 0))
+                    } else {
+                        end = s[1] + start - s[0]
+                    }
                 } else { //left
                     end = x2(new Date(2010, startMonth+1, 0))
-                    start = s[0] - (s[1] - end)
+                    if(new Date(2010, oldMonth+1, 0).getDate() > new Date(2010, startMonth+1, 0).getDate()){
+                        start = x2(new Date(2010, startMonth, 1))
+                    } else {
+                        start = s[0] - (s[1] - end)
+
+                    }
                 }
             }
 
@@ -1842,7 +1856,7 @@ function createLineChartWithBrush(myStart, myEnd, isFromBarChart){
 
         }
         isFromBarChart = false
-        changePCA(newMonth+1);
+        //changePCA(newMonth+1);
         createSlider(x2.invert(start), x2.invert(end), x2.invert(start))
         ddday=x2.invert(start)
 
@@ -2916,7 +2930,7 @@ function createPCA(){
 var h = parseInt(d3.select('#pca').style('height'), 10);
 var w = parseInt(d3.select('#pca').style('width'), 10);
 
-var margin = {top: h*5/100, right: w*5/100, bottom: h*15/100, left: w*12/100};
+var margin = {top: h*5/100, right: w*5/100, bottom: h*7/100, left: w*11/100};
 var width = w - margin.left - margin.right;
 var height = h - margin.top - margin.bottom;
 
@@ -2925,8 +2939,6 @@ var x = d3.scaleLinear()
 
 var y = d3.scaleLinear()
     .range([height, 0]);
-
-var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 var xAxis = d3.axisBottom(x);
 
@@ -2941,8 +2953,10 @@ var svg = svgPca
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // Define the div for the tooltip
-var div = d3.select("#pca_div").append("div")	
-    .attr("class", "tooltip")/* 
+var div = d3.select("#pca_div");
+// var div = d3.select("#pca_div").append("div")	
+//     .attr("class", "tooltip")
+    /* 
     .style("visibility", "hidden");				 */
     // .style("opacity", 0);
 
@@ -2956,12 +2970,6 @@ d3.csv("pca_finale2.csv", function(error, data) {
 
   x.domain([d3.min(data,function(d){return d.x}), d3.max(data,function(d){return d.x})]).nice();
   y.domain([d3.min(data,function(d){return d.y}), d3.max(data,function(d){return d.y})])
-
-
-/*   svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis); */
 
       svg.append("text")
       .attr("transform", "translate(" + (width/2) + " ," + margin.top + ")")
@@ -3002,8 +3010,8 @@ d3.csv("pca_finale2.csv", function(error, data) {
       .attr("r", 3.5)
       .attr("cx", function(d) { return x(d.x); })
       .attr("cy", function(d) { return y(d.y); })
-      .attr('fill',"#69b3a2")
-      .attr('fill-opacity', 0.6)
+      .attr('fill-opacity', 0.2)
+      .attr('fill',"lightblue")
       .on("mouseover", function(d) {  
 
         d3.select("#pca_div").selectAll("div").remove();
@@ -3018,96 +3026,31 @@ d3.csv("pca_finale2.csv", function(error, data) {
         .style("max-width", "280px")
         div.selectAll("foreignObject").append("xhtml:p").style("margin", "5px")
         .html( d.hash );
-    
-        hoverMonth = d.month;
-
-          svg.selectAll(".dot")
-          .style("fill", function(d) {
-              return (d.month == hoverMonth) ? ("#69b3a2") : "lightgrey";
-          })
-
         })					
-        .on("mouseleave", function(d) {		
+        .on("mouseleave", function(d) {
 
             d3.select("#pca_div").selectAll("div").remove();
 
             div.selectAll("foreignObject").remove();
 
-            svg.selectAll(".dot")
-            .style("fill", function(d) {
-                return (d.month == month) ? "#69b3a2" : "lightgrey";
-            })
         });
 
 });
 }
 
-function changePCA(month){
+function changePCA(tsx){
+    
+    var svgPca = d3.select('#pca');
 
-var color = d3.scaleOrdinal(d3.schemeCategory10);
+    var svg = svgPca.select("g");
 
-var svgPca = d3.select('#pca');
-
-var svg = svgPca.select("g");
-
-
-    d3.csv("pca_finale2.csv", function(error, data) {
-        if (error) throw error;
-
-        data.forEach(function(d) {
-            d.y = +d.y;
-            d.x = +d.x;
-        });
-
-        var div = d3.select("#pca_div");
-
-        /*   svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis); */
-
-        svg.selectAll(".dot")
-            .data(data)
-            .style("fill", function(d) {
-                return (d.month == month) ? "#69b3a2" : "lightgrey";
-            })
-            .attr('fill-opacity', 0.6)
-            .on("mouseover", function(d) {
-
-                d3.select("#pca_div").selectAll("div").remove();
-
-                div.selectAll("foreignObject").remove();
-                div.append("foreignObject").attr("width",200).attr("height",200).attr("y",-80)
-                .attr("class","day dark-scheme")
-                .style("left", (d3.select(this).attr("cx")-200) + "px")		
-                .style("top", (d3.select(this).attr("cy")-50) + "px")
-                .style("position", "absolute")
-                .style("overflow-wrap", "break-word")
-                .style("max-width", "280px")
-                div.selectAll("foreignObject").append("xhtml:p").style("margin", "5px")
-                .html( d.hash );
-            
-                hoverMonth = d.month;
-
-                svg.selectAll(".dot")
-                .style("fill", function(d) {
-                    return (d.month == hoverMonth) ? "#69b3a2" : "lightgrey";
-                })
-
-                })					
-                .on("mouseleave", function(d) {		
-
-                    d3.select("#pca_div").selectAll("div").remove();
-
-                    div.selectAll("foreignObject").remove();
-
-                    svg.selectAll(".dot")
-                    .style("fill", function(d) {
-                        return (d.month == month) ? "#69b3a2" : "lightgrey";
-                    })
-                });
-
-    });
+    svg.selectAll(".dot")
+        .style("fill", function(d) {
+            return (tsx.includes(d.hash)) ? "rgb(31, 119, 180)" : "lightblue";
+        })
+        .style("fill-opacity",function(d) {
+            return (tsx.includes(d.hash)) ? 1 : 0.2;
+        })
 }
 
 function filterTransactionsByInOutAvg(data, day){
